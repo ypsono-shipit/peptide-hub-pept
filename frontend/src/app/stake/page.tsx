@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-
-const WHITELISTED_BOND_ASSETS = ["LLY", "TSHA", "USDC"];
+import { StakePanel } from "@/components/StakePanel";
+import { TESTNET_CONTRACTS } from "@/lib/deployments";
 
 export default function StakePage() {
   const [tab, setTab] = useState<"stake" | "bond">("stake");
@@ -26,36 +26,27 @@ export default function StakePage() {
       </div>
 
       {tab === "stake" ? (
-        <div className="space-y-4 rounded-md border border-border bg-panel p-4">
-          <p className="text-sm text-text-secondary">
-            Earn real yield from perps trading fees and Treasury returns. No lockup.
-          </p>
-          <input
-            placeholder="Amount of PEPT"
-            className="w-full rounded-md bg-surface px-3 py-2 text-sm outline-none"
-          />
-          <button className="w-full rounded-md bg-accent py-2.5 text-sm font-semibold text-surface">
-            Stake
-          </button>
-        </div>
+        <StakePanel />
       ) : (
         <div className="space-y-4 rounded-md border border-border bg-panel p-4">
           <p className="text-sm text-text-secondary">
             Deposit whitelisted Robinhood Chain Stock Tokens or stables to receive discounted $PEPT,
             vesting linearly to the Treasury.
           </p>
-          <select className="w-full rounded-md bg-surface px-3 py-2 text-sm outline-none">
-            {WHITELISTED_BOND_ASSETS.map((a) => (
-              <option key={a}>{a}</option>
-            ))}
-          </select>
-          <input
-            placeholder="Amount"
-            className="w-full rounded-md bg-surface px-3 py-2 text-sm outline-none"
-          />
-          <button className="w-full rounded-md bg-accent py-2.5 text-sm font-semibold text-surface">
-            Bond
-          </button>
+          <div className="rounded-md bg-surface p-3 text-xs text-text-secondary">
+            No bond markets are configured yet on testnet — <code>BondDepository</code> is deployed
+            at{" "}
+            <a
+              href={`https://explorer.testnet.chain.robinhood.com/address/${TESTNET_CONTRACTS.BondDepository}`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              {TESTNET_CONTRACTS.BondDepository}
+            </a>{" "}
+            but needs a whitelisted reserve token (a real testnet Stock Token address) before a
+            market can be opened.
+          </div>
         </div>
       )}
     </div>

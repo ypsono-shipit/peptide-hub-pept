@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { formatEther } from "viem";
+import { useAccount, useConnect, useDisconnect, useReadContract } from "wagmi";
+import { peptContract } from "@/lib/contracts";
 
 const TABS = [
   { href: "/markets", label: "Markets" },
@@ -16,6 +18,13 @@ export function TopNav() {
   const { address, isConnected } = useAccount();
   const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
+
+  const peptBalance = useReadContract({
+    ...peptContract,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
 
   return (
     <header className="flex items-center justify-between border-b border-border bg-panel px-6 py-3">
@@ -44,12 +53,19 @@ export function TopNav() {
           Robinhood Chain Testnet · 46630
         </span>
         {isConnected ? (
-          <button
-            onClick={() => disconnect()}
-            className="rounded-md bg-surface px-3 py-1.5 text-sm font-medium hover:bg-border"
-          >
-            {address?.slice(0, 6)}...{address?.slice(-4)}
-          </button>
+          <>
+            {peptBalance.data !== undefined && (
+              <span className="text-sm tabular-nums text-text-secondary">
+                {Number(formatEther(peptBalance.data as bigint)).toFixed(2)} PEPT
+              </span>
+            )}
+            <button
+              onClick={() => disconnect()}
+              className="rounded-md bg-surface px-3 py-1.5 text-sm font-medium hover:bg-border"
+            >
+              {address?.slice(0, 6)}...{address?.slice(-4)}
+            </button>
+          </>
         ) : (
           <button
             onClick={() => connect({ connector: connectors[0] })}
