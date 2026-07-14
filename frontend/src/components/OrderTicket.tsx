@@ -15,6 +15,7 @@ export function OrderTicket({ symbol, price }: { symbol: string; price: number }
 
   return (
     <aside className="w-80 shrink-0 border-l border-border bg-panel p-4">
+      <div className="mb-3 text-sm font-semibold">{symbol}</div>
       <div className="mb-4 grid grid-cols-2 gap-1 rounded-md bg-surface p-1">
         <button
           onClick={() => setSide("long")}

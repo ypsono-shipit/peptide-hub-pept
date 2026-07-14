@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createChart, ColorType, type IChartApi } from "lightweight-charts";
+import { createChart, ColorType, type IChartApi, type UTCTimestamp } from "lightweight-charts";
 
 const TIMEFRAMES = ["1D", "1W", "1M", "3M"] as const;
 
@@ -17,7 +17,7 @@ function mockCandles(basePrice: number) {
     const close = open + drift;
     const high = Math.max(open, close) + basePrice * 0.004;
     const low = Math.min(open, close) - basePrice * 0.004;
-    candles.push({ time: now - i * 3600, open, high, low, close });
+    candles.push({ time: (now - i * 3600) as UTCTimestamp, open, high, low, close });
     price = close;
   }
   return candles;
