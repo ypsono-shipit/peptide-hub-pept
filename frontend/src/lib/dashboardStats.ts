@@ -1,0 +1,27 @@
+// Presentational demo figures — not fetched from anywhere real. TVL/OI/etc.
+// have no on-chain source yet (Treasury and PerpsEngine are fresh/empty on
+// testnet); these exist purely to give the dashboard the density the design
+// calls for. Replace with real reads once there's real usage to report.
+export const PEPT_INDEX_STATS = {
+  tvl: "$2.4M",
+  openInterest: "$860K",
+  constituents: 12,
+};
+
+export const GLP1_BASKET_COMPONENTS = ["LLY", "NVO", "VKTX", "ALT", "Structure Therapeutics"];
+
+export const PORTFOLIO_ALLOCATION = [
+  { label: "PEPT Index", value: 42 },
+  { label: "LLY Perp", value: 28 },
+  { label: "TSHA Perp", value: 12 },
+  { label: "GLP1 Basket", value: 18 },
+];
+
+export const STATUS_BAR = {
+  peptTvl: "$2.4M",
+  labs: 128,
+  researchPapers: 340,
+  marketplaceListings: 2450,
+  network: "Robinhood Chain Testnet",
+  status: "Healthy" as const,
+};

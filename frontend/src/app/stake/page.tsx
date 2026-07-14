@@ -3,23 +3,24 @@
 import { useState } from "react";
 import { StakePanel } from "@/components/StakePanel";
 import { TESTNET_CONTRACTS } from "@/lib/deployments";
+import { cn } from "@/lib/cn";
 
 export default function StakePage() {
   const [tab, setTab] = useState<"stake" | "bond">("stake");
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-lg font-semibold">Stake & Bond</h1>
-      <div className="mb-6 grid grid-cols-2 gap-1 rounded-md bg-panel p-1">
+    <div className="mx-auto max-w-2xl p-2">
+      <h1 className="mb-4 text-xl font-semibold tracking-tight text-ink">Stake & Bond</h1>
+      <div className="mb-6 grid grid-cols-2 gap-1 rounded-2xl bg-white/30 p-1">
         <button
           onClick={() => setTab("stake")}
-          className={`rounded py-2 text-sm font-semibold ${tab === "stake" ? "bg-surface" : "text-text-secondary"}`}
+          className={cn("rounded-xl py-2 text-sm font-semibold", tab === "stake" ? "bg-white/50 text-ink" : "text-ink-soft")}
         >
           Stake $PEPT
         </button>
         <button
           onClick={() => setTab("bond")}
-          className={`rounded py-2 text-sm font-semibold ${tab === "bond" ? "bg-surface" : "text-text-secondary"}`}
+          className={cn("rounded-xl py-2 text-sm font-semibold", tab === "bond" ? "bg-white/50 text-ink" : "text-ink-soft")}
         >
           Bond
         </button>
@@ -28,12 +29,12 @@ export default function StakePage() {
       {tab === "stake" ? (
         <StakePanel />
       ) : (
-        <div className="space-y-4 rounded-md border border-border bg-panel p-4">
-          <p className="text-sm text-text-secondary">
+        <div className="glass-panel space-y-4 p-5">
+          <p className="text-sm text-ink-soft">
             Deposit whitelisted Robinhood Chain Stock Tokens or stables to receive discounted $PEPT,
             vesting linearly to the Treasury.
           </p>
-          <div className="rounded-md bg-surface p-3 text-xs text-text-secondary">
+          <div className="rounded-2xl bg-white/30 p-3 text-xs text-ink-soft">
             No bond markets are configured yet on testnet — <code>BondDepository</code> is deployed
             at{" "}
             <a
@@ -44,8 +45,8 @@ export default function StakePage() {
             >
               {TESTNET_CONTRACTS.BondDepository}
             </a>{" "}
-            but needs a whitelisted reserve token (a real testnet Stock Token address) before a
-            market can be opened.
+            but needs a whitelisted reserve token before a market can be opened. Robinhood Chain
+            has no biotech Stock Tokens yet, so nothing real to whitelist for now.
           </div>
         </div>
       )}

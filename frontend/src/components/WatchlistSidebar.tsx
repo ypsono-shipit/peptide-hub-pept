@@ -1,7 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { MOCK_MARKETS } from "@/lib/markets";
+import { MOCK_MARKETS, type Market } from "@/lib/markets";
+import { useOraclePrice } from "@/lib/useOraclePrice";
+import { cn } from "@/lib/cn";
+
+function WatchlistItem({
+  market,
+  selected,
+  onSelect,
+}: {
+  market: Market;
+  selected: boolean;
+  onSelect: (symbol: string) => void;
+}) {
+  const { price } = useOraclePrice(market.oracleKey, market.price);
+
+  return (
+    <button
+      onClick={() => onSelect(market.symbol)}
+      className={cn(
+        "flex w-full flex-col gap-0.5 rounded-2xl px-3 py-2.5 text-left transition-colors hover:bg-white/25",
+        selected && "bg-white/40"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-ink">{market.symbol}</span>
+        <span className="text-sm tabular-nums text-ink">${price.toFixed(2)}</span>
+      </div>
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-ink-soft">{market.name}</span>
+        <span className={market.change24h >= 0 ? "text-positive" : "text-negative"}>
+          {market.change24h >= 0 ? "+" : ""}
+          {market.change24h.toFixed(1)}%
+        </span>
+      </div>
+    </button>
+  );
+}
 
 export function WatchlistSidebar({
   selected,
@@ -18,39 +54,18 @@ export function WatchlistSidebar({
   );
 
   return (
-    <aside className="w-64 shrink-0 border-r border-border bg-panel">
-      <div className="border-b border-border p-3">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search markets"
-          className="w-full rounded-md bg-surface px-3 py-1.5 text-sm outline-none placeholder:text-text-secondary"
-        />
-      </div>
-      <ul>
+    <aside className="glass-panel flex w-64 shrink-0 flex-col overflow-y-auto p-3">
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search markets"
+        className="mb-2 w-full rounded-2xl bg-white/40 px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft"
+      />
+      <div className="flex flex-col gap-0.5">
         {filtered.map((m) => (
-          <li key={m.symbol}>
-            <button
-              onClick={() => onSelect(m.symbol)}
-              className={`flex w-full flex-col gap-0.5 border-b border-border/50 px-3 py-2 text-left hover:bg-surface ${
-                selected === m.symbol ? "bg-surface" : ""
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{m.symbol}</span>
-                <span className="text-sm tabular-nums">${m.price.toFixed(2)}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-text-secondary">{m.name}</span>
-                <span className={m.change24h >= 0 ? "text-long" : "text-short"}>
-                  {m.change24h >= 0 ? "+" : ""}
-                  {m.change24h.toFixed(1)}%
-                </span>
-              </div>
-            </button>
-          </li>
+          <WatchlistItem key={m.symbol} market={m} selected={selected === m.symbol} onSelect={onSelect} />
         ))}
-      </ul>
+      </div>
     </aside>
   );
 }

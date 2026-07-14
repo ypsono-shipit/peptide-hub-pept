@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { createChart, ColorType, type IChartApi, type UTCTimestamp } from "lightweight-charts";
+import { cn } from "@/lib/cn";
 
 const TIMEFRAMES = ["1D", "1W", "1M", "3M"] as const;
 
@@ -32,12 +33,12 @@ export function ChartPanel({ symbol, price }: { symbol: string; price: number })
 
     const chart = createChart(containerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: "#151619" },
-        textColor: "#8B8D93",
+        background: { type: ColorType.Solid, color: "rgba(255,255,255,0)" },
+        textColor: "rgba(255,255,255,0.68)",
       },
       grid: {
-        vertLines: { color: "#26282C" },
-        horzLines: { color: "#26282C" },
+        vertLines: { color: "rgba(255,255,255,0.06)" },
+        horzLines: { color: "rgba(255,255,255,0.06)" },
       },
       width: containerRef.current.clientWidth,
       height: 420,
@@ -45,11 +46,11 @@ export function ChartPanel({ symbol, price }: { symbol: string; price: number })
     });
 
     const series = chart.addCandlestickSeries({
-      upColor: "#00C853",
-      downColor: "#FF3B30",
+      upColor: "#3CCF7E",
+      downColor: "#FF6B81",
       borderVisible: false,
-      wickUpColor: "#00C853",
-      wickDownColor: "#FF3B30",
+      wickUpColor: "#3CCF7E",
+      wickDownColor: "#FF6B81",
     });
     series.setData(mockCandles(price));
 
@@ -65,21 +66,24 @@ export function ChartPanel({ symbol, price }: { symbol: string; price: number })
   }, [symbol, price]);
 
   return (
-    <div className="flex-1 border-b border-border bg-panel">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-2">
-        <span className="text-sm font-semibold">{symbol}</span>
+    <div className="glass-panel flex flex-1 flex-col overflow-hidden">
+      <div className="flex items-center gap-2 border-b border-glass-border px-4 py-2.5">
+        <span className="text-sm font-semibold text-ink">{symbol}</span>
         <div className="ml-auto flex gap-1">
-          {TIMEFRAMES.map((tf) => (
+          {TIMEFRAMES.map((tf, i) => (
             <button
               key={tf}
-              className="rounded px-2 py-1 text-xs text-text-secondary hover:bg-surface hover:text-text-primary"
+              className={cn(
+                "rounded-full px-2.5 py-1 text-xs font-medium",
+                i === 0 ? "bg-white/50 text-ink" : "text-ink-soft hover:bg-white/25 hover:text-ink"
+              )}
             >
               {tf}
             </button>
           ))}
         </div>
       </div>
-      <div ref={containerRef} className="w-full" />
+      <div ref={containerRef} className="w-full flex-1" />
     </div>
   );
 }

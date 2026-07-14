@@ -1,0 +1,563 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "collateralToken_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "oracle_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "treasury_",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "marketKey",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "active",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxLeverageBps",
+        "type": "uint256"
+      }
+    ],
+    "name": "MarketSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "positionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "exitPrice",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "pnl",
+        "type": "int256"
+      }
+    ],
+    "name": "PositionClosed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "positionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "exitPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "PositionLiquidated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "positionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "trader",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "marketKey",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isLong",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sizeUsd",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "collateral",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "entryPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "PositionOpened",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "positionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "closePosition",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "collateralToken",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "cumulativeFundingIndex",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "lastFundingUpdate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "positionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "liquidate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "markets",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "active",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "oracleKey",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxLeverageBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fundingRatePerHour",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "makerFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidationFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maintenanceMarginBps",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextPositionId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "marketKey",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isLong",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sizeUsd",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "collateralAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "openPosition",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "positionId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "oracle",
+    "outputs": [
+      {
+        "internalType": "contract PeptideOracle",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "positions",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "trader",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "marketKey",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isLong",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sizeUsd",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "collateral",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "entryPrice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "entryFundingIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "openedAt",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "protocolFeesAccrued",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "marketKey",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "active",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxLeverageBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fundingRatePerHour",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "makerFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidationFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maintenanceMarginBps",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMarket",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "sweepFeesToTreasury",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treasury",
+    "outputs": [
+      {
+        "internalType": "contract Treasury",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

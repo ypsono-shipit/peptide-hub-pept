@@ -26,7 +26,13 @@ contract PeptideOracle is Ownable {
         uint256 updatedAt;
     }
 
-    uint256 public constant MAX_STALENESS = 15 minutes;
+    // Chainlink feeds update every few seconds/minutes, so a tight window
+    // catches a genuinely broken feed. Admin-pushed prices (no live source
+    // behind them — see pushPrice) have no such cadence; a 15-minute window
+    // would just mean re-pushing constantly for no safety benefit. Pushed
+    // prices get a much looser window instead.
+    uint256 public constant CHAINLINK_MAX_STALENESS = 15 minutes;
+    uint256 public constant PUSHED_MAX_STALENESS = 30 days;
 
     mapping(bytes32 => Feed) public feeds; // market key (e.g. keccak256("PEPTIDE-INDEX")) -> feed
 
@@ -54,13 +60,13 @@ contract PeptideOracle is Ownable {
         if (f.chainlinkFeed != address(0)) {
             AggregatorV3Interface agg = AggregatorV3Interface(f.chainlinkFeed);
             (, int256 answer,, uint256 updatedAt,) = agg.latestRoundData();
-            require(block.timestamp - updatedAt <= MAX_STALENESS, "Oracle: stale chainlink price");
+            require(block.timestamp - updatedAt <= CHAINLINK_MAX_STALENESS, "Oracle: stale chainlink price");
             require(answer > 0, "Oracle: bad chainlink price");
             uint8 dec = agg.decimals();
             return dec == 18 ? uint256(answer) : uint256(answer) * (10 ** (18 - dec));
         }
 
-        require(block.timestamp - f.updatedAt <= MAX_STALENESS, "Oracle: stale pushed price");
+        require(block.timestamp - f.updatedAt <= PUSHED_MAX_STALENESS, "Oracle: stale pushed price");
         return f.pushedPrice;
     }
 }

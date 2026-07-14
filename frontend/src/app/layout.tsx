@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { TopNav } from "@/components/TopNav";
+import { Sidebar } from "@/components/Sidebar";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Peptide Hub — $PEPT Peptide Perps",
-  description: "Peptide/biotech-themed perps trading on Robinhood Chain",
+  title: "Peptide Hub — The Operating System for Peptide Finance",
+  description: "Peptide/biotech markets, tokenized biotech stocks, and the world's largest peptide marketplace.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={inter.variable}>
       <body>
         <Providers>
-          <div className="flex min-h-screen flex-col">
-            <TopNav />
-            <main className="flex-1">{children}</main>
+          <div className="ambient-bg" />
+          <div className="relative z-10 flex h-screen gap-5 p-5">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto">{children}</main>
           </div>
         </Providers>
       </body>

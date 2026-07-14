@@ -10,8 +10,22 @@
     "Treasury": "0x3F0b6D1Be32D2819ABA3893053C4ec3b93116Be5",
     "BondDepository": "0x0B9EFc5DA4921B6d0249A06f3a1BB716636bD042",
     "Staking": "0xebbFEb218117858871f96f204DE1BBD33A921456",
-    "PeptideOracle": "0x58166a94701D94C573a60821919339905478943B",
-    "PerpsEngine": null
+    "PeptideOracle": "0x937C0a5eD4F19d9F6A3A7EEcdC46ED12aD34F941",
+    "PerpsEngine": "0x5f6848B92A3a587EE2C4e9322F297f9a14753f3a",
+    "TestCollateral_tPUSD": "0xACD157418837F63E4FD3CDc86E026522352E7DCE"
   },
-  "notes": "PerpsEngine not yet deployed — needs a whitelisted collateral token (e.g. a Robinhood Chain testnet Stock Token from the faucet) set as COLLATERAL_TOKEN_ADDRESS before deploying."
+  "oraclePrices": {
+    "note": "All admin-pushed synthetic prices, not real feeds. LLY is confirmed real on Robinhood Chain MAINNET (0x8005d266423c7Ea827372c9c864491e5786600eA, verified on-chain: name()='Eli Lilly • Robinhood Token', symbol()='LLY') but has zero code on testnet (chain 46630) as of 2026-07-15 — not all mainnet Stock Tokens are mirrored to testnet. TSHA/GLP-1 basket still have no known real token on either network. Revisit LLY-PERP oracle wiring when this moves to mainnet.",
+    "PEPT-USD": "1.00",
+    "LLY-PERP": "812.44",
+    "TSHA-PERP": "6.72",
+    "GLP1-BASKET": "118.05",
+    "pushedAt": "2026-07-14T19:23:24.453Z",
+    "stalenessWindow": "30 days (pushed), 15 minutes (Chainlink) — see PeptideOracle.sol"
+  },
+  "mainnetReferences": {
+    "note": "Addresses verified on Robinhood Chain mainnet (chain 4663, rpc.mainnet.chain.robinhood.com) for future migration — NOT usable on testnet.",
+    "LLY": "0x8005d266423c7Ea827372c9c864491e5786600eA"
+  },
+  "notes": "PerpsEngine deployed and configured with tPUSD test collateral for all 4 markets. BondDepository still has no reserve token whitelisted (no real Stock Token exists on testnet)."
 }

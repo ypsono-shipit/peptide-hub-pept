@@ -86,32 +86,34 @@ export function StakePanel() {
 
   if (!isConnected) {
     return (
-      <div className="space-y-4 rounded-md border border-border bg-panel p-4">
-        <p className="text-sm text-text-secondary">Connect a wallet to stake $PEPT on Robinhood Chain Testnet.</p>
+      <div className="glass-panel space-y-4 p-5">
+        <p className="text-sm text-ink-soft">Connect a wallet to stake $PEPT on Robinhood Chain Testnet.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 rounded-md border border-border bg-panel p-4">
-      <p className="text-sm text-text-secondary">
+    <div className="glass-panel space-y-4 p-5">
+      <p className="text-sm text-ink-soft">
         Earn real yield from perps trading fees and Treasury returns. No lockup.
       </p>
 
       <div className="grid grid-cols-3 gap-3 text-xs">
-        <div className="rounded-md bg-surface p-2">
-          <div className="text-text-secondary">Wallet PEPT</div>
-          <div className="mt-1 tabular-nums">
+        <div className="rounded-2xl bg-white/30 p-2.5">
+          <div className="text-ink-soft">Wallet PEPT</div>
+          <div className="mt-1 tabular-nums text-ink">
             {peptBalance.data !== undefined ? formatEther(peptBalance.data as bigint) : "—"}
           </div>
         </div>
-        <div className="rounded-md bg-surface p-2">
-          <div className="text-text-secondary">Staked</div>
-          <div className="mt-1 tabular-nums">{staked.data !== undefined ? formatEther(staked.data as bigint) : "—"}</div>
+        <div className="rounded-2xl bg-white/30 p-2.5">
+          <div className="text-ink-soft">Staked</div>
+          <div className="mt-1 tabular-nums text-ink">
+            {staked.data !== undefined ? formatEther(staked.data as bigint) : "—"}
+          </div>
         </div>
-        <div className="rounded-md bg-surface p-2">
-          <div className="text-text-secondary">Pending Reward</div>
-          <div className="mt-1 tabular-nums">
+        <div className="rounded-2xl bg-white/30 p-2.5">
+          <div className="text-ink-soft">Pending Reward</div>
+          <div className="mt-1 tabular-nums text-ink">
             {pendingReward.data !== undefined ? formatEther(pendingReward.data as bigint) : "—"}
           </div>
         </div>
@@ -121,21 +123,21 @@ export function StakePanel() {
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         placeholder="Amount of PEPT"
-        className="w-full rounded-md bg-surface px-3 py-2 text-sm outline-none"
+        className="w-full rounded-2xl bg-white/40 px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft"
       />
 
       <div className="grid grid-cols-2 gap-2">
         <button
           disabled={busy || parsedAmount === 0n}
           onClick={needsApproval ? approve : stake}
-          className="rounded-md bg-accent py-2.5 text-sm font-semibold text-surface disabled:opacity-50"
+          className="rounded-2xl bg-gradient-to-r from-primary to-accent py-2.5 text-sm font-semibold text-cloud disabled:opacity-50"
         >
           {busy ? "Confirming…" : needsApproval ? "Approve" : "Stake"}
         </button>
         <button
           disabled={busy || parsedAmount === 0n}
           onClick={unstake}
-          className="rounded-md bg-surface py-2.5 text-sm font-semibold disabled:opacity-50"
+          className="rounded-2xl bg-white/40 py-2.5 text-sm font-semibold text-ink disabled:opacity-50"
         >
           Unstake
         </button>
@@ -144,7 +146,7 @@ export function StakePanel() {
       <button
         disabled={busy || !pendingReward.data || (pendingReward.data as bigint) === 0n}
         onClick={claim}
-        className="w-full rounded-md bg-surface py-2.5 text-sm font-semibold disabled:opacity-50"
+        className="w-full rounded-2xl bg-white/40 py-2.5 text-sm font-semibold text-ink disabled:opacity-50"
       >
         Claim Reward
       </button>
@@ -154,7 +156,7 @@ export function StakePanel() {
           href={`https://explorer.testnet.chain.robinhood.com/tx/${txHash}`}
           target="_blank"
           rel="noreferrer"
-          className="block text-center text-xs text-text-secondary underline"
+          className="block text-center text-xs text-ink-soft underline"
         >
           View transaction ↗
         </a>
