@@ -158,7 +158,7 @@ contract PerpsEngine is Ownable, ReentrancyGuard {
         return (priceDelta * direction * int256(p.sizeUsd)) / int256(p.entryPrice);
     }
 
-    function _settle(Position storage p, int256 pnl) internal returns (uint256 payout) {
+    function _settle(Position storage p, int256 pnl) internal view returns (uint256 payout) {
         int256 net = int256(p.collateral) + pnl;
         payout = net > 0 ? uint256(net) : 0;
     }

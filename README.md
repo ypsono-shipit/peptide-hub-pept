@@ -1,6 +1,8 @@
 # Peptide Hub — $PEPT Peptide Perps
 
-Peptide/biotech-themed perpetual futures DEX on **Robinhood Chain** (EVM L2, Chain ID 4663), with OHM-fork tokenomics ($PEPT bonding, staking, protocol-owned treasury).
+Peptide/biotech-themed perpetual futures DEX on **Robinhood Chain** (Arbitrum Orbit L2 — mainnet Chain ID 4663, testnet Chain ID 46630), with OHM-fork tokenomics ($PEPT bonding, staking, protocol-owned treasury).
+
+Currently targeting **testnet**: RPC `https://rpc.testnet.chain.robinhood.com`, explorer `https://explorer.testnet.chain.robinhood.com`, faucet `https://faucet.testnet.chain.robinhood.com`.
 
 Full product spec: [Peptide-Hub-PRD](../Business-Ideas/Peptide-Hub-PRD.md)
 

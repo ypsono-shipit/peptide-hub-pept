@@ -41,7 +41,7 @@ export function TopNav() {
       </div>
       <div className="flex items-center gap-3">
         <span className="rounded-full border border-border px-2.5 py-1 text-xs text-text-secondary">
-          Robinhood Chain · 4663
+          Robinhood Chain Testnet · 46630
         </span>
         {isConnected ? (
           <button
