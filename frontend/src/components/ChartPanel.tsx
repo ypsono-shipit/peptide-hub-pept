@@ -1,32 +1,35 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createChart, ColorType, type IChartApi, type UTCTimestamp } from "lightweight-charts";
+import {
+  createChart,
+  ColorType,
+  type IChartApi,
+  type ISeriesApi,
+  type UTCTimestamp,
+  type CandlestickData,
+} from "lightweight-charts";
 import { cn } from "@/lib/cn";
 
-const TIMEFRAMES = ["1m", "5m", "15m", "1h", "4h", "1D"] as const;
+const TIMEFRAMES = ["1h", "4h", "1D", "1W"] as const;
+type Tf = (typeof TIMEFRAMES)[number];
 
-function mockCandles(basePrice: number) {
-  const now = Math.floor(Date.now() / 1000);
-  const candles = [];
-  let price = basePrice * 0.96;
-  for (let i = 80; i >= 0; i--) {
-    const open = price;
-    const drift = (Math.sin(i / 4) * 0.4 + ((i * 17) % 7) / 40 - 0.08) * (basePrice * 0.012);
-    const close = Math.max(basePrice * 0.5, open + drift);
-    const high = Math.max(open, close) + basePrice * 0.003;
-    const low = Math.min(open, close) - basePrice * 0.003;
-    candles.push({ time: (now - i * 900) as UTCTimestamp, open, high, low, close });
-    price = close;
-  }
-  // pin last close near live price
-  if (candles.length) {
-    const last = candles[candles.length - 1]!;
-    last.close = basePrice;
-    last.high = Math.max(last.open, basePrice) + basePrice * 0.002;
-    last.low = Math.min(last.open, basePrice) - basePrice * 0.002;
-  }
-  return candles;
+type Candle = {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+};
+
+function toChartData(candles: Candle[]): CandlestickData[] {
+  return candles.map((c) => ({
+    time: c.time as UTCTimestamp,
+    open: c.open,
+    high: c.high,
+    low: c.low,
+    close: c.close,
+  }));
 }
 
 export function ChartPanel({
@@ -39,8 +42,40 @@ export function ChartPanel({
   unit?: "$" | "$/mg";
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [tf, setTf] = useState<(typeof TIMEFRAMES)[number]>("15m");
+  const chartRef = useRef<IChartApi | null>(null);
+  const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const [tf, setTf] = useState<Tf>("4h");
+  const [candles, setCandles] = useState<Candle[]>([]);
+  const [sampleCount, setSampleCount] = useState(0);
+  const [status, setStatus] = useState<"loading" | "ok" | "empty" | "error">("loading");
 
+  // Fetch OHLC from oracle JSON history
+  useEffect(() => {
+    let cancelled = false;
+    setStatus("loading");
+    const q = new URLSearchParams({
+      market: symbol,
+      tf,
+      live: String(price),
+    });
+    fetch(`/api/ohlc?${q}`)
+      .then((r) => r.json())
+      .then((data: { candles?: Candle[]; sampleCount?: number }) => {
+        if (cancelled) return;
+        const c = data.candles ?? [];
+        setCandles(c);
+        setSampleCount(data.sampleCount ?? 0);
+        setStatus(c.length === 0 ? "empty" : "ok");
+      })
+      .catch(() => {
+        if (!cancelled) setStatus("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [symbol, tf, price]);
+
+  // Create chart once
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -71,13 +106,13 @@ export function ChartPanel({
       wickUpColor: "#22c55e",
       wickDownColor: "#ef4444",
     });
-    series.setData(mockCandles(price));
-    chart.timeScale().fitContent();
 
-    const chartApi: IChartApi = chart;
+    chartRef.current = chart;
+    seriesRef.current = series;
+
     const ro = new ResizeObserver(() => {
-      if (!containerRef.current) return;
-      chartApi.applyOptions({
+      if (!containerRef.current || !chartRef.current) return;
+      chartRef.current.applyOptions({
         width: containerRef.current.clientWidth,
         height: containerRef.current.clientHeight,
       });
@@ -87,10 +122,33 @@ export function ChartPanel({
     return () => {
       ro.disconnect();
       chart.remove();
+      chartRef.current = null;
+      seriesRef.current = null;
     };
-  }, [symbol, price, tf]);
+  }, []);
 
-  const chg = price > 0 ? ((price - price * 0.994) / (price * 0.994)) * 100 : 0;
+  // Push candle data when loaded
+  useEffect(() => {
+    if (!seriesRef.current || !chartRef.current) return;
+    if (candles.length === 0) {
+      // single mark candle so chart isn't blank
+      if (price > 0) {
+        const t = Math.floor(Date.now() / 1000) as UTCTimestamp;
+        seriesRef.current.setData([{ time: t, open: price, high: price, low: price, close: price }]);
+      }
+      return;
+    }
+    seriesRef.current.setData(toChartData(candles));
+    chartRef.current.timeScale().fitContent();
+  }, [candles, price]);
+
+  const last = candles[candles.length - 1];
+  const open = last?.open ?? price;
+  const high = last?.high ?? price;
+  const low = last?.low ?? price;
+  const close = price > 0 ? price : (last?.close ?? 0);
+  const chg = open > 0 ? ((close - open) / open) * 100 : 0;
+  const pos = chg >= 0;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-panel">
@@ -99,9 +157,12 @@ export function ChartPanel({
           {symbol} · {tf}
         </span>
         <span className="font-mono text-[11px] text-muted">
-          O {price.toFixed(4)} H {(price * 1.01).toFixed(4)} L {(price * 0.99).toFixed(4)} C{" "}
-          <span className="text-positive">{price.toFixed(4)}</span>
-          <span className="ml-1 text-positive">+{chg.toFixed(2)}%</span>
+          O {open.toFixed(4)} H {high.toFixed(4)} L {low.toFixed(4)} C{" "}
+          <span className={pos ? "text-positive" : "text-negative"}>{close.toFixed(4)}</span>
+          <span className={cn("ml-1", pos ? "text-positive" : "text-negative")}>
+            {pos ? "+" : ""}
+            {chg.toFixed(2)}%
+          </span>
         </span>
         <div className="ml-auto flex gap-0.5">
           {TIMEFRAMES.map((t) => (
@@ -120,7 +181,15 @@ export function ChartPanel({
       </div>
       <div ref={containerRef} className="min-h-[280px] w-full flex-1" />
       <div className="border-t border-border px-3 py-1 text-[10px] text-faint">
-        Illustrative candles · mark from PeptideOracle{unit === "$/mg" ? " ($/mg)" : ""}
+        {status === "loading" && "Loading oracle history…"}
+        {status === "error" && "Failed to load history — showing live mark only"}
+        {status === "empty" && "No history yet — live oracle mark only (cron will fill this)"}
+        {status === "ok" && (
+          <>
+            Oracle history · {sampleCount} samples · {tf} OHLC (forward-filled)
+            {unit === "$/mg" ? " · $/mg" : ""} · live mark overlays last close
+          </>
+        )}
       </div>
     </div>
   );

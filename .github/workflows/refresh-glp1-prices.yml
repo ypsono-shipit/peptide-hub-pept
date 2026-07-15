@@ -38,6 +38,9 @@ concurrency:
   group: glp1-oracle-refresh
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
   push-prices:
     runs-on: ubuntu-latest
@@ -47,6 +50,8 @@ jobs:
         working-directory: contracts
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -76,6 +81,24 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: glp1-last-scrape-${{ github.run_id }}
-          path: contracts/data/glp1-last-scrape.json
+          path: |
+            contracts/data/glp1-last-scrape.json
+            contracts/data/price-history.json
+            frontend/public/data/price-history.json
           if-no-files-found: ignore
           retention-days: 14
+
+      # Keep chart history on main so Vercel deploys pick up new samples.
+      - name: Commit price history
+        if: success() && github.ref == 'refs/heads/main'
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add contracts/data/price-history.json frontend/public/data/price-history.json || true
+          if git diff --staged --quiet; then
+            echo "No history changes to commit"
+          else
+            git commit -m "chore: append oracle price history [skip ci]"
+            git push
+          fi

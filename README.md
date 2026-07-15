@@ -17,6 +17,13 @@ Full product spec: [Peptide-Hub-PRD](../Business-Ideas/Peptide-Hub-PRD.md)
 - **PLP:** GMX-style LP vault — deposit USDC → mint PLP; max OI = 50% of AUM; fees/losses to LPs
 - UI: `/liquidity` · deploy: `cd contracts && npm run deploy:usdc-plp`
 
+### Oracle charts
+
+- Each successful `pushPrice` appends to `frontend/public/data/price-history.json` (and contracts copy)
+- API: `GET /api/ohlc?market=SEMA-PERP&tf=4h&live=5.06`
+- ChartPanel loads OHLC from that history (forward-filled stair-steps between sparse samples)
+- Seed empty charts: `cd contracts && npm run seed:history`
+
 ## Phased Roadmap
 
 1. **MVP** — Paper trading simulator + basic staking UI

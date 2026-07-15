@@ -13,7 +13,8 @@
     "push:glp1": "hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet",
     "push:glp1:dry": "DRY_RUN=1 hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet",
     "deploy:plp": "hardhat run scripts/deploy-plp.ts --network robinhoodTestnet",
-    "deploy:usdc-plp": "hardhat run scripts/deploy-usdc-plp.ts --network robinhoodTestnet"
+    "deploy:usdc-plp": "hardhat run scripts/deploy-usdc-plp.ts --network robinhoodTestnet",
+    "seed:history": "ts-node scripts/seed-price-history.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",

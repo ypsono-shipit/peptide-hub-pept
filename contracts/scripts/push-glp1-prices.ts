@@ -5,6 +5,7 @@ import deployment from "../deployments/testnet.json";
 import referenceData from "../data/glp1-reference-prices.json";
 import { resolveAllDualSources, type DualSourceResult } from "./lib/dual-source";
 import { roundPrice } from "./lib/stats";
+import { appendPriceSamples, type PriceSample } from "./lib/price-history";
 
 /**
  * Refresh GLP-1 peptide oracle prices on Robinhood Chain testnet.
@@ -230,6 +231,8 @@ async function main() {
   console.log(`\nPushing as ${signer.address} → oracle ${oracleAddr}${forcePush ? " (FORCE)" : ""}`);
 
   let anyPaused = false;
+  const historySamples: PriceSample[] = [];
+  const nowTs = Math.floor(Date.now() / 1000);
 
   for (const row of rows) {
     const marketKey = ethers.keccak256(ethers.toUtf8Bytes(row.symbol));
@@ -262,8 +265,21 @@ async function main() {
       );
     } else {
       const onChain = await oracle.latestPrice(marketKey);
-      console.log(`✓ ${row.symbol}: $${ethers.formatEther(onChain)}/mg  tx=${tx.hash}`);
+      const priceNum = Number(ethers.formatEther(onChain));
+      console.log(`✓ ${row.symbol}: $${priceNum}/mg  tx=${tx.hash}`);
+      historySamples.push({
+        market: row.symbol,
+        ts: nowTs,
+        price: priceNum,
+        source: row.source.slice(0, 200),
+        txHash: tx.hash,
+      });
     }
+  }
+
+  if (historySamples.length > 0) {
+    const paths = appendPriceSamples(historySamples);
+    console.log(`Appended ${historySamples.length} samples to price history:`, paths);
   }
 
   if (anyPaused) {
