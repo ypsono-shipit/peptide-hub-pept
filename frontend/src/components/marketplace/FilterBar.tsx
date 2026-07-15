@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Grid3x3, List } from "lucide-react";
+import { Grid3x3, List } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export function FilterBar({
@@ -8,32 +8,44 @@ export function FilterBar({
   onViewChange,
   inStockOnly,
   onInStockOnlyChange,
+  sort,
+  onSortChange,
+  resultCount,
 }: {
   view: "list" | "grid";
   onViewChange: (v: "list" | "grid") => void;
   inStockOnly: boolean;
   onInStockOnlyChange: (v: boolean) => void;
+  sort: "featured" | "az" | "price-asc" | "price-desc";
+  onSortChange: (s: "featured" | "az" | "price-asc" | "price-desc") => void;
+  resultCount: number;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Pill active>All</Pill>
+      <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium text-ink">
+        {resultCount} compounds
+      </span>
       <button
         onClick={() => onInStockOnlyChange(!inStockOnly)}
         className={cn(
           "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-          inStockOnly ? "bg-white/20 text-ink" : "bg-white/8 text-ink-soft hover:bg-white/15"
+          inStockOnly ? "bg-white/20 text-ink" : "bg-white/8 text-ink-soft hover:bg-white/15",
         )}
       >
         <span className="h-1.5 w-1.5 rounded-full bg-positive" />
         In Stock
       </button>
-      <Pill>USA</Pill>
-      <Pill>EU</Pill>
-      <Pill>Asia</Pill>
-      <Dropdown label="Target" />
-      <Dropdown label="Purity" />
-      <Dropdown label="Form" />
-      <Dropdown label="Sort: Popular" />
+
+      <select
+        value={sort}
+        onChange={(e) => onSortChange(e.target.value as typeof sort)}
+        className="rounded-full bg-white/8 px-3 py-1.5 text-xs font-medium text-ink-soft outline-none hover:bg-white/15 hover:text-ink"
+      >
+        <option value="featured">Sort: Featured</option>
+        <option value="az">A–Z</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+      </select>
 
       <div className="ml-auto flex items-center gap-1 rounded-full bg-white/8 p-1">
         <button
@@ -50,27 +62,5 @@ export function FilterBar({
         </button>
       </div>
     </div>
-  );
-}
-
-function Pill({ children, active }: { children: React.ReactNode; active?: boolean }) {
-  return (
-    <span
-      className={cn(
-        "rounded-full px-3 py-1.5 text-xs font-medium",
-        active ? "bg-white/20 text-ink" : "bg-white/8 text-ink-soft"
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
-function Dropdown({ label }: { label: string }) {
-  return (
-    <button className="flex items-center gap-1 rounded-full bg-white/8 px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-white/15 hover:text-ink">
-      {label}
-      <ChevronDown size={12} />
-    </button>
   );
 }
