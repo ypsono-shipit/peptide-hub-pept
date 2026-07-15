@@ -8,13 +8,13 @@ import { Sparkline } from "@/components/ui/Sparkline";
 import { DonutChart } from "@/components/ui/DonutChart";
 import { MOCK_MARKETS } from "@/lib/markets";
 import { useOraclePrice } from "@/lib/useOraclePrice";
-import { PEPT_INDEX_STATS, GLP1_BASKET_COMPONENTS, PORTFOLIO_ALLOCATION, STATUS_BAR } from "@/lib/dashboardStats";
+import { PEPT_INDEX_STATS, GLP1_BASKET_COMPONENTS, PORTFOLIO_ALLOCATION } from "@/lib/dashboardStats";
 import { cn } from "@/lib/cn";
 
 // WebGL can't run during SSR/static generation — load client-side only.
 const PeptideCapsule3D = dynamic(() => import("@/components/ui/PeptideCapsule3D").then((m) => m.PeptideCapsule3D), {
   ssr: false,
-  loading: () => <div className="h-[440px] w-full animate-pulse rounded-glass bg-white/5" />,
+  loading: () => <div className="h-[300px] w-full animate-pulse rounded-glass bg-white/5" />,
 });
 
 const peptIndex = MOCK_MARKETS[0];
@@ -28,11 +28,11 @@ function MarketOverviewRow({ market }: { market: (typeof MOCK_MARKETS)[number] }
   return (
     <Link
       href="/trade"
-      className="grid grid-cols-[1.4fr_0.9fr_0.9fr_1fr] items-center gap-3 rounded-2xl px-3 py-3 transition-colors hover:bg-white/25"
+      className="grid grid-cols-[1.4fr_0.9fr_0.9fr_1fr] items-center gap-3 rounded-2xl px-3 py-1.5 transition-colors hover:bg-white/25"
     >
       <div>
         <div className="text-sm font-semibold text-ink">{market.symbol}</div>
-        <div className="text-xs text-ink-soft">{market.name}</div>
+        <div className="text-[11px] text-ink-soft">{market.name}</div>
       </div>
       <div className="text-sm tabular-nums text-ink">${price.toFixed(2)}</div>
       <div className={cn("text-sm tabular-nums", positive ? "text-positive" : "text-negative")}>
@@ -40,7 +40,7 @@ function MarketOverviewRow({ market }: { market: (typeof MOCK_MARKETS)[number] }
         {market.change24h.toFixed(2)}%
       </div>
       <div className="flex justify-end">
-        <Sparkline seed={market.symbol} positive={positive} width={64} height={22} />
+        <Sparkline seed={market.symbol} positive={positive} width={56} height={18} />
       </div>
     </Link>
   );
@@ -93,8 +93,8 @@ export default function DashboardPage() {
           </GlassCard>
 
           {/* Market Overview */}
-          <GlassCard className="p-6">
-            <div className="mb-2 flex items-center justify-between">
+          <GlassCard className="p-5">
+            <div className="mb-1 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-ink">Market Overview</h2>
               <Link href="/trade" className="flex items-center gap-1 text-xs text-ink-soft hover:text-ink">
                 View all <ArrowUpRight size={12} />
@@ -118,19 +118,6 @@ export default function DashboardPage() {
           </GlassCard>
         </div>
       </div>
-
-      {/* Status bar */}
-      <GlassCard className="flex shrink-0 flex-wrap items-center gap-x-8 gap-y-2 px-6 py-3.5">
-        <StatusItem label="PEPT TVL" value={STATUS_BAR.peptTvl} />
-        <StatusItem label="Labs" value={String(STATUS_BAR.labs)} />
-        <StatusItem label="Research Papers" value={String(STATUS_BAR.researchPapers)} />
-        <StatusItem label="Marketplace Listings" value={String(STATUS_BAR.marketplaceListings)} />
-        <StatusItem label="Network" value={STATUS_BAR.network} />
-        <div className="ml-auto flex items-center gap-2 text-xs font-medium text-positive">
-          <span className="h-1.5 w-1.5 rounded-full bg-positive" />
-          {STATUS_BAR.status}
-        </div>
-      </GlassCard>
     </div>
   );
 }
@@ -142,15 +129,6 @@ function Stat({ label, value, positive }: { label: string; value: string; positi
       <div className={cn("mt-1 text-lg font-semibold tabular-nums", positive ? "text-positive" : "text-cloud")}>
         {value}
       </div>
-    </div>
-  );
-}
-
-function StatusItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-1.5 text-xs">
-      <span className="text-ink-soft">{label}</span>
-      <span className="font-medium text-ink">{value}</span>
     </div>
   );
 }

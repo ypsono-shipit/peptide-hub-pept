@@ -10,6 +10,7 @@ import { MOCK_MARKETS } from "@/lib/markets";
 import { useOraclePrice } from "@/lib/useOraclePrice";
 import { Sparkline } from "@/components/ui/Sparkline";
 import { cn } from "@/lib/cn";
+import { STATUS_BAR } from "@/lib/dashboardStats";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
@@ -71,6 +72,19 @@ export function Sidebar() {
         <span className="text-sm font-semibold tracking-tight text-ink">Peptide Hub</span>
       </div>
 
+      <div className="rounded-2xl bg-white/5 p-3">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
+          <StatMini label="PEPT TVL" value={STATUS_BAR.peptTvl} />
+          <StatMini label="Labs" value={String(STATUS_BAR.labs)} />
+          <StatMini label="Research Papers" value={String(STATUS_BAR.researchPapers)} />
+          <StatMini label="Listings" value={String(STATUS_BAR.marketplaceListings)} />
+        </div>
+        <div className="mt-2.5 flex items-center gap-1.5 border-t border-glass-border pt-2.5 text-[11px] font-medium text-positive">
+          <span className="h-1.5 w-1.5 rounded-full bg-positive" />
+          {STATUS_BAR.status}
+        </div>
+      </div>
+
       <nav className="flex flex-col gap-1">
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href;
@@ -128,5 +142,14 @@ export function Sidebar() {
         <div className="mt-3 px-1 text-[11px] text-ink-soft">Robinhood Chain Testnet · 46630</div>
       </div>
     </aside>
+  );
+}
+
+function StatMini({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="text-ink-soft">{label}</div>
+      <div className="font-medium text-ink">{value}</div>
+    </div>
   );
 }
