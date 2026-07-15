@@ -2,10 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { formatEther } from "viem";
-import { useAccount, useConnect, useDisconnect, useReadContract } from "wagmi";
 import { LayoutGrid, LineChart, Store, FlaskConical, Wallet, Coins, Settings, Atom } from "lucide-react";
-import { peptContract } from "@/lib/contracts";
 import { MOCK_MARKETS } from "@/lib/markets";
 import { useOraclePrice } from "@/lib/useOraclePrice";
 import { Sparkline } from "@/components/ui/Sparkline";
@@ -52,16 +49,6 @@ function WatchRow({ symbol, name, price, change24h, oracleKey }: (typeof MOCK_MA
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { address, isConnected } = useAccount();
-  const { connectors, connect } = useConnect();
-  const { disconnect } = useDisconnect();
-
-  const peptBalance = useReadContract({
-    ...peptContract,
-    functionName: "balanceOf",
-    args: address ? [address] : undefined,
-    query: { enabled: !!address },
-  });
 
   return (
     <aside className="glass-panel flex h-full w-72 shrink-0 flex-col gap-6 overflow-y-auto p-5">
@@ -114,32 +101,6 @@ export function Sidebar() {
             <WatchRow key={m.symbol} {...m} />
           ))}
         </div>
-      </div>
-
-      <div className="border-t border-glass-border pt-4">
-        {isConnected ? (
-          <div className="space-y-2">
-            {peptBalance.data !== undefined && (
-              <div className="px-1 text-xs tabular-nums text-ink-soft">
-                {Number(formatEther(peptBalance.data as bigint)).toFixed(2)} PEPT
-              </div>
-            )}
-            <button
-              onClick={() => disconnect()}
-              className="w-full rounded-2xl bg-white/40 px-3 py-2 text-xs font-medium text-ink hover:bg-white/55"
-            >
-              {address?.slice(0, 6)}...{address?.slice(-4)}
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => connect({ connector: connectors[0] })}
-            className="w-full rounded-2xl bg-gradient-to-r from-primary to-accent px-3 py-2.5 text-xs font-semibold text-cloud shadow-glass-sm hover:opacity-90"
-          >
-            Connect Wallet
-          </button>
-        )}
-        <div className="mt-3 px-1 text-[11px] text-ink-soft">Robinhood Chain Testnet · 46630</div>
       </div>
     </aside>
   );
