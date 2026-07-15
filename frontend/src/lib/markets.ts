@@ -6,33 +6,24 @@ export type Market = {
   price: number;
   change24h: number;
   volume24h: number;
-  /** keccak256(<market key seed>) — shared by PeptideOracle (price) and PerpsEngine (market config); same key on both by construction. */
+  /** keccak256(<market key seed>) — shared by PeptideOracle + PerpsEngine. */
   oracleKey?: `0x${string}`;
-  /** $/mg for real peptide-chemical markets, $ (index/notional) for everything else. */
+  /** $/mg for peptide-chemical markets, $ for equity-style notionals. */
   unit: "$" | "$/mg";
-  /** Priced (for index weighting / info) but no PerpsEngine market configured — not tradeable yet. */
+  /** Shown in UI but not tradeable yet (no full PerpsEngine listing or hidden until ready). */
   comingSoon?: boolean;
 };
-
-// On-chain PeptideOracle market keys. PEPT-IDX's key was pushed under the
-// seed "PEPT-USD", decoupled from its "PEPT Index" display name/symbol —
-// every other market's key matches its display symbol exactly.
-const PEPT_ORACLE_KEY = keccak256(toBytes("PEPT-USD"));
 
 export function getMarketByOracleKey(oracleKey: `0x${string}`): Market | undefined {
   return MOCK_MARKETS.find((m) => m.oracleKey === oracleKey);
 }
 
+/**
+ * Tradeable peptide perps + coming-soon GLP-1 names.
+ * $PEPT is the platform / OHM-fork token — not a perp market.
+ * Keys: keccak256(utf8(symbol)) e.g. keccak256("TIRZ-PERP").
+ */
 export const MOCK_MARKETS: Market[] = [
-  {
-    symbol: "PEPT-IDX",
-    name: "PEPT Index",
-    price: 1.0,
-    change24h: 2.84,
-    volume24h: 0,
-    oracleKey: PEPT_ORACLE_KEY,
-    unit: "$",
-  },
   {
     symbol: "SEMA-PERP",
     name: "Semaglutide",
@@ -50,24 +41,6 @@ export const MOCK_MARKETS: Market[] = [
     volume24h: 0,
     oracleKey: keccak256(toBytes("GLP1-IDX-PERP")),
     unit: "$/mg",
-  },
-  {
-    symbol: "LLY-PERP",
-    name: "Eli Lilly Perpetual",
-    price: 812.44,
-    change24h: 1.91,
-    volume24h: 3_420_000,
-    oracleKey: keccak256(toBytes("LLY-PERP")),
-    unit: "$",
-  },
-  {
-    symbol: "TSHA-PERP",
-    name: "Taysha Gene Therapies",
-    price: 6.72,
-    change24h: -0.74,
-    volume24h: 480_000,
-    oracleKey: keccak256(toBytes("TSHA-PERP")),
-    unit: "$",
   },
   {
     symbol: "TIRZ-PERP",
@@ -88,5 +61,23 @@ export const MOCK_MARKETS: Market[] = [
     oracleKey: keccak256(toBytes("RETA-PERP")),
     unit: "$/mg",
     comingSoon: true,
+  },
+  {
+    symbol: "LLY-PERP",
+    name: "Eli Lilly Perpetual",
+    price: 812.44,
+    change24h: 1.91,
+    volume24h: 3_420_000,
+    oracleKey: keccak256(toBytes("LLY-PERP")),
+    unit: "$",
+  },
+  {
+    symbol: "TSHA-PERP",
+    name: "Taysha Gene Therapies",
+    price: 6.72,
+    change24h: -0.74,
+    volume24h: 480_000,
+    oracleKey: keccak256(toBytes("TSHA-PERP")),
+    unit: "$",
   },
 ];

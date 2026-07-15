@@ -15,10 +15,10 @@ export const GLP1_INDEX_WEIGHTS = [
 ];
 
 export const PORTFOLIO_ALLOCATION = [
-  { label: "PEPT Index", value: 42 },
-  { label: "SEMA Perp", value: 28 },
+  { label: "SEMA Perp", value: 40 },
+  { label: "GLP1 Index", value: 30 },
+  { label: "LLY Perp", value: 18 },
   { label: "TSHA Perp", value: 12 },
-  { label: "GLP1 Index", value: 18 },
 ];
 
 export const STATUS_BAR = {
