@@ -56,7 +56,7 @@ export default function DashboardPage() {
         <div className="flex flex-1 flex-col gap-5 overflow-y-auto pr-1">
           {/* Hero */}
           <GlassCard tone="rich" className="overflow-hidden p-8">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
               <div className="lg:w-[34%] lg:shrink-0">
                 <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-[11px] font-medium tracking-wide text-cloud">
                   The World&apos;s First Peptide Index
@@ -112,9 +112,11 @@ export default function DashboardPage() {
         <div className="flex w-[360px] shrink-0 flex-col gap-5 overflow-y-auto">
           <FeaturedPerpetualCard />
           <Glp1BasketCard />
-          <GlassCard className="p-5">
+          <GlassCard className="flex flex-1 flex-col p-5">
             <h3 className="mb-4 text-sm font-semibold text-ink">Portfolio Allocation</h3>
-            <DonutChart segments={PORTFOLIO_ALLOCATION} />
+            <div className="flex flex-1 items-center">
+              <DonutChart segments={PORTFOLIO_ALLOCATION} />
+            </div>
           </GlassCard>
         </div>
       </div>

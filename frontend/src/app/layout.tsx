@@ -21,12 +21,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* This is a dense desktop terminal, not a responsive layout — below
               its minimum width, panels should scroll horizontally as a unit
               rather than get squished into each other. */}
-          <div className="h-screen overflow-x-auto overflow-y-hidden">
-            <div className="relative z-10 flex h-full min-w-[1360px] flex-col">
-              <TopBar />
-              <div className="flex flex-1 gap-5 overflow-hidden p-5">
-                <Sidebar />
-                <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
+          <div className="h-screen overflow-auto">
+            <div className="relative z-10 flex h-full min-w-[1360px] gap-5 p-5">
+              <Sidebar />
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5">
+                <TopBar />
+                <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">{children}</main>
               </div>
             </div>
           </div>

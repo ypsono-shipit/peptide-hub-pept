@@ -19,7 +19,7 @@ export function TopBar() {
   });
 
   return (
-    <header className="flex shrink-0 items-center justify-end gap-3 px-5 pt-5">
+    <header className="flex shrink-0 items-center justify-end gap-3">
       <div className="flex items-center gap-1.5 rounded-2xl border border-glass-border bg-glass px-3 py-2 text-xs font-medium text-ink backdrop-blur-2xl">
         Robinhood Testnet
         <ChevronDown size={13} className="text-ink-soft" />
