@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, LineChart, Store, FlaskConical, Wallet, Coins, Settings, Atom } from "lucide-react";
+import {
+  LayoutGrid,
+  LineChart,
+  Store,
+  FlaskConical,
+  Wallet,
+  Coins,
+  Droplets,
+  Settings,
+  Atom,
+} from "lucide-react";
 import { MOCK_MARKETS } from "@/lib/markets";
 import { useOraclePrice } from "@/lib/useOraclePrice";
 import { Sparkline } from "@/components/ui/Sparkline";
@@ -12,6 +22,7 @@ import { STATUS_BAR } from "@/lib/dashboardStats";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/trade", label: "Trade", icon: LineChart },
+  { href: "/liquidity", label: "PLP Liquidity", icon: Droplets },
   { href: "/marketplace", label: "Marketplace", icon: Store },
   { href: "/labs", label: "Labs", icon: FlaskConical },
   { href: "/portfolio", label: "Portfolio", icon: Wallet },

@@ -8,8 +8,17 @@ Full product spec: [Peptide-Hub-PRD](../Business-Ideas/Peptide-Hub-PRD.md)
 
 ## Structure
 
-- `frontend/` — Next.js + TypeScript + Tailwind + wagmi/viem trading terminal (Markets, Trade, Portfolio, Stake & Bond)
-- `contracts/` — Hardhat + Solidity contracts (PEPT ERC-20, BondDepository, Staking, Treasury, PerpsEngine, Oracle)
+- `frontend/` — Next.js + TypeScript + Tailwind + wagmi/viem trading terminal (Trade, PLP Liquidity, Marketplace, Portfolio, Stake)
+- `contracts/` — Hardhat + Solidity (PEPT, PLP / PerpsLiquidityPool, PerpsEngine, PeptideOracle, Staking, Treasury, BondDepository)
+
+### PLP (Peptide Liquidity Pool)
+
+GMX-style LP vault that backstops perps open interest:
+
+- LPs deposit **tPUSD** → mint **PLP** shares
+- Max OI = **50%** of pool AUM (`maxUtilizationBps`)
+- Trading fees + trader losses accrue to LPs; trader profits paid from the pool
+- UI: `/liquidity` · deploy: `cd contracts && npm run deploy:plp`
 
 ## Phased Roadmap
 

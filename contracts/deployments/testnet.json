@@ -11,8 +11,10 @@
     "BondDepository": "0x0B9EFc5DA4921B6d0249A06f3a1BB716636bD042",
     "Staking": "0xebbFEb218117858871f96f204DE1BBD33A921456",
     "PeptideOracle": "0x59d62e2735Bd583F34A8AC2573bA952Df5849449",
-    "PerpsEngine": "0x7C06f25B8F82501D5cf150f7342B78Ab2B7f0E7B",
-    "TestCollateral_tPUSD": "0xACD157418837F63E4FD3CDc86E026522352E7DCE"
+    "PerpsEngine": "0x849a45a0BCd64247b0878E5080E0983EcC0FA05C",
+    "TestCollateral_tPUSD": "0xACD157418837F63E4FD3CDc86E026522352E7DCE",
+    "PLP": "0xFaF2346b877601b0663D178dc29e351e42A3789d",
+    "PerpsLiquidityPool": "0xa1e13DF22cBB2Fcdb906256632eA36D1569d2d4D"
   },
   "oraclePrices": {
     "note": "Admin-pushed prices. PEPT-USD/LLY-PERP/TSHA-PERP have no real source (30-day staleness). SEMA-PERP/GLP1-IDX-PERP/TIRZ-PERP/RETA-PERP are bootstrapped from real PeptidePricing.com + PeptideScouter.com cross-vendor medians (48h staleness — must be refreshed at least every 2 days to stay tradeable; run scripts/push-glp1-prices.ts). GLP1-BASKET (old stock-ticker theme) retired in favor of GLP1-IDX-PERP.",
@@ -30,5 +32,12 @@
     "note": "Addresses verified on Robinhood Chain mainnet (chain 4663, rpc.mainnet.chain.robinhood.com) for future migration — NOT usable on testnet.",
     "LLY": "0x8005d266423c7Ea827372c9c864491e5786600eA"
   },
-  "notes": "PerpsEngine deployed and configured with tPUSD test collateral for all 4 markets. BondDepository still has no reserve token whitelisted (no real Stock Token exists on testnet)."
+  "notes": "PerpsEngine deployed and configured with tPUSD test collateral for all 4 markets. BondDepository still has no reserve token whitelisted (no real Stock Token exists on testnet).",
+  "plp": {
+    "seededAt": "2026-07-15T08:04:14.559Z",
+    "seedAmount": "100000.0",
+    "maxUtilizationBps": 5000,
+    "reserveBps": 2000,
+    "note": "GMX-style LP vault. OI capped at 50% of AUM. Fees + losses to LPs; profits paid from pool."
+  }
 }
