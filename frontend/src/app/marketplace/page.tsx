@@ -26,7 +26,7 @@ export default function MarketplacePage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [view, setView] = useState<"list" | "grid">("list");
+  const [view, setView] = useState<"list" | "grid">("grid");
   const [sort, setSort] = useState<Sort>("featured");
   const [selectedId, setSelectedId] = useState(PEPTIDES[0]!.id);
 
@@ -52,7 +52,7 @@ export default function MarketplacePage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <TopBar />
-      <div className="flex min-h-0 flex-1 gap-3 overflow-hidden p-3">
+      <div className="flex min-h-0 flex-1 gap-2 overflow-hidden p-2 sm:gap-3 sm:p-3">
         <CategorySidebar
           query={query}
           onQueryChange={setQuery}
@@ -60,16 +60,16 @@ export default function MarketplacePage() {
           onCategoryChange={setCategory}
         />
 
-        <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 overflow-y-auto sm:gap-3">
           <MarketplaceHero />
 
-          <GlassCard className="flex flex-col gap-4 p-5">
-            <div className="flex gap-1 rounded-2xl bg-white/8 p-1">
+          <GlassCard className="flex flex-col gap-3 p-3 sm:p-4">
+            <div className="flex gap-1 rounded-lg bg-bg p-0.5">
               <button
                 onClick={() => setTab("peptides")}
                 className={cn(
-                  "rounded-xl px-4 py-1.5 text-sm font-medium",
-                  tab === "peptides" ? "bg-white/25 text-ink" : "text-ink-soft",
+                  "rounded-md px-3 py-1.5 text-sm font-medium",
+                  tab === "peptides" ? "bg-panel-hover text-ink" : "text-muted hover:text-ink",
                 )}
               >
                 Compounds
@@ -77,8 +77,8 @@ export default function MarketplacePage() {
               <button
                 onClick={() => setTab("partner")}
                 className={cn(
-                  "rounded-xl px-4 py-1.5 text-sm font-medium",
-                  tab === "partner" ? "bg-white/25 text-ink" : "text-ink-soft",
+                  "rounded-md px-3 py-1.5 text-sm font-medium",
+                  tab === "partner" ? "bg-panel-hover text-ink" : "text-muted hover:text-ink",
                 )}
               >
                 Partnership
@@ -102,7 +102,7 @@ export default function MarketplacePage() {
                     No compounds match your filters.
                   </div>
                 ) : view === "list" ? (
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-2">
                     {filtered.map((p) => (
                       <PeptideListItem
                         key={p.id}
@@ -113,7 +113,7 @@ export default function MarketplacePage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {filtered.map((p) => (
                       <PeptideGridItem
                         key={p.id}

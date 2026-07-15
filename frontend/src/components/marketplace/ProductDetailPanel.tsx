@@ -13,104 +13,86 @@ import { COLLATERAL_SYMBOL } from "@/lib/deployments";
 export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
   return (
     <>
-      <GlassCard className="p-5">
-        <div className="mb-4 flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-white/5">
+      <GlassCard className="overflow-hidden p-0">
+        <div className="flex aspect-square w-full items-center justify-center bg-white">
           {peptide.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={peptide.imageUrl}
               alt={peptide.name}
-              className="h-full w-full object-contain p-2"
+              className="h-full w-full object-contain p-4"
             />
           ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary">
-              <DynamicIcon name={peptide.icon} size={26} />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-panel text-ink">
+              <DynamicIcon name={peptide.icon} size={28} />
             </div>
           )}
         </div>
 
-        <div className="flex items-start justify-between gap-2">
+        <div className="space-y-3 p-3">
           <div>
-            <h3 className="text-base font-semibold text-ink">{peptide.name}</h3>
-            <p className="text-xs text-ink-soft">{peptide.description}</p>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-base font-semibold leading-snug text-ink">{peptide.name}</h3>
+              <span className="shrink-0 font-mono text-[10px] text-muted">{peptide.sku}</span>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-ink-soft">{peptide.description}</p>
           </div>
-          <span className="shrink-0 font-mono text-[10px] text-ink-soft">{peptide.sku}</span>
-        </div>
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {peptide.bestseller && (
-            <Badge className="bg-primary text-on-primary">Bestseller</Badge>
-          )}
-          {peptide.inStock && (
-            <Badge className="border border-border-strong bg-panel text-ink">In Stock</Badge>
-          )}
-          <Badge className="bg-white/10 text-ink-soft">Research Use Only</Badge>
-        </div>
+          <div className="flex flex-wrap gap-1.5">
+            {peptide.bestseller && (
+              <Badge className="bg-primary text-on-primary">Bestseller</Badge>
+            )}
+            {peptide.inStock && (
+              <Badge className="border border-border-strong bg-bg text-ink">In Stock</Badge>
+            )}
+            <Badge className="border border-border bg-bg text-muted">RUO</Badge>
+          </div>
 
-        <div className="mt-3 space-y-1.5 text-xs text-ink-soft">
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-ink" /> {peptide.kitLabel} · {peptide.dosage}
+          <div className="space-y-1 text-xs leading-relaxed text-ink-soft">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 size={13} className="shrink-0 text-ink" />
+              {peptide.kitLabel} · {peptide.dosage}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 size={13} className="shrink-0 text-ink" />
+              {peptide.purity} · {peptide.form}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 size={13} className="shrink-0 text-ink" />
+              {RESEARCH_ONLY.testing}
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-ink" /> {peptide.purity} · {peptide.form}
-          </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-ink" /> {RESEARCH_ONLY.testing}
-          </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-ink" /> Pay with {COLLATERAL_SYMBOL} on-chain
-          </div>
-        </div>
 
-        <div className="mt-4 rounded-2xl bg-white/8 px-3 py-2">
-          <div className="text-[11px] text-ink-soft">{peptide.priceIsFrom ? "From" : "Price"}</div>
-          <div className="text-xl font-semibold tabular-nums text-ink">
-            ${peptide.priceFrom.toFixed(2)}
+          <div className="rounded-lg border border-border bg-bg px-3 py-2">
+            <div className="text-[10px] uppercase tracking-wide text-muted">
+              {peptide.priceIsFrom ? "From" : "Price"}
+            </div>
+            <div className="font-mono text-xl font-semibold tabular-nums text-ink">
+              ${peptide.priceFrom.toFixed(2)}
+            </div>
+            <div className="mt-0.5 text-[11px] text-muted">
+              {COLLATERAL_SYMBOL} · PEPT-KIT NFT · redeemable kit
+            </div>
           </div>
-          <div className="text-[11px] text-ink-soft">
-            {COLLATERAL_SYMBOL} · mints PEPT-KIT NFT · redeemable for physical kit
-          </div>
-        </div>
 
-        <div className="mt-4">
           <BuyWithUsdc peptide={peptide} size="md" />
-        </div>
-        <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">
-          Payment mints a kit voucher NFT to your wallet. Hold it until physical fulfillment opens,
-          then redeem the claim for the real 10-vial research kit.
-        </p>
 
-        <p className="mt-3 text-[11px] leading-relaxed text-ink-soft">{RESEARCH_ONLY.disclaimer}</p>
+          <p className="text-[10px] leading-snug text-muted">{RESEARCH_ONLY.disclaimer}</p>
+        </div>
       </GlassCard>
 
-      <GlassCard className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
-            <FlaskConical size={18} />
+      <GlassCard className="p-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary">
+            <FlaskConical size={16} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 text-sm font-medium text-ink">
               {MARKETPLACE_BRAND.name}
-              {PARTNER_LAB.verified && <CheckCircle2 size={13} className="text-ink" />}
+              {PARTNER_LAB.verified && <CheckCircle2 size={12} className="text-ink" />}
             </div>
-            <div className="text-[11px] text-ink-soft">
-              Catalog partnership · {PARTNER_LAB.productCount} compounds · USDC checkout
-            </div>
-          </div>
-        </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-ink-soft">
-          <div>
-            <div className="text-ink-soft">Purity</div>
-            <div className="font-medium text-ink">{PARTNER_LAB.purity}</div>
-          </div>
-          <div>
-            <div className="text-ink-soft">Testing</div>
-            <div className="font-medium text-ink">{PARTNER_LAB.testing}</div>
-          </div>
-          <div className="col-span-2">
-            <div className="text-ink-soft">Checkout</div>
-            <div className="font-medium text-ink">
-              {COLLATERAL_SYMBOL} on Robinhood Chain Testnet
+            <div className="text-[11px] text-muted">
+              {PARTNER_LAB.productCount} compounds · USDC checkout
             </div>
           </div>
         </div>
@@ -121,7 +103,7 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
 
 function Badge({ children, className }: { children: React.ReactNode; className: string }) {
   return (
-    <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${className}`}>
+    <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${className}`}>
       {children}
     </span>
   );

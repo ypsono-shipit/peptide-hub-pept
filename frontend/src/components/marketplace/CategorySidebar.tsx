@@ -25,34 +25,35 @@ export function CategorySidebar({
   const counts = categoryCounts();
 
   return (
-    <div className="flex w-72 shrink-0 flex-col gap-5 overflow-y-auto">
-      <GlassCard className="p-5">
-        <h1 className="text-base font-semibold text-ink">Marketplace</h1>
-        <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+    <div className="hidden w-56 shrink-0 flex-col gap-3 overflow-y-auto lg:flex">
+      <GlassCard className="p-3">
+        <h1 className="text-sm font-semibold text-ink">Marketplace</h1>
+        <p className="mt-1 text-[11px] leading-snug text-ink-soft">
           <span className="font-medium text-ink">{MARKETPLACE_BRAND.name}</span>
-          . Pay in {COLLATERAL_SYMBOL}, receive a redeemable kit NFT for the physical peptide.
+          {" · "}
+          {COLLATERAL_SYMBOL} → kit NFT
         </p>
 
-        <div className="relative mt-4">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft" />
+        <div className="relative mt-3">
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Search compounds or SKU..."
-            className="w-full rounded-2xl bg-white/10 py-2 pl-9 pr-3 text-sm text-ink outline-none placeholder:text-ink-soft"
+            placeholder="Search…"
+            className="w-full rounded-lg border border-border bg-bg py-2 pl-8 pr-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-border-strong"
           />
         </div>
 
-        <div className="mt-4 flex flex-col gap-0.5">
+        <div className="mt-3 flex flex-col gap-0.5">
           {CATEGORIES.map((c) => (
             <button
               key={c.id}
               onClick={() => onCategoryChange(c.id)}
               className={cn(
-                "flex items-center gap-2.5 rounded-2xl px-3 py-2 text-left text-sm transition-colors",
+                "flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
                 category === c.id
-                  ? "bg-white/15 font-medium text-ink"
-                  : "text-ink-soft hover:bg-white/10 hover:text-ink",
+                  ? "bg-panel-hover font-medium text-ink"
+                  : "text-muted hover:bg-panel hover:text-ink",
               )}
             >
               <DynamicIcon name={c.icon} size={15} />
@@ -63,28 +64,30 @@ export function CategorySidebar({
         </div>
       </GlassCard>
 
-      <GlassCard className="p-5">
-        <h3 className="mb-4 text-sm font-semibold text-ink">How it works</h3>
-        <div className="flex flex-col gap-4">
+      <GlassCard className="p-3">
+        <h3 className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-muted">
+          How it works
+        </h3>
+        <div className="flex flex-col gap-3">
           {HOW_IT_WORKS.map((s, i) => (
-            <div key={s.step} className="flex gap-3">
+            <div key={s.step} className="flex gap-2.5">
               <div className="flex flex-col items-center">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-on-primary">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-on-primary">
                   {s.step}
                 </div>
-                {i < HOW_IT_WORKS.length - 1 && <div className="mt-1 h-full w-px bg-glass-border" />}
+                {i < HOW_IT_WORKS.length - 1 && <div className="mt-1 h-full w-px bg-border" />}
               </div>
-              <div className="pb-1">
-                <div className="text-sm font-medium text-ink">{s.title}</div>
-                <div className="text-xs text-ink-soft">{s.description}</div>
+              <div className="min-w-0 pb-0.5">
+                <div className="text-xs font-medium text-ink">{s.title}</div>
+                <div className="text-[11px] leading-snug text-muted">{s.description}</div>
               </div>
             </div>
           ))}
         </div>
       </GlassCard>
 
-      <GlassCard className="p-4">
-        <p className="text-[11px] leading-relaxed text-ink-soft">{RESEARCH_ONLY.disclaimer}</p>
+      <GlassCard className="p-3">
+        <p className="text-[10px] leading-snug text-muted">{RESEARCH_ONLY.disclaimer}</p>
       </GlassCard>
     </div>
   );

@@ -111,8 +111,8 @@ export function BuyWithUsdc({
 
   const base =
     size === "sm"
-      ? "rounded-2xl px-3.5 py-2 text-xs font-semibold"
-      : "rounded-2xl px-4 py-2.5 text-sm font-semibold";
+      ? "whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold"
+      : "whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold";
 
   if (!peptide.inStock) {
     return (
