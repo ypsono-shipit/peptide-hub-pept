@@ -9,7 +9,7 @@ export default function LiquidityPage() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-ink">PLP Liquidity</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Peptide Liquidity Provider pool — backstops perps open interest on Robinhood testnet.
+          Peptide Liquidity Provider pool — deposit testnet USDC to backstop perps open interest.
         </p>
       </div>
       <LiquidityPanel />

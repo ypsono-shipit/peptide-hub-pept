@@ -34,8 +34,9 @@ export const perpsEngineContract = {
   abi: PERPS_ENGINE_ABI as Abi,
 } as const;
 
+/** Testnet USDC (6 decimals, public mint). */
 export const collateralContract = {
-  address: TESTNET_CONTRACTS.TestCollateral_tPUSD as `0x${string}`,
+  address: TESTNET_CONTRACTS.USDC as `0x${string}`,
   abi: MOCK_ERC20_ABI as Abi,
 } as const;
 

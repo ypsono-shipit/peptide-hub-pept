@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatEther, parseEther } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { cn } from "@/lib/cn";
 import { collateralContract, perpsEngineContract } from "@/lib/contracts";
+import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL } from "@/lib/deployments";
+
+/** Convert raw collateral units → 18-dec USD notional * leverage. */
+function sizeUsdFromMargin(collateralRaw: bigint, leverage: number): bigint {
+  const scale = 10n ** BigInt(18 - COLLATERAL_DECIMALS);
+  return collateralRaw * scale * BigInt(leverage);
+}
 
 export function OrderTicket({
   symbol,
@@ -25,16 +32,16 @@ export function OrderTicket({
   const sizeNum = Number(size) || 0;
   const notional = sizeNum * leverage;
   const liquidationPrice = side === "long" ? price * (1 - 1 / leverage) : price * (1 + 1 / leverage);
-  const estFee = notional * 0.0006;
+  const estFee = notional * 0.001; // 0.1% taker
 
   const collateralAmount = (() => {
     try {
-      return size ? parseEther(size) : 0n;
+      return size ? parseUnits(size, COLLATERAL_DECIMALS) : 0n;
     } catch {
       return 0n;
     }
   })();
-  const sizeUsd = collateralAmount * BigInt(leverage);
+  const sizeUsd = sizeUsdFromMargin(collateralAmount, leverage);
 
   const collateralBalance = useReadContract({
     ...collateralContract,
@@ -69,7 +76,7 @@ export function OrderTicket({
     writeContract({
       ...collateralContract,
       functionName: "mint",
-      args: [address, parseEther("1000")],
+      args: [address, parseUnits("1000", COLLATERAL_DECIMALS)],
     });
 
   const approve = () =>
@@ -89,6 +96,13 @@ export function OrderTicket({
     setSize("");
   };
 
+  const balLabel =
+    collateralBalance.data !== undefined
+      ? Number(formatUnits(collateralBalance.data as bigint, COLLATERAL_DECIMALS)).toLocaleString(undefined, {
+          maximumFractionDigits: 2,
+        })
+      : "—";
+
   return (
     <aside className="glass-panel w-80 shrink-0 p-5">
       <div className="mb-4 text-sm font-semibold text-ink">{symbol}</div>
@@ -97,7 +111,7 @@ export function OrderTicket({
           onClick={() => setSide("long")}
           className={cn(
             "rounded-xl py-1.5 text-sm font-semibold transition-colors",
-            side === "long" ? "bg-positive text-cloud" : "text-ink-soft"
+            side === "long" ? "bg-positive text-cloud" : "text-ink-soft",
           )}
         >
           Long
@@ -106,7 +120,7 @@ export function OrderTicket({
           onClick={() => setSide("short")}
           className={cn(
             "rounded-xl py-1.5 text-sm font-semibold transition-colors",
-            side === "short" ? "bg-negative text-cloud" : "text-ink-soft"
+            side === "short" ? "bg-negative text-cloud" : "text-ink-soft",
           )}
         >
           Short
@@ -114,12 +128,8 @@ export function OrderTicket({
       </div>
 
       <div className="mb-1 flex items-center justify-between text-xs text-ink-soft">
-        <span>Size (tPUSD collateral)</span>
-        {isConnected && (
-          <span>
-            Balance: {collateralBalance.data !== undefined ? formatEther(collateralBalance.data as bigint) : "—"}
-          </span>
-        )}
+        <span>Margin ({COLLATERAL_SYMBOL})</span>
+        {isConnected && <span>Balance: {balLabel}</span>}
       </div>
       <input
         value={size}
@@ -133,7 +143,7 @@ export function OrderTicket({
           disabled={busy}
           className="mb-4 text-xs text-ink-soft underline hover:text-ink disabled:opacity-50"
         >
-          Get 1,000 test tPUSD (testnet faucet)
+          Mint 1,000 test {COLLATERAL_SYMBOL} (public faucet)
         </button>
       )}
 
@@ -166,22 +176,26 @@ export function OrderTicket({
       </div>
 
       {!isConnected ? (
-        <div className="rounded-2xl bg-white/10 py-2.5 text-center text-sm text-ink-soft">Connect wallet to trade</div>
+        <div className="rounded-2xl bg-white/10 py-2.5 text-center text-sm text-ink-soft">
+          Connect wallet to trade
+        </div>
       ) : !marketKey ? (
-        <div className="rounded-2xl bg-white/10 py-2.5 text-center text-sm text-ink-soft">Market not tradeable yet</div>
+        <div className="rounded-2xl bg-white/10 py-2.5 text-center text-sm text-ink-soft">
+          Market not tradeable yet
+        </div>
       ) : (
         <button
           disabled={busy || collateralAmount === 0n}
           onClick={needsApproval ? approve : openPosition}
           className={cn(
             "w-full rounded-2xl py-2.5 text-sm font-semibold text-cloud shadow-glass-sm disabled:opacity-50",
-            side === "long" ? "bg-positive" : "bg-negative"
+            side === "long" ? "bg-positive" : "bg-negative",
           )}
         >
           {busy
             ? "Confirming…"
             : needsApproval
-              ? "Approve tPUSD"
+              ? `Approve ${COLLATERAL_SYMBOL}`
               : `${side === "long" ? "Open Long" : "Open Short"}`}
         </button>
       )}

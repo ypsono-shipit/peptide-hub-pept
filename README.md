@@ -11,14 +11,11 @@ Full product spec: [Peptide-Hub-PRD](../Business-Ideas/Peptide-Hub-PRD.md)
 - `frontend/` — Next.js + TypeScript + Tailwind + wagmi/viem trading terminal (Trade, PLP Liquidity, Marketplace, Portfolio, Stake)
 - `contracts/` — Hardhat + Solidity (PEPT, PLP / PerpsLiquidityPool, PerpsEngine, PeptideOracle, Staking, Treasury, BondDepository)
 
-### PLP (Peptide Liquidity Pool)
+### Collateral & PLP
 
-GMX-style LP vault that backstops perps open interest:
-
-- LPs deposit **tPUSD** → mint **PLP** shares
-- Max OI = **50%** of pool AUM (`maxUtilizationBps`)
-- Trading fees + trader losses accrue to LPs; trader profits paid from the pool
-- UI: `/liquidity` · deploy: `cd contracts && npm run deploy:plp`
+- **Collateral:** testnet **USDC** (`0xAc8019…`, 6 decimals, public `mint`) on Robinhood testnet — not official Circle; replaces the old tPUSD mock
+- **PLP:** GMX-style LP vault — deposit USDC → mint PLP; max OI = 50% of AUM; fees/losses to LPs
+- UI: `/liquidity` · deploy: `cd contracts && npm run deploy:usdc-plp`
 
 ## Phased Roadmap
 

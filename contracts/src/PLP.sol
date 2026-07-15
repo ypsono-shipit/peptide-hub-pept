@@ -3,14 +3,12 @@ pragma solidity ^0.8.24;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title PLP — Peptide Liquidity Provider shares
-/// @notice ERC-20 receipt token for deposits into PerpsLiquidityPool.
-///         Value accrues as trading fees and trader losses flow into the pool;
-///         trader profits are paid out of the pool (GMX-style counterparty).
 contract PLP is ERC20, Ownable {
     address public minter;
 
@@ -35,29 +33,24 @@ contract PLP is ERC20, Ownable {
 }
 
 /// @title PerpsLiquidityPool
-/// @notice Collateral vault that backstops peptide perps open interest.
-///         LPs deposit the perps collateral asset (e.g. tPUSD / USDC), receive
-///         PLP shares, earn fees + trader losses, and take the other side of
-///         trader PnL. Open interest is capped at `maxUtilizationBps` of AUM.
-///
-///         This is a testnet/v1 design — no time-weighted AUM, no tranche
-///         risk, no oracle depeg handling. Do not treat as audit-ready.
+/// @notice Collateral vault backstopping peptide perps OI (GMX-style).
+///         Supports 6- or 18-decimal collateral (e.g. USDC vs tPUSD).
+///         Open interest is tracked in 18-decimal USD notionals.
 contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable asset;
     PLP public immutable plp;
+    uint8 public immutable assetDecimals;
+    /// @notice Multiply raw asset amount by this to get 18-decimal USD units.
+    uint256 public immutable toUsdScale;
 
     address public perpsEngine;
 
-    /// @notice Max total open interest as a fraction of pool AUM (e.g. 5000 = 50%).
     uint256 public maxUtilizationBps = 5_000;
+    uint256 public reserveBps = 2_000;
 
-    /// @notice Fraction of open interest reserved against LP withdrawals
-    ///         (conservative haircut so LPs can't fully drain while risk is open).
-    uint256 public reserveBps = 2_000; // 20% of OI reserved
-
-    /// @notice Latest open interest reported by PerpsEngine (USD notional, 18 dec).
+    /// @notice Aggregate OI in 18-decimal USD (matches PerpsEngine.sizeUsd).
     uint256 public openInterestUsd;
 
     uint256 public totalFeesReceived;
@@ -83,6 +76,10 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
         require(asset_ != address(0) && plpToken != address(0), "PLP pool: zero");
         asset = IERC20(asset_);
         plp = PLP(plpToken);
+        uint8 dec = IERC20Metadata(asset_).decimals();
+        require(dec <= 18, "PLP pool: decimals");
+        assetDecimals = dec;
+        toUsdScale = 10 ** (18 - uint256(dec));
     }
 
     function setEngine(address engine) external onlyOwner {
@@ -102,25 +99,30 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
         emit ReserveBpsSet(bps);
     }
 
-    /// @notice AUM in collateral token units (18 decimals for tPUSD).
     function totalAssets() public view returns (uint256) {
         return asset.balanceOf(address(this));
     }
 
-    /// @notice Maximum allowed aggregate open interest given current AUM.
-    function maxOpenInterest() public view returns (uint256) {
-        return (totalAssets() * maxUtilizationBps) / 10_000;
+    /// @notice AUM in 18-decimal USD units.
+    function aumUsd18() public view returns (uint256) {
+        return totalAssets() * toUsdScale;
     }
 
-    /// @notice Assets LPs may withdraw without breaching OI reserve.
+    /// @notice Max OI in 18-decimal USD (same units as PerpsEngine.sizeUsd).
+    function maxOpenInterest() public view returns (uint256) {
+        return (aumUsd18() * maxUtilizationBps) / 10_000;
+    }
+
+    /// @notice Assets (raw token units) LPs may withdraw.
     function availableAssets() public view returns (uint256) {
         uint256 bal = totalAssets();
-        uint256 reserved = (openInterestUsd * reserveBps) / 10_000;
-        // Also never withdraw below the utilization floor for current OI
-        uint256 utilFloor = openInterestUsd == 0
+        // Reserve haircut on OI, converted back to asset units
+        uint256 reservedUsd = (openInterestUsd * reserveBps) / 10_000;
+        uint256 utilFloorUsd = openInterestUsd == 0
             ? 0
             : (openInterestUsd * 10_000 + maxUtilizationBps - 1) / maxUtilizationBps;
-        if (utilFloor > reserved) reserved = utilFloor;
+        if (utilFloorUsd > reservedUsd) reservedUsd = utilFloorUsd;
+        uint256 reserved = reservedUsd / toUsdScale;
         return bal > reserved ? bal - reserved : 0;
     }
 
@@ -141,7 +143,6 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
         require(assets > 0, "PLP pool: zero");
         shares = previewDeposit(assets);
         require(shares > 0, "PLP pool: zero shares");
-
         asset.safeTransferFrom(msg.sender, address(this), assets);
         plp.mint(msg.sender, shares);
         emit Deposited(msg.sender, assets, shares);
@@ -150,39 +151,29 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
     function withdraw(uint256 shares) external nonReentrant returns (uint256 assets) {
         require(shares > 0, "PLP pool: zero");
         require(plp.balanceOf(msg.sender) >= shares, "PLP pool: insufficient PLP");
-
         assets = previewWithdraw(shares);
         require(assets > 0, "PLP pool: zero assets");
         require(assets <= availableAssets(), "PLP pool: reserved for open interest");
-
         plp.burn(msg.sender, shares);
         asset.safeTransfer(msg.sender, assets);
         emit Withdrawn(msg.sender, assets, shares);
     }
-
-    // ─── Engine hooks ────────────────────────────────────────────────────
 
     function setOpenInterest(uint256 oi) external onlyEngine {
         openInterestUsd = oi;
         emit OpenInterestUpdated(oi);
     }
 
-    /// @notice Engine already holds `amount` of asset and transfers it in first,
-    ///         or we pull — here we assume tokens were transferred to this pool
-    ///         by the engine immediately before/with this call. Accounting only.
     function notifyFees(uint256 amount) external onlyEngine {
         totalFeesReceived += amount;
         emit FeesReceived(amount);
     }
 
-    /// @notice Trader loss residual already transferred to this pool by engine.
     function notifyLoss(uint256 amount) external onlyEngine {
         totalLossesReceived += amount;
         emit LossReceived(amount);
     }
 
-    /// @notice Pay trader profit from LP capital to `to` (usually PerpsEngine).
-    ///         Engine should reduce open interest before calling when closing.
     function coverProfit(address to, uint256 amount) external onlyEngine nonReentrant {
         require(amount > 0, "PLP pool: zero profit");
         require(amount <= totalAssets(), "PLP pool: insolvent");
