@@ -32,7 +32,7 @@ export function FilterBar({
           inStockOnly ? "bg-white/20 text-ink" : "bg-white/8 text-ink-soft hover:bg-white/15",
         )}
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-positive" />
+        <span className="h-1.5 w-1.5 rounded-full bg-ink" />
         In Stock
       </button>
 

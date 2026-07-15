@@ -36,7 +36,7 @@ export function TopBar({
       {market && (
         <>
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border-strong bg-panel text-[10px] font-bold tracking-tight text-ink">
               {market.symbol.slice(0, 2)}
             </div>
             <div>
@@ -78,7 +78,7 @@ export function TopBar({
 
       <div className="ml-auto flex items-center gap-2">
         <div className="hidden items-center gap-1.5 rounded-lg border border-border bg-panel px-2.5 py-1.5 text-xs text-ink-soft sm:flex">
-          <span className="h-1.5 w-1.5 rounded-full bg-positive" />
+          <span className="h-1.5 w-1.5 rounded-full bg-ink" />
           Robinhood Testnet
           <ChevronDown size={12} className="text-muted" />
         </div>
@@ -90,7 +90,7 @@ export function TopBar({
             onClick={() => disconnect()}
             className="flex items-center gap-2 rounded-lg border border-border bg-panel px-2.5 py-1.5 text-xs hover:bg-panel-hover"
           >
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/30 text-[10px] font-bold text-primary">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-border-strong bg-panel-hover text-[10px] font-bold text-ink">
               {address?.slice(2, 4).toUpperCase()}
             </span>
             <span className="hidden font-mono text-ink sm:inline">
@@ -106,7 +106,7 @@ export function TopBar({
         ) : (
           <button
             onClick={() => connect({ connector: connectors[0] })}
-            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-cloud hover:bg-primary/90"
+            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-on-primary hover:bg-accent"
           >
             Connect Wallet
           </button>

@@ -224,7 +224,7 @@ export function LiquidityPanel() {
                   type="button"
                   onClick={approve}
                   disabled={busy || parsed === 0n}
-                  className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-cloud disabled:opacity-50"
+                  className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-on-primary disabled:opacity-50"
                 >
                   {busy ? "Confirm…" : `Approve ${COLLATERAL_SYMBOL}`}
                 </button>
@@ -233,7 +233,7 @@ export function LiquidityPanel() {
                   type="button"
                   onClick={mode === "deposit" ? deposit : withdraw}
                   disabled={busy || parsed === 0n}
-                  className="rounded-lg bg-positive px-4 py-2 text-xs font-semibold text-cloud disabled:opacity-50"
+                  className="rounded-lg border border-ink bg-transparent px-4 py-2 text-xs font-semibold text-ink disabled:opacity-50"
                 >
                   {busy ? "Confirm…" : mode === "deposit" ? "Deposit" : "Withdraw"}
                 </button>

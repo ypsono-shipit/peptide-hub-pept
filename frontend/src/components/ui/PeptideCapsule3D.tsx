@@ -8,10 +8,10 @@ import { Vector3, Quaternion } from "three";
 // Ball-and-stick peptide chain suspended inside the capsule, in local
 // [-1, 1] capsule-space coordinates.
 const ATOMS: { pos: [number, number, number]; r: number; color: string }[] = [
-  { pos: [-0.28, -0.55, 0.05], r: 0.11, color: "#7C8DFF" },
-  { pos: [0.05, -0.15, -0.05], r: 0.135, color: "#8D8AFF" },
-  { pos: [0.35, 0.1, 0.08], r: 0.1, color: "#A57DFF" },
-  { pos: [0.12, 0.5, -0.04], r: 0.09, color: "#9C7DFF" },
+  { pos: [-0.28, -0.55, 0.05], r: 0.11, color: "#e5e5e5" },
+  { pos: [0.05, -0.15, -0.05], r: 0.135, color: "#f5f5f5" },
+  { pos: [0.35, 0.1, 0.08], r: 0.1, color: "#a3a3a3" },
+  { pos: [0.12, 0.5, -0.04], r: 0.09, color: "#d4d4d4" },
 ];
 const BONDS: [number, number][] = [
   [0, 1],
@@ -34,7 +34,7 @@ function Bond({ from, to }: { from: [number, number, number]; to: [number, numbe
   return (
     <mesh position={mid} quaternion={quaternion}>
       <cylinderGeometry args={[0.025, 0.025, length, 8]} />
-      <meshStandardMaterial color="#C8CBFF" roughness={0.3} metalness={0.1} />
+      <meshStandardMaterial color="#c4c4c4" roughness={0.3} metalness={0.1} />
     </mesh>
   );
 }
@@ -66,7 +66,7 @@ function CapsuleShell() {
         ior={1.25}
         chromaticAberration={0.04}
         backside
-        color="#EAF0FF"
+        color="#f0f0f0"
       />
     </mesh>
   );
@@ -76,8 +76,8 @@ function Scene() {
   return (
     <>
       <ambientLight intensity={0.6} />
-      <directionalLight position={[3, 4, 2]} intensity={1.4} color="#B9C2FF" />
-      <pointLight position={[-3, -2, 2]} intensity={0.8} color="#A57DFF" />
+      <directionalLight position={[3, 4, 2]} intensity={1.4} color="#ffffff" />
+      <pointLight position={[-3, -2, 2]} intensity={0.8} color="#d4d4d4" />
 
       <Float speed={1.4} rotationIntensity={0.3} floatIntensity={0.6}>
         <group>

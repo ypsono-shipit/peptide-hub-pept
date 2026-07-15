@@ -33,7 +33,7 @@ function GlowRing() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.85, 0]}>
       <ringGeometry args={[0.55, 0.85, 64]} />
-      <meshBasicMaterial color="#22c55e" transparent opacity={0.35} side={THREE.DoubleSide} />
+      <meshBasicMaterial color="#f5f5f5" transparent opacity={0.25} side={THREE.DoubleSide} />
     </mesh>
   );
 }
@@ -41,10 +41,10 @@ function GlowRing() {
 function Scene() {
   return (
     <>
-      <color attach="background" args={["#141414"]} />
+      <color attach="background" args={["#0a0a0a"]} />
       <ambientLight intensity={1.1} />
       <directionalLight position={[2, 3, 4]} intensity={1.2} />
-      <pointLight position={[0, -0.5, 2]} intensity={0.6} color="#22c55e" />
+      <pointLight position={[0, -0.5, 2]} intensity={0.5} color="#ffffff" />
 
       <Suspense fallback={null}>
         <RotatingVial />

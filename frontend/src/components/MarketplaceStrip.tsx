@@ -21,7 +21,7 @@ export function MarketplaceStrip() {
             Research Only partner catalog — research-use-only compounds
           </p>
         </div>
-        <Link href="/marketplace" className="text-xs text-primary hover:underline">
+        <Link href="/marketplace" className="text-xs text-ink hover:underline">
           View all
         </Link>
       </div>

@@ -130,7 +130,7 @@ export function StakePanel() {
         <button
           disabled={busy || parsedAmount === 0n}
           onClick={needsApproval ? approve : stake}
-          className="rounded-lg bg-primary py-2.5 text-sm font-semibold text-cloud disabled:opacity-50"
+          className="rounded-lg bg-primary py-2.5 text-sm font-semibold text-on-primary disabled:opacity-50"
         >
           {busy ? "Confirming…" : needsApproval ? "Approve" : "Stake"}
         </button>

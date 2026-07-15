@@ -16,7 +16,7 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
               className="h-full w-full object-contain p-2"
             />
           ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-cloud">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary">
               <DynamicIcon name={peptide.icon} size={26} />
             </div>
           )}
@@ -32,24 +32,24 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {peptide.bestseller && (
-            <Badge className="bg-gradient-to-r from-primary to-accent text-cloud">Bestseller</Badge>
+            <Badge className="bg-primary text-on-primary">Bestseller</Badge>
           )}
-          {peptide.inStock && <Badge className="bg-positive/20 text-positive">In Stock</Badge>}
+          {peptide.inStock && <Badge className="border border-border-strong bg-panel text-ink">In Stock</Badge>}
           <Badge className="bg-white/10 text-ink-soft">Research Use Only</Badge>
         </div>
 
         <div className="mt-3 space-y-1.5 text-xs text-ink-soft">
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-primary" /> {peptide.kitLabel} · {peptide.dosage}
+            <CheckCircle2 size={13} className="text-ink" /> {peptide.kitLabel} · {peptide.dosage}
           </div>
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-primary" /> {peptide.purity} · {peptide.form}
+            <CheckCircle2 size={13} className="text-ink" /> {peptide.purity} · {peptide.form}
           </div>
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-primary" /> {RESEARCH_ONLY.testing}
+            <CheckCircle2 size={13} className="text-ink" /> {RESEARCH_ONLY.testing}
           </div>
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-primary" /> {RESEARCH_ONLY.shipping}
+            <CheckCircle2 size={13} className="text-ink" /> {RESEARCH_ONLY.shipping}
           </div>
         </div>
 
@@ -63,7 +63,7 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
           href={peptide.partnerUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary to-accent px-4 py-2.5 text-sm font-semibold text-cloud hover:opacity-90"
+          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-accent"
         >
           Buy on Research Only
           <ExternalLink size={14} />
@@ -74,13 +74,13 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
 
       <GlassCard className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-cloud">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
             <FlaskConical size={18} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 text-sm font-medium text-ink">
               {PARTNER_LAB.name}
-              {PARTNER_LAB.verified && <CheckCircle2 size={13} className="text-primary" />}
+              {PARTNER_LAB.verified && <CheckCircle2 size={13} className="text-ink" />}
             </div>
             <div className="text-[11px] text-ink-soft">
               Exclusive marketplace partner · {PARTNER_LAB.productCount} compounds

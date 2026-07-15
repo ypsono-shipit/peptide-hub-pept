@@ -17,7 +17,7 @@ export function PeptideListItem({
       onClick={onSelect}
       className={cn(
         "flex w-full items-center gap-4 rounded-2xl border px-4 py-3.5 text-left transition-colors",
-        selected ? "border-primary/40 bg-white/15" : "border-transparent hover:bg-white/10",
+        selected ? "border-ink/40 bg-white/15" : "border-transparent hover:bg-white/10",
       )}
     >
       <ProductThumb peptide={peptide} />
@@ -27,7 +27,7 @@ export function PeptideListItem({
           <span className="text-sm font-semibold text-ink">{peptide.name}</span>
           <span className="font-mono text-[10px] text-ink-soft">{peptide.sku}</span>
           {peptide.bestseller && (
-            <span className="rounded-full bg-gradient-to-r from-primary to-accent px-2 py-0.5 text-[10px] font-semibold text-cloud">
+            <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-on-primary">
               Bestseller
             </span>
           )}
@@ -43,7 +43,7 @@ export function PeptideListItem({
       <div className="w-24 shrink-0">
         {peptide.inStock && (
           <div className="flex items-center gap-1 text-[11px] text-positive">
-            <span className="h-1.5 w-1.5 rounded-full bg-positive" />
+            <span className="h-1.5 w-1.5 rounded-full bg-ink" />
             In Stock
           </div>
         )}
@@ -60,7 +60,7 @@ export function PeptideListItem({
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className="flex shrink-0 items-center gap-1 rounded-2xl bg-gradient-to-r from-primary to-accent px-3.5 py-2 text-xs font-semibold text-cloud hover:opacity-90"
+        className="flex shrink-0 items-center gap-1 rounded-2xl bg-primary px-3.5 py-2 text-xs font-semibold text-on-primary hover:bg-accent"
       >
         Buy
         <ExternalLink size={12} />
@@ -81,7 +81,7 @@ function ProductThumb({ peptide }: { peptide: Peptide }) {
     );
   }
   return (
-    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-cloud">
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
       <DynamicIcon name={peptide.icon} size={20} />
     </div>
   );

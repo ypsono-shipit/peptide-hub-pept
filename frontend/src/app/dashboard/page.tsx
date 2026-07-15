@@ -33,7 +33,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/trade"
-              className="mt-3 inline-block text-xs font-medium text-primary hover:underline"
+              className="mt-3 inline-block text-xs font-medium text-ink hover:underline"
             >
               Open trade terminal →
             </Link>
@@ -60,7 +60,7 @@ function MarketRow({ market }: { market: (typeof MOCK_MARKETS)[number] }) {
         <div className="flex items-center gap-2 text-sm font-medium text-ink">
           {market.symbol}
           {isLive && (
-            <span className="rounded bg-positive/15 px-1.5 py-0.5 text-[9px] text-positive">
+            <span className="rounded bg-panel-hover px-1.5 py-0.5 text-[9px] text-positive">
               LIVE
             </span>
           )}

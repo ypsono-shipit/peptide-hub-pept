@@ -11,9 +11,9 @@ import {
   Coins,
   Settings,
   HelpCircle,
-  Syringe,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { Logo } from "@/components/Logo";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutGrid },
@@ -34,9 +34,7 @@ export function Sidebar() {
   return (
     <aside className="flex w-[72px] shrink-0 flex-col border-r border-border bg-bg py-4 lg:w-52">
       <Link href="/dashboard" className="mb-6 flex items-center gap-2.5 px-3 lg:px-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
-          <Syringe size={18} />
-        </div>
+        <Logo size={36} className="ring-1 ring-border" />
         <div className="hidden min-w-0 lg:block">
           <div className="truncate text-sm font-semibold tracking-tight text-ink">PEPT TRADE</div>
           <div className="truncate text-[10px] text-muted">Peptide Perpetuals</div>

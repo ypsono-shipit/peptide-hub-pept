@@ -29,7 +29,7 @@ export function CategorySidebar({
             href={RESEARCH_ONLY.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-primary hover:underline"
+            className="font-medium text-ink hover:underline"
           >
             Research Only
           </a>
@@ -72,7 +72,7 @@ export function CategorySidebar({
           {HOW_IT_WORKS.map((s, i) => (
             <div key={s.step} className="flex gap-3">
               <div className="flex flex-col items-center">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-[11px] font-semibold text-cloud">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-on-primary">
                   {s.step}
                 </div>
                 {i < HOW_IT_WORKS.length - 1 && <div className="mt-1 h-full w-px bg-glass-border" />}
@@ -88,7 +88,7 @@ export function CategorySidebar({
           href={RESEARCH_ONLY.shopUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary to-accent px-3 py-2 text-xs font-semibold text-cloud hover:opacity-90"
+          className="mt-4 flex items-center justify-center gap-1.5 rounded-2xl bg-primary px-3 py-2 text-xs font-semibold text-on-primary hover:bg-accent"
         >
           Shop on Research Only
           <ExternalLink size={12} />

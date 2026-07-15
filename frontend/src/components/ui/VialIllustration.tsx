@@ -5,9 +5,9 @@ export function VialIllustration() {
   return (
     <div className="relative flex h-full min-h-[120px] items-end justify-center gap-3">
       {[
-        { h: 88, w: 30, tint: "#7C8DFF" },
-        { h: 104, w: 34, tint: "#A57DFF" },
-        { h: 76, w: 26, tint: "#7C8DFF" },
+        { h: 88, w: 30, tint: "#a3a3a3" },
+        { h: 104, w: 34, tint: "#e5e5e5" },
+        { h: 76, w: 26, tint: "#737373" },
       ].map((v, i) => (
         <svg key={i} width={v.w} height={v.h} viewBox={`0 0 ${v.w} ${v.h}`} className="drop-shadow-lg">
           <defs>

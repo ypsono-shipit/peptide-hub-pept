@@ -1,4 +1,4 @@
-const COLORS = ["#7C8DFF", "#A57DFF", "#3CCF7E", "#FF6B81"];
+const COLORS = ["#f5f5f5", "#a3a3a3", "#737373", "#404040"];
 
 export function DonutChart({ segments }: { segments: { label: string; value: number }[] }) {
   const total = segments.reduce((sum, s) => sum + s.value, 0);

@@ -110,7 +110,7 @@ export function OrderTicket({
   return (
     <div className="flex w-full flex-col rounded-xl border border-border bg-panel lg:w-[320px] lg:shrink-0">
       <div className="flex border-b border-border text-sm">
-        <button className="flex-1 border-b-2 border-primary py-2.5 font-medium text-ink">Trade</button>
+        <button className="flex-1 border-b-2 border-ink py-2.5 font-medium text-ink">Trade</button>
         <button className="flex-1 py-2.5 text-muted" title="Market orders only on-chain">
           Limit Order
         </button>
@@ -122,7 +122,7 @@ export function OrderTicket({
             onClick={() => setSide("long")}
             className={cn(
               "rounded-md py-2 text-sm font-semibold",
-              side === "long" ? "bg-positive text-cloud" : "text-muted hover:text-ink",
+              side === "long" ? "bg-primary text-on-primary" : "text-muted hover:text-ink",
             )}
           >
             Buy / Long
@@ -131,7 +131,9 @@ export function OrderTicket({
             onClick={() => setSide("short")}
             className={cn(
               "rounded-md py-2 text-sm font-semibold",
-              side === "short" ? "bg-negative text-cloud" : "text-muted hover:text-ink",
+              side === "short"
+                ? "border border-ink bg-transparent text-ink"
+                : "text-muted hover:text-ink",
             )}
           >
             Sell / Short
@@ -191,7 +193,7 @@ export function OrderTicket({
           <button
             onClick={mint}
             disabled={busy}
-            className="text-left text-[11px] text-primary hover:underline disabled:opacity-50"
+            className="text-left text-[11px] text-ink underline-offset-2 hover:underline disabled:opacity-50"
           >
             Mint 10,000 test {COLLATERAL_SYMBOL}
           </button>
@@ -217,7 +219,7 @@ export function OrderTicket({
           max={20}
           value={leverage}
           onChange={(e) => setLeverage(Number(e.target.value))}
-          className="w-full accent-positive"
+          className="w-full"
         />
 
         <div className="space-y-1.5 rounded-lg bg-bg p-2.5 text-[11px]">
@@ -237,8 +239,10 @@ export function OrderTicket({
             disabled={busy || collateralAmount === 0n}
             onClick={needsApproval ? approve : open}
             className={cn(
-              "w-full rounded-lg py-3 text-sm font-semibold text-cloud disabled:opacity-50",
-              side === "long" ? "bg-positive hover:bg-positive-dim" : "bg-negative hover:bg-negative-dim",
+              "w-full rounded-lg py-3 text-sm font-semibold disabled:opacity-50",
+              side === "long"
+                ? "bg-primary text-on-primary hover:bg-accent"
+                : "border border-ink bg-transparent text-ink hover:bg-panel-hover",
             )}
           >
             {busy

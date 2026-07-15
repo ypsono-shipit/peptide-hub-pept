@@ -158,7 +158,7 @@ function PartnerLabPanel() {
           href={PARTNER_LAB.shopUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary to-accent px-4 py-2.5 text-sm font-semibold text-cloud hover:opacity-90"
+          className="inline-flex items-center gap-1.5 rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-accent"
         >
           Open shop
           <ExternalLink size={14} />

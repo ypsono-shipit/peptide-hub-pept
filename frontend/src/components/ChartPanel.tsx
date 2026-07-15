@@ -81,13 +81,13 @@ export function ChartPanel({
 
     const chart = createChart(containerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: "#141414" },
+        background: { type: ColorType.Solid, color: "#0a0a0a" },
         textColor: "#737373",
         fontFamily: "JetBrains Mono, ui-monospace, monospace",
       },
       grid: {
-        vertLines: { color: "#1f1f1f" },
-        horzLines: { color: "#1f1f1f" },
+        vertLines: { color: "#1a1a1a" },
+        horzLines: { color: "#1a1a1a" },
       },
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight || 360,
@@ -99,12 +99,15 @@ export function ChartPanel({
       },
     });
 
+    // Monochrome candles: solid white up, hollow/gray down
     const series = chart.addCandlestickSeries({
-      upColor: "#22c55e",
-      downColor: "#ef4444",
-      borderVisible: false,
-      wickUpColor: "#22c55e",
-      wickDownColor: "#ef4444",
+      upColor: "#f5f5f5",
+      downColor: "#0a0a0a",
+      borderVisible: true,
+      borderUpColor: "#f5f5f5",
+      borderDownColor: "#737373",
+      wickUpColor: "#f5f5f5",
+      wickDownColor: "#737373",
     });
 
     chartRef.current = chart;

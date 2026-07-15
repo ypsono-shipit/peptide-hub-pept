@@ -5,26 +5,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Obsession OS flat terminal + PEPT mock accents
-        bg: "#0a0a0a",
-        panel: "#141414",
-        "panel-hover": "#1a1a1a",
+        // Strict monochrome — black / white / gray only
+        bg: "#000000",
+        panel: "#0a0a0a",
+        "panel-hover": "#141414",
         border: "#1f1f1f",
-        "border-strong": "#2a2a2a",
+        "border-strong": "#333333",
         muted: "#737373",
         faint: "#525252",
-        ink: "#e5e5e5",
+        ink: "#f5f5f5",
         "ink-soft": "#a3a3a3",
-        primary: "#8b5cf6",
-        accent: "#a78bfa",
-        positive: "#22c55e",
-        "positive-dim": "#16a34a",
-        negative: "#ef4444",
-        "negative-dim": "#dc2626",
+        // White CTAs; on-primary is black ink on white fills
+        primary: "#ffffff",
+        accent: "#e5e5e5",
+        "on-primary": "#000000",
+        // PnL / long-short: white vs mid-gray (no hue)
+        positive: "#f5f5f5",
+        "positive-dim": "#d4d4d4",
+        negative: "#737373",
+        "negative-dim": "#525252",
         cloud: "#ffffff",
-        // legacy aliases used in marketplace components
-        glass: "#141414",
-        "glass-strong": "#1a1a1a",
+        // legacy aliases
+        glass: "#0a0a0a",
+        "glass-strong": "#141414",
         "glass-border": "#1f1f1f",
         "cloud-soft": "#a3a3a3",
       },
