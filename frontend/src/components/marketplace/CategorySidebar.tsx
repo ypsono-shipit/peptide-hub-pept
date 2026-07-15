@@ -4,7 +4,6 @@ import { DynamicIcon } from "@/components/ui/DynamicIcon";
 import {
   CATEGORIES,
   HOW_IT_WORKS,
-  MARKETPLACE_BRAND,
   RESEARCH_ONLY,
   categoryCounts,
 } from "@/lib/marketplaceData";
@@ -28,10 +27,8 @@ export function CategorySidebar({
     <div className="hidden w-56 shrink-0 flex-col gap-3 overflow-y-auto lg:flex">
       <GlassCard className="p-3">
         <h1 className="text-sm font-semibold text-ink">Marketplace</h1>
-        <p className="mt-1 text-[11px] leading-snug text-ink-soft">
-          <span className="font-medium text-ink">{MARKETPLACE_BRAND.name}</span>
-          {" · "}
-          {COLLATERAL_SYMBOL} → kit NFT
+        <p className="mt-1 text-[11px] leading-snug text-muted">
+          Pay {COLLATERAL_SYMBOL} · receive kit NFT
         </p>
 
         <div className="relative mt-3">

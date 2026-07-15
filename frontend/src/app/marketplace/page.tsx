@@ -10,12 +10,7 @@ import { PeptideListItem } from "@/components/marketplace/PeptideListItem";
 import { PeptideGridItem } from "@/components/marketplace/PeptideGridItem";
 import { ProductDetailPanel } from "@/components/marketplace/ProductDetailPanel";
 import { MyVouchers } from "@/components/marketplace/MyVouchers";
-import {
-  PEPTIDES,
-  PARTNER_LAB,
-  RESEARCH_ONLY,
-  MARKETPLACE_BRAND,
-} from "@/lib/marketplaceData";
+import { PEPTIDES, PARTNER_LAB, RESEARCH_ONLY } from "@/lib/marketplaceData";
 import { COLLATERAL_SYMBOL } from "@/lib/deployments";
 import { cn } from "@/lib/cn";
 
@@ -144,7 +139,7 @@ function PartnerLabPanel() {
   return (
     <div className="space-y-4 py-2">
       <div>
-        <h3 className="text-lg font-semibold text-ink">{MARKETPLACE_BRAND.name}</h3>
+        <h3 className="text-lg font-semibold text-ink">Catalog & checkout</h3>
         <p className="mt-1 text-sm text-ink-soft">{RESEARCH_ONLY.tagline}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -155,10 +150,9 @@ function PartnerLabPanel() {
       </div>
       <p className="text-xs leading-relaxed text-ink-soft">{PARTNER_LAB.disclaimer}</p>
       <p className="text-xs leading-relaxed text-ink-soft">
-        Catalog and kit pricing follow the Research Only product line. Purchase is settled on PEPT
-        Trade with testnet {COLLATERAL_SYMBOL}: you receive a PEPT-KIT voucher NFT (one per kit)
-        that can later be redeemed for the physical research peptide. Proceeds go to the on-chain
-        treasury. Demo on Robinhood Chain Testnet — physical fulfillment not live yet.
+        Purchase with testnet {COLLATERAL_SYMBOL}: you receive a PEPT-KIT voucher NFT (one per kit)
+        redeemable later for the physical research peptide. Proceeds go to the on-chain treasury.
+        Demo on Robinhood Chain Testnet — physical fulfillment not live yet.
       </p>
     </div>
   );

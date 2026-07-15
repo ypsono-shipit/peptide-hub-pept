@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PEPTIDES, MARKETPLACE_BRAND } from "@/lib/marketplaceData";
+import { PEPTIDES } from "@/lib/marketplaceData";
 import { Sparkline } from "@/components/ui/Sparkline";
 import { cn } from "@/lib/cn";
 import { COLLATERAL_SYMBOL } from "@/lib/deployments";
@@ -17,7 +17,7 @@ export function MarketplaceStrip() {
     <div className="rounded-xl border border-border bg-panel p-3">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-ink">{MARKETPLACE_BRAND.name}</h3>
+          <h3 className="text-sm font-semibold text-ink">Marketplace</h3>
           <p className="text-[11px] text-muted">
             Research kits · pay listed prices in {COLLATERAL_SYMBOL} on-chain
           </p>

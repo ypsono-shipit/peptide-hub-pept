@@ -1,13 +1,8 @@
-import { CheckCircle2, FlaskConical } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { DynamicIcon } from "@/components/ui/DynamicIcon";
 import { BuyWithUsdc } from "@/components/marketplace/BuyWithUsdc";
-import {
-  MARKETPLACE_BRAND,
-  PARTNER_LAB,
-  RESEARCH_ONLY,
-  type Peptide,
-} from "@/lib/marketplaceData";
+import { RESEARCH_ONLY, type Peptide } from "@/lib/marketplaceData";
 import { COLLATERAL_SYMBOL } from "@/lib/deployments";
 
 export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
@@ -78,23 +73,6 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
           <BuyWithUsdc peptide={peptide} size="md" />
 
           <p className="text-[10px] leading-snug text-muted">{RESEARCH_ONLY.disclaimer}</p>
-        </div>
-      </GlassCard>
-
-      <GlassCard className="p-3">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary">
-            <FlaskConical size={16} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1 text-sm font-medium text-ink">
-              {MARKETPLACE_BRAND.name}
-              {PARTNER_LAB.verified && <CheckCircle2 size={12} className="text-ink" />}
-            </div>
-            <div className="text-[11px] text-muted">
-              {PARTNER_LAB.productCount} compounds · USDC checkout
-            </div>
-          </div>
         </div>
       </GlassCard>
     </>

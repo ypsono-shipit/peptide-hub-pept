@@ -676,17 +676,17 @@ export const HOW_IT_WORKS = [
   {
     step: 1,
     title: "Browse the catalog",
-    description: "Filter Pept Trade x Research Only compounds by research area",
+    description: "Filter compounds by research area",
   },
   {
     step: 2,
     title: "Pay in USDC",
-    description: "Buy a kit on Robinhood testnet at the listed USDC price",
+    description: "Buy a kit on Robinhood testnet at the listed price",
   },
   {
     step: 3,
     title: "Receive kit NFT",
-    description: "Get a PEPT-KIT voucher NFT — redeem later for the physical peptide",
+    description: "Get a PEPT-KIT voucher — redeem later for the physical peptide",
   },
 ];
 
