@@ -86,34 +86,34 @@ export function StakePanel() {
 
   if (!isConnected) {
     return (
-      <div className="glass-panel space-y-4 p-5">
-        <p className="text-sm text-ink-soft">Connect a wallet to stake $PEPT on Robinhood Chain Testnet.</p>
+      <div className="panel space-y-4 p-5">
+        <p className="text-sm text-muted">Connect a wallet to stake $PEPT on Robinhood Chain Testnet.</p>
       </div>
     );
   }
 
   return (
-    <div className="glass-panel space-y-4 p-5">
-      <p className="text-sm text-ink-soft">
-        Earn real yield from perps trading fees and Treasury returns. No lockup.
+    <div className="panel space-y-4 p-5">
+      <p className="text-sm text-muted">
+        Earn yield from perps fees and Treasury returns when funded. No lockup.
       </p>
 
-      <div className="grid grid-cols-3 gap-3 text-xs">
-        <div className="rounded-2xl bg-white/30 p-2.5">
-          <div className="text-ink-soft">Wallet PEPT</div>
-          <div className="mt-1 tabular-nums text-ink">
+      <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="rounded-lg bg-bg p-2.5">
+          <div className="text-muted">Wallet PEPT</div>
+          <div className="mt-1 font-mono tabular-nums text-ink">
             {peptBalance.data !== undefined ? formatEther(peptBalance.data as bigint) : "—"}
           </div>
         </div>
-        <div className="rounded-2xl bg-white/30 p-2.5">
-          <div className="text-ink-soft">Staked</div>
-          <div className="mt-1 tabular-nums text-ink">
+        <div className="rounded-lg bg-bg p-2.5">
+          <div className="text-muted">Staked</div>
+          <div className="mt-1 font-mono tabular-nums text-ink">
             {staked.data !== undefined ? formatEther(staked.data as bigint) : "—"}
           </div>
         </div>
-        <div className="rounded-2xl bg-white/30 p-2.5">
-          <div className="text-ink-soft">Pending Reward</div>
-          <div className="mt-1 tabular-nums text-ink">
+        <div className="rounded-lg bg-bg p-2.5">
+          <div className="text-muted">Pending</div>
+          <div className="mt-1 font-mono tabular-nums text-ink">
             {pendingReward.data !== undefined ? formatEther(pendingReward.data as bigint) : "—"}
           </div>
         </div>
@@ -123,21 +123,21 @@ export function StakePanel() {
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         placeholder="Amount of PEPT"
-        className="w-full rounded-2xl bg-white/40 px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft"
+        className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-ink outline-none placeholder:text-muted"
       />
 
       <div className="grid grid-cols-2 gap-2">
         <button
           disabled={busy || parsedAmount === 0n}
           onClick={needsApproval ? approve : stake}
-          className="rounded-2xl bg-gradient-to-r from-primary to-accent py-2.5 text-sm font-semibold text-cloud disabled:opacity-50"
+          className="rounded-lg bg-primary py-2.5 text-sm font-semibold text-cloud disabled:opacity-50"
         >
           {busy ? "Confirming…" : needsApproval ? "Approve" : "Stake"}
         </button>
         <button
           disabled={busy || parsedAmount === 0n}
           onClick={unstake}
-          className="rounded-2xl bg-white/40 py-2.5 text-sm font-semibold text-ink disabled:opacity-50"
+          className="rounded-lg border border-border bg-bg py-2.5 text-sm font-semibold text-ink disabled:opacity-50"
         >
           Unstake
         </button>
@@ -146,7 +146,7 @@ export function StakePanel() {
       <button
         disabled={busy || !pendingReward.data || (pendingReward.data as bigint) === 0n}
         onClick={claim}
-        className="w-full rounded-2xl bg-white/40 py-2.5 text-sm font-semibold text-ink disabled:opacity-50"
+        className="w-full rounded-lg border border-border bg-bg py-2.5 text-sm font-semibold text-ink disabled:opacity-50"
       >
         Claim Reward
       </button>
@@ -156,7 +156,7 @@ export function StakePanel() {
           href={`https://explorer.testnet.chain.robinhood.com/tx/${txHash}`}
           target="_blank"
           rel="noreferrer"
-          className="block text-center text-xs text-ink-soft underline"
+          className="block text-center text-xs text-muted underline"
         >
           View transaction ↗
         </a>

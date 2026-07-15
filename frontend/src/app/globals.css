@@ -3,46 +3,42 @@
 @tailwind utilities;
 
 body {
-  @apply text-ink antialiased;
-  background: radial-gradient(120% 100% at 15% 0%, #172242 0%, #0d1327 45%, #0a0e1c 100%);
+  @apply bg-bg text-ink antialiased;
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
   min-height: 100vh;
 }
 
-/* Soft ambient lighting layer — stands in for the spec's "blurred DNA /
-   peptide molecule / lab glass imagery at <10% opacity". No real imagery
-   is generated here; this is deliberately abstract soft light instead. */
-.ambient-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
+/* Obsession-style scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
 }
 
-.ambient-bg::before,
-.ambient-bg::after {
-  content: "";
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(120px);
+@layer components {
+  .panel {
+    @apply rounded-xl border border-border bg-panel;
+  }
+  .panel-strong {
+    @apply rounded-xl border border-border-strong bg-panel-hover;
+  }
+  /* legacy class used across pages */
+  .glass-panel {
+    @apply rounded-xl border border-border bg-panel;
+  }
 }
 
-.ambient-bg::before {
-  width: 65vw;
-  height: 65vw;
-  top: -18vw;
-  right: -12vw;
-  background: radial-gradient(circle, rgba(124, 141, 255, 0.28) 0%, rgba(124, 141, 255, 0) 70%);
-}
-
-.ambient-bg::after {
-  width: 55vw;
-  height: 55vw;
-  bottom: -22vw;
-  left: -8vw;
-  background: radial-gradient(circle, rgba(165, 125, 255, 0.22) 0%, rgba(165, 125, 255, 0) 70%);
-}
-
-.glass-panel {
-  @apply rounded-glass border border-glass-border bg-glass shadow-glass backdrop-blur-2xl;
+/* Mono numbers */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }

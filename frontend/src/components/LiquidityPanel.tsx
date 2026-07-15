@@ -140,7 +140,7 @@ export function LiquidityPanel() {
 
   return (
     <div className="space-y-5">
-      <div className="glass-panel grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="panel grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label={`Pool AUM (${COLLATERAL_SYMBOL})`} value={fmtUsdc(aum)} />
         <Stat label="Max OI (50% util)" value={`$${fmtUsd18(maxOpen)}`} />
         <Stat label="Open interest" value={`$${fmtUsd18(openInt)} (${utilPct.toFixed(1)}%)`} />
@@ -151,22 +151,21 @@ export function LiquidityPanel() {
         <Stat label="PLP supply" value={fmtPlp(plpSupply.data as bigint | undefined)} />
       </div>
 
-      <div className="glass-panel space-y-4 p-5">
+      <div className="panel space-y-4 p-4">
         <div>
-          <h2 className="text-lg font-semibold text-ink">Provide liquidity (PLP)</h2>
-          <p className="mt-1 text-sm text-ink-soft">
-            Deposit testnet {COLLATERAL_SYMBOL} to mint PLP. LPs backstop perps open interest, earn
-            fees and trader losses, and pay trader profits. Collateral is 6-decimal USDC on Robinhood
-            testnet (public mint faucet).
+          <h2 className="text-base font-semibold text-ink">Provide liquidity (PLP)</h2>
+          <p className="mt-1 text-sm text-muted">
+            Deposit testnet {COLLATERAL_SYMBOL} to mint PLP. LPs backstop OI, earn fees and losses,
+            pay trader profits.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-1 rounded-2xl bg-white/30 p-1">
+        <div className="grid grid-cols-2 gap-1 rounded-lg bg-bg p-1">
           <button
             onClick={() => setMode("deposit")}
             className={cn(
-              "rounded-xl py-2 text-sm font-semibold",
-              mode === "deposit" ? "bg-white/50 text-ink" : "text-ink-soft",
+              "rounded-md py-2 text-sm font-semibold",
+              mode === "deposit" ? "bg-panel-hover text-ink" : "text-muted",
             )}
           >
             Deposit
@@ -174,8 +173,8 @@ export function LiquidityPanel() {
           <button
             onClick={() => setMode("withdraw")}
             className={cn(
-              "rounded-xl py-2 text-sm font-semibold",
-              mode === "withdraw" ? "bg-white/50 text-ink" : "text-ink-soft",
+              "rounded-md py-2 text-sm font-semibold",
+              mode === "withdraw" ? "bg-panel-hover text-ink" : "text-muted",
             )}
           >
             Withdraw
@@ -183,10 +182,10 @@ export function LiquidityPanel() {
         </div>
 
         {!isConnected ? (
-          <p className="text-sm text-ink-soft">Connect a wallet to deposit or withdraw.</p>
+          <p className="text-sm text-muted">Connect a wallet to deposit or withdraw.</p>
         ) : (
           <>
-            <div className="flex flex-wrap gap-4 text-xs text-ink-soft">
+            <div className="flex flex-wrap gap-4 text-xs text-muted">
               <span>
                 {COLLATERAL_SYMBOL}:{" "}
                 <strong className="text-ink">{fmtUsdc(usdcBal.data as bigint | undefined)}</strong>
@@ -200,11 +199,11 @@ export function LiquidityPanel() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder={mode === "deposit" ? `${COLLATERAL_SYMBOL} amount` : "PLP shares"}
-              className="w-full rounded-2xl bg-white/40 px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft"
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-ink outline-none placeholder:text-muted"
             />
 
             {parsed > 0n && (
-              <p className="text-xs text-ink-soft">
+              <p className="text-xs text-muted">
                 {mode === "deposit"
                   ? `You receive ~${fmtPlp(previewDeposit.data as bigint | undefined)} PLP`
                   : `You receive ~${fmtUsdc(previewWithdraw.data as bigint | undefined)} ${COLLATERAL_SYMBOL}`}
@@ -216,7 +215,7 @@ export function LiquidityPanel() {
                 type="button"
                 onClick={mintFaucet}
                 disabled={busy}
-                className="rounded-2xl bg-white/25 px-4 py-2 text-xs font-semibold text-ink hover:bg-white/35 disabled:opacity-50"
+                className="rounded-lg border border-border bg-bg px-4 py-2 text-xs font-semibold text-ink hover:bg-panel-hover disabled:opacity-50"
               >
                 Mint 10k {COLLATERAL_SYMBOL}
               </button>
@@ -225,7 +224,7 @@ export function LiquidityPanel() {
                   type="button"
                   onClick={approve}
                   disabled={busy || parsed === 0n}
-                  className="rounded-2xl bg-gradient-to-r from-primary to-accent px-4 py-2 text-xs font-semibold text-cloud disabled:opacity-50"
+                  className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-cloud disabled:opacity-50"
                 >
                   {busy ? "Confirm…" : `Approve ${COLLATERAL_SYMBOL}`}
                 </button>
@@ -234,7 +233,7 @@ export function LiquidityPanel() {
                   type="button"
                   onClick={mode === "deposit" ? deposit : withdraw}
                   disabled={busy || parsed === 0n}
-                  className="rounded-2xl bg-gradient-to-r from-primary to-accent px-4 py-2 text-xs font-semibold text-cloud disabled:opacity-50"
+                  className="rounded-lg bg-positive px-4 py-2 text-xs font-semibold text-cloud disabled:opacity-50"
                 >
                   {busy ? "Confirm…" : mode === "deposit" ? "Deposit" : "Withdraw"}
                 </button>
@@ -249,9 +248,9 @@ export function LiquidityPanel() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-white/25 px-3 py-2.5">
-      <div className="text-[11px] text-ink-soft">{label}</div>
-      <div className="text-sm font-semibold tabular-nums text-ink">{value}</div>
+    <div className="rounded-lg bg-bg px-3 py-2.5">
+      <div className="text-[11px] text-muted">{label}</div>
+      <div className="font-mono text-sm font-semibold tabular-nums text-ink">{value}</div>
     </div>
   );
 }

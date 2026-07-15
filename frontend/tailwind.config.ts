@@ -5,33 +5,41 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Peptide Hub "elegant scientific financial platform" design system:
-        // deep navy canvas + frosted glass panels lit from within — glass
-        // only reads convincingly against a dark/rich backdrop, not a flat
-        // light one.
-        bg: "#0A0E1C",
-        glass: "rgba(255,255,255,0.07)",
-        "glass-strong": "rgba(255,255,255,0.14)",
-        "glass-border": "rgba(255,255,255,0.14)",
-        primary: "#7C8DFF",
-        accent: "#A57DFF",
-        positive: "#3CCF7E",
-        negative: "#FF6B81",
-        cloud: "#FFFFFF",
-        "cloud-soft": "rgba(255,255,255,0.72)",
-        ink: "#FFFFFF",
-        "ink-soft": "rgba(255,255,255,0.68)",
+        // Obsession OS flat terminal + PEPT mock accents
+        bg: "#0a0a0a",
+        panel: "#141414",
+        "panel-hover": "#1a1a1a",
+        border: "#1f1f1f",
+        "border-strong": "#2a2a2a",
+        muted: "#737373",
+        faint: "#525252",
+        ink: "#e5e5e5",
+        "ink-soft": "#a3a3a3",
+        primary: "#8b5cf6",
+        accent: "#a78bfa",
+        positive: "#22c55e",
+        "positive-dim": "#16a34a",
+        negative: "#ef4444",
+        "negative-dim": "#dc2626",
+        cloud: "#ffffff",
+        // legacy aliases used in marketplace components
+        glass: "#141414",
+        "glass-strong": "#1a1a1a",
+        "glass-border": "#1f1f1f",
+        "cloud-soft": "#a3a3a3",
       },
       borderRadius: {
-        glass: "28px",
-        "glass-lg": "32px",
+        glass: "12px",
+        "glass-lg": "16px",
       },
       boxShadow: {
-        glass: "0 24px 70px -24px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.25)",
-        "glass-sm": "0 12px 32px -16px rgba(0,0,0,0.45)",
+        glass: "none",
+        "glass-sm": "none",
+        panel: "0 0 0 1px #1f1f1f",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
       },
     },
   },

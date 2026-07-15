@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ExternalLink } from "lucide-react";
+import { TopBar } from "@/components/TopBar";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { CategorySidebar } from "@/components/marketplace/CategorySidebar";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
@@ -44,7 +45,9 @@ export default function MarketplacePage() {
   const selected = PEPTIDES.find((p) => p.id === selectedId) ?? filtered[0] ?? PEPTIDES[0]!;
 
   return (
-    <div className="flex h-full gap-5">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <TopBar />
+      <div className="flex min-h-0 flex-1 gap-3 overflow-hidden p-3">
       <CategorySidebar
         query={query}
         onQueryChange={setQuery}
@@ -52,7 +55,7 @@ export default function MarketplacePage() {
         onCategoryChange={setCategory}
       />
 
-      <div className="flex flex-1 flex-col gap-5 overflow-y-auto pr-1">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-1">
         <MarketplaceHero />
 
         <GlassCard className="flex flex-col gap-4 p-5">
@@ -123,8 +126,9 @@ export default function MarketplacePage() {
         </GlassCard>
       </div>
 
-      <div className="flex w-[340px] shrink-0 flex-col gap-3 overflow-y-auto">
+      <div className="hidden w-[300px] shrink-0 flex-col gap-3 overflow-y-auto xl:flex">
         <ProductDetailPanel peptide={selected} />
+      </div>
       </div>
     </div>
   );

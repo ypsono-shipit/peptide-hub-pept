@@ -1,35 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Sidebar } from "@/components/Sidebar";
-import { TopBar } from "@/components/TopBar";
+import { AppShell } from "@/components/AppShell";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Peptide Hub — The Operating System for Peptide Finance",
-  description: "Peptide/biotech markets, tokenized biotech stocks, and the world's largest peptide marketplace.",
+  title: "PEPT Trade — Peptide Perpetuals",
+  description: "Trade peptide-themed perps on Robinhood Chain. Oracle-marked markets, USDC margin, PLP liquidity, Research Only marketplace.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body>
+    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
+      <body className="bg-bg font-sans">
         <Providers>
-          <div className="ambient-bg" />
-          {/* This is a dense desktop terminal, not a responsive layout — below
-              its minimum width, panels should scroll horizontally as a unit
-              rather than get squished into each other. */}
-          <div className="h-screen overflow-auto">
-            <div className="relative z-10 flex h-full min-w-[1360px] gap-5 p-5">
-              <Sidebar />
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5">
-                <TopBar />
-                <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">{children}</main>
-              </div>
-            </div>
-          </div>
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>

@@ -1,55 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { TopBar } from "@/components/TopBar";
 import { StakePanel } from "@/components/StakePanel";
-import { TESTNET_CONTRACTS } from "@/lib/deployments";
-import { cn } from "@/lib/cn";
+import { Panel } from "@/components/ui/Panel";
 
 export default function StakePage() {
-  const [tab, setTab] = useState<"stake" | "bond">("stake");
-
   return (
-    <div className="mx-auto max-w-2xl p-2">
-      <h1 className="mb-4 text-xl font-semibold tracking-tight text-ink">Stake & Bond</h1>
-      <div className="mb-6 grid grid-cols-2 gap-1 rounded-2xl bg-white/30 p-1">
-        <button
-          onClick={() => setTab("stake")}
-          className={cn("rounded-xl py-2 text-sm font-semibold", tab === "stake" ? "bg-white/50 text-ink" : "text-ink-soft")}
-        >
-          Stake $PEPT
-        </button>
-        <button
-          onClick={() => setTab("bond")}
-          className={cn("rounded-xl py-2 text-sm font-semibold", tab === "bond" ? "bg-white/50 text-ink" : "text-ink-soft")}
-        >
-          Bond
-        </button>
-      </div>
-
-      {tab === "stake" ? (
-        <StakePanel />
-      ) : (
-        <div className="glass-panel space-y-4 p-5">
-          <p className="text-sm text-ink-soft">
-            Deposit whitelisted Robinhood Chain Stock Tokens or stables to receive discounted $PEPT,
-            vesting linearly to the Treasury.
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <TopBar />
+      <div className="mx-auto w-full max-w-xl flex-1 space-y-4 overflow-y-auto p-4">
+        <div>
+          <h1 className="text-lg font-semibold text-ink">Stake $PEPT</h1>
+          <p className="text-sm text-muted">
+            Stake protocol token for rewards (OHM-style bonding stays dormant on testnet)
           </p>
-          <div className="rounded-2xl bg-white/30 p-3 text-xs text-ink-soft">
-            No bond markets are configured yet on testnet — <code>BondDepository</code> is deployed
-            at{" "}
-            <a
-              href={`https://explorer.testnet.chain.robinhood.com/address/${TESTNET_CONTRACTS.BondDepository}`}
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              {TESTNET_CONTRACTS.BondDepository}
-            </a>{" "}
-            but needs a whitelisted reserve token before a market can be opened. Robinhood Chain
-            has no biotech Stock Tokens yet, so nothing real to whitelist for now.
-          </div>
         </div>
-      )}
+        <StakePanel />
+        <Panel className="p-3 text-xs text-muted">
+          Bond markets are not configured — no reserve Stock Tokens on testnet yet.
+        </Panel>
+      </div>
     </div>
   );
 }
