@@ -14,7 +14,7 @@ import { cn } from "@/lib/cn";
 // WebGL can't run during SSR/static generation — load client-side only.
 const PeptideCapsule3D = dynamic(() => import("@/components/ui/PeptideCapsule3D").then((m) => m.PeptideCapsule3D), {
   ssr: false,
-  loading: () => <div className="h-72 w-full animate-pulse rounded-glass bg-white/5" />,
+  loading: () => <div className="h-[440px] w-full animate-pulse rounded-glass bg-white/5" />,
 });
 
 const peptIndex = MOCK_MARKETS[0];
@@ -57,16 +57,16 @@ export default function DashboardPage() {
           {/* Hero */}
           <GlassCard tone="rich" className="overflow-hidden p-8">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
-              <div className="flex-1">
+              <div className="lg:w-[34%] lg:shrink-0">
                 <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-[11px] font-medium tracking-wide text-cloud">
                   The World&apos;s First Peptide Index
                 </span>
                 <h1 className="mt-4 text-4xl font-semibold tracking-tight text-cloud">PEPT-IDX</h1>
-                <p className="mt-2 max-w-sm text-sm leading-relaxed text-cloud-soft">
+                <p className="mt-2 text-sm leading-relaxed text-cloud-soft">
                   A synthetic index tracking the global peptide and biotech economy.
                 </p>
 
-                <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4">
+                <div className="mt-8 grid grid-cols-2 gap-5">
                   <Stat label="Index Value" value={`$${peptIndexPrice.toFixed(2)}`} />
                   <Stat label="24h Change" value={`+${peptIndex.change24h.toFixed(2)}%`} positive />
                   <Stat label="TVL" value={PEPT_INDEX_STATS.tvl} />

@@ -102,8 +102,8 @@ function Scene() {
 /** Interactive, drag-to-rotate 3D peptide capsule — real WebGL, not a static image. */
 export function PeptideCapsule3D() {
   return (
-    <div className="h-72 w-full cursor-grab active:cursor-grabbing">
-      <Canvas camera={{ position: [0, 0, 3.2], fov: 40 }} dpr={[1, 2]}>
+    <div className="h-[440px] w-full cursor-grab active:cursor-grabbing">
+      <Canvas camera={{ position: [0, 0, 2.9], fov: 38 }} dpr={[1, 2]}>
         <Suspense fallback={null}>
           <Scene />
         </Suspense>

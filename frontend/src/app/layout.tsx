@@ -17,9 +17,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <div className="ambient-bg" />
-          <div className="relative z-10 flex h-screen gap-5 p-5">
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto">{children}</main>
+          {/* This is a dense desktop terminal, not a responsive layout — below
+              its minimum width, panels should scroll horizontally as a unit
+              rather than get squished into each other. */}
+          <div className="h-screen overflow-x-auto overflow-y-hidden">
+            <div className="relative z-10 flex h-full min-w-[1360px] gap-5 p-5">
+              <Sidebar />
+              <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
+            </div>
           </div>
         </Providers>
       </body>
