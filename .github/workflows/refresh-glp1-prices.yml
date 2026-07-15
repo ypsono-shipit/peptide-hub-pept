@@ -1,0 +1,81 @@
+name: Refresh GLP-1 peptide oracle prices
+
+# Runs on GitHub-hosted runners (not your laptop). Requires repo secret:
+#   DEPLOYER_PRIVATE_KEY — oracle owner key (push-only privileges recommended)
+#
+# Scheduled workflows only fire on the default branch after this file is merged.
+# Use "Run workflow" for manual tests from any branch.
+
+on:
+  schedule:
+    # Every 3 hours UTC — keeps feeds well inside the 48h on-chain staleness
+    # window even if a few runs fail.
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Scrape only — do not push on-chain"
+        type: boolean
+        default: false
+      force_push:
+        description: "Use forcePushPrice (bypass 30% circuit breaker) — human review only"
+        type: boolean
+        default: false
+      skip_scrape:
+        description: "Skip live scrape; use reference JSON only"
+        type: boolean
+        default: false
+      skip_scouter:
+        description: "Skip PeptideScouter; vendor basket only"
+        type: boolean
+        default: false
+      skip_basket:
+        description: "Skip vendor basket; PeptideScouter only"
+        type: boolean
+        default: false
+
+concurrency:
+  group: glp1-oracle-refresh
+  cancel-in-progress: false
+
+jobs:
+  push-prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: contracts/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Scrape (weighted dual-source) + push GLP-1 prices on-chain
+        env:
+          ROBINHOOD_TESTNET_RPC: https://rpc.testnet.chain.robinhood.com
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          # inputs.* only set on workflow_dispatch; schedule runs get false/empty.
+          DRY_RUN: ${{ inputs.dry_run == true && '1' || '0' }}
+          FORCE_PUSH: ${{ inputs.force_push == true && '1' || '0' }}
+          SKIP_SCRAPE: ${{ inputs.skip_scrape == true && '1' || '0' }}
+          SKIP_SCOUTER: ${{ inputs.skip_scouter == true && '1' || '0' }}
+          SKIP_BASKET: ${{ inputs.skip_basket == true && '1' || '0' }}
+          # Scheduled runs fail loud if scrape breaks (no silent stale JSON push).
+          FALLBACK_ON_SCRAPE_ERROR: "0"
+        run: npx hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet
+
+      - name: Upload scrape snapshot artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: glp1-last-scrape-${{ github.run_id }}
+          path: contracts/data/glp1-last-scrape.json
+          if-no-files-found: ignore
+          retention-days: 14

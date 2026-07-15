@@ -1,0 +1,53 @@
+{
+  "note": "Curated direct vendor product pages for the dual-source GLP-1 oracle. Independent of PeptideScouter HTML tables — each URL is scraped for price + vial size and normalized to $/mg. Prefer single-vial listings (skip multi-vial kits). Disable flaky/CF-blocked vendors with enabled:false. sizeMg is optional: when set, treat page as a fixed-size SKU; when omitted, parse WooCommerce variations / title / attributes.",
+  "minVendorSamples": 3,
+  "maxSourceDivergenceBps": 4000,
+  "fetchDelayMs": 400,
+  "products": {
+    "semaglutide": [
+      { "vendor": "PeptidesKingdom", "url": "https://peptideskingdom.com/product/semaglutide/", "enabled": true },
+      { "vendor": "EZPeptides", "url": "https://ezpeptides.com/product/ezp-1p-5mg/", "sizeMg": 5, "enabled": true },
+      { "vendor": "EZPeptides", "url": "https://ezpeptides.com/product/ezp-1p-10mg/", "sizeMg": 10, "enabled": true },
+      { "vendor": "Pepvida Labs", "url": "https://pepvidalabs.com/product/glp-1-5mg/", "sizeMg": 5, "enabled": true },
+      { "vendor": "Pepvida Labs", "url": "https://pepvidalabs.com/product/glp-1-10mg/", "sizeMg": 10, "enabled": true },
+      { "vendor": "Peptide Giants", "url": "https://peptidegiants.com/product/glp-1s/", "enabled": false },
+      { "vendor": "Trulab Peptides", "url": "https://trulabpeptides.com/product/glp1sm/", "enabled": true },
+      { "vendor": "Synthesis Peptides", "url": "https://synthesispeptides.io/product/glp-1s/", "enabled": true },
+      { "vendor": "Peppy and Me", "url": "https://peppyandme.com/product/sm_1", "enabled": true },
+      { "vendor": "Paradigm Peptide", "url": "https://www.paradigm-peptide.com/product-page/semaglutide-10mg", "sizeMg": 10, "enabled": true },
+      { "vendor": "Biotech Compounds", "url": "https://biotechcompounds.com/products/glp-1s", "sizeMg": 30, "enabled": true }
+    ],
+    "tirzepatide": [
+      { "vendor": "PeptidesKingdom", "url": "https://peptideskingdom.com/product/tirzepatide/", "enabled": true },
+      { "vendor": "EZPeptides", "url": "https://ezpeptides.com/product/ezp-2p-10mg/", "sizeMg": 10, "enabled": true },
+      { "vendor": "EZPeptides", "url": "https://ezpeptides.com/product/ezp-2p-15mg/", "sizeMg": 15, "enabled": true },
+      { "vendor": "EZPeptides", "url": "https://ezpeptides.com/product/ezp-2p-20mg/", "sizeMg": 20, "enabled": true },
+      { "vendor": "Pepvida Labs", "url": "https://pepvidalabs.com/product/glp-2-5mg/", "sizeMg": 5, "enabled": true },
+      { "vendor": "Pepvida Labs", "url": "https://pepvidalabs.com/product/glp-2-12mg/", "sizeMg": 12, "enabled": true },
+      { "vendor": "Pepvida Labs", "url": "https://pepvidalabs.com/product/glp-2-32mg/", "sizeMg": 32, "enabled": true },
+      { "vendor": "Peptide Giants", "url": "https://peptidegiants.com/product/glp-2t/", "enabled": false },
+      { "vendor": "Trulab Peptides", "url": "https://trulabpeptides.com/product/glp2tz/", "enabled": true },
+      { "vendor": "Synthesis Peptides", "url": "https://synthesispeptides.io/product/glp-2t/", "enabled": true },
+      { "vendor": "Peppy and Me", "url": "https://peppyandme.com/product/tz_2", "enabled": true },
+      { "vendor": "Paradigm Peptide", "url": "https://www.paradigm-peptide.com/product-page/tirz-10mg", "sizeMg": 10, "enabled": true },
+      { "vendor": "Paradigm Peptide", "url": "https://www.paradigm-peptide.com/product-page/tirzepatide-30mg", "sizeMg": 30, "enabled": true },
+      { "vendor": "Biotech Compounds", "url": "https://biotechcompounds.com/products/glp-2t", "enabled": true }
+    ],
+    "retatrutide": [
+      { "vendor": "PeptidesKingdom", "url": "https://peptideskingdom.com/product/retatrutide/", "enabled": true },
+      { "vendor": "EZPeptides", "url": "https://ezpeptides.com/product/ezp-3p-12mg/", "sizeMg": 12, "enabled": true },
+      { "vendor": "EZPeptides", "url": "https://ezpeptides.com/product/ezp-3p-20mg/", "sizeMg": 20, "enabled": true },
+      { "vendor": "Pepvida Labs", "url": "https://pepvidalabs.com/product/glp-3-10mg/", "sizeMg": 10, "enabled": true },
+      { "vendor": "Pepvida Labs", "url": "https://pepvidalabs.com/product/glp-3-22mg/", "sizeMg": 22, "enabled": true },
+      { "vendor": "Pepvida Labs", "url": "https://pepvidalabs.com/product/glp-3-30mg/", "sizeMg": 30, "enabled": true },
+      { "vendor": "Peptide Giants", "url": "https://peptidegiants.com/product/glp-3r/", "enabled": false },
+      { "vendor": "Trulab Peptides", "url": "https://trulabpeptides.com/product/glp3rt/", "enabled": true },
+      { "vendor": "Synthesis Peptides", "url": "https://synthesispeptides.io/product/glp-3r/", "enabled": true },
+      { "vendor": "Peppy and Me", "url": "https://peppyandme.com/product/rt_3", "enabled": true },
+      { "vendor": "Paradigm Peptide", "url": "https://www.paradigm-peptide.com/product-page/retatrutide-10mg", "sizeMg": 10, "enabled": true },
+      { "vendor": "Paradigm Peptide", "url": "https://www.paradigm-peptide.com/product-page/retatrutide-20mg", "sizeMg": 20, "enabled": true },
+      { "vendor": "Paradigm Peptide", "url": "https://www.paradigm-peptide.com/product-page/retatrutide-30", "sizeMg": 30, "enabled": true },
+      { "vendor": "Biotech Compounds", "url": "https://biotechcompounds.com/products/retatrutide", "enabled": true }
+    ]
+  }
+}

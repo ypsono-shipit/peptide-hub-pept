@@ -6,9 +6,10 @@ import { ArrowUpRight, Activity } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Sparkline } from "@/components/ui/Sparkline";
 import { DonutChart } from "@/components/ui/DonutChart";
+import { ComingSoonBadge } from "@/components/ui/ComingSoonBadge";
 import { MOCK_MARKETS } from "@/lib/markets";
 import { useOraclePrice } from "@/lib/useOraclePrice";
-import { PEPT_INDEX_STATS, GLP1_BASKET_COMPONENTS, PORTFOLIO_ALLOCATION } from "@/lib/dashboardStats";
+import { PEPT_INDEX_STATS, GLP1_INDEX_WEIGHTS, PORTFOLIO_ALLOCATION } from "@/lib/dashboardStats";
 import { cn } from "@/lib/cn";
 
 // WebGL can't run during SSR/static generation — load client-side only.
@@ -17,9 +18,9 @@ const PeptideCapsule3D = dynamic(() => import("@/components/ui/PeptideCapsule3D"
   loading: () => <div className="h-[300px] w-full animate-pulse rounded-glass bg-white/5" />,
 });
 
-const peptIndex = MOCK_MARKETS[0];
-const lly = MOCK_MARKETS[1];
-const glp1 = MOCK_MARKETS[3];
+const peptIndex = MOCK_MARKETS.find((m) => m.symbol === "PEPT-IDX")!;
+const sema = MOCK_MARKETS.find((m) => m.symbol === "SEMA-PERP")!;
+const glp1Idx = MOCK_MARKETS.find((m) => m.symbol === "GLP1-IDX-PERP")!;
 
 function MarketOverviewRow({ market }: { market: (typeof MOCK_MARKETS)[number] }) {
   const { price } = useOraclePrice(market.oracleKey, market.price);
@@ -31,10 +32,15 @@ function MarketOverviewRow({ market }: { market: (typeof MOCK_MARKETS)[number] }
       className="grid grid-cols-[1.4fr_0.9fr_0.9fr_1fr] items-center gap-3 rounded-2xl px-3 py-1.5 transition-colors hover:bg-white/25"
     >
       <div>
-        <div className="text-sm font-semibold text-ink">{market.symbol}</div>
+        <div className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+          {market.symbol}
+          {market.comingSoon && <ComingSoonBadge />}
+        </div>
         <div className="text-[11px] text-ink-soft">{market.name}</div>
       </div>
-      <div className="text-sm tabular-nums text-ink">${price.toFixed(2)}</div>
+      <div className="text-sm tabular-nums text-ink">
+        {market.unit === "$/mg" ? `$${price.toFixed(2)}/mg` : `$${price.toFixed(2)}`}
+      </div>
       <div className={cn("text-sm tabular-nums", positive ? "text-positive" : "text-negative")}>
         {positive ? "+" : ""}
         {market.change24h.toFixed(2)}%
@@ -105,13 +111,18 @@ export default function DashboardPage() {
                 <MarketOverviewRow key={m.symbol} market={m} />
               ))}
             </div>
+            <p className="mt-3 border-t border-glass-border pt-3 text-[11px] leading-relaxed text-ink-soft">
+              Peptide markets (SEMA, GLP1-IDX, TIRZ, RETA) are priced from research-chemical vendor
+              aggregators, not equities — research use only, not for human consumption. Prices are
+              indicative and highly volatile.
+            </p>
           </GlassCard>
         </div>
 
         {/* Right column */}
         <div className="flex w-[360px] shrink-0 flex-col gap-5 overflow-y-auto">
           <FeaturedPerpetualCard />
-          <Glp1BasketCard />
+          <Glp1IndexCard />
           <GlassCard className="flex flex-1 flex-col p-5">
             <h3 className="mb-4 text-sm font-semibold text-ink">Portfolio Allocation</h3>
             <div className="flex flex-1 items-center">
@@ -136,7 +147,7 @@ function Stat({ label, value, positive }: { label: string; value: string; positi
 }
 
 function FeaturedPerpetualCard() {
-  const { price } = useOraclePrice(lly.oracleKey, lly.price);
+  const { price } = useOraclePrice(sema.oracleKey, sema.price);
   return (
     <GlassCard className="p-5">
       <div className="mb-3 flex items-center gap-2">
@@ -145,35 +156,36 @@ function FeaturedPerpetualCard() {
         </div>
         <div>
           <div className="text-[11px] uppercase tracking-wide text-ink-soft">Featured Perpetual</div>
-          <div className="text-sm font-semibold text-ink">LLY-PERP · Eli Lilly</div>
+          <div className="text-sm font-semibold text-ink">SEMA-PERP · Semaglutide</div>
         </div>
       </div>
-      <p className="mb-4 text-xs text-ink-soft">GLP-1 Market Leader</p>
+      <p className="mb-4 text-xs text-ink-soft">Flagship GLP-1 peptide market</p>
       <div className="mb-4 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold tabular-nums text-ink">${price.toFixed(2)}</span>
-        <span className="text-sm font-medium text-positive">+{lly.change24h.toFixed(2)}%</span>
+        <span className="text-2xl font-semibold tabular-nums text-ink">${price.toFixed(2)}/mg</span>
       </div>
       <Link
         href="/trade"
         className="block rounded-2xl bg-gradient-to-r from-primary to-accent px-4 py-2.5 text-center text-sm font-semibold text-cloud hover:opacity-90"
       >
-        Trade LLY
+        Trade Semaglutide
       </Link>
     </GlassCard>
   );
 }
 
-function Glp1BasketCard() {
+function Glp1IndexCard() {
+  const { price } = useOraclePrice(glp1Idx.oracleKey, glp1Idx.price);
   return (
     <GlassCard className="p-5">
-      <h3 className="mb-1.5 text-sm font-semibold text-ink">{glp1.name}</h3>
+      <h3 className="mb-1.5 text-sm font-semibold text-ink">GLP-1 Index</h3>
       <p className="mb-4 text-xs leading-relaxed text-ink-soft">
-        Basket tracking companies benefiting from GLP-1 obesity drugs.
+        Weighted basket of Semaglutide, Tirzepatide, and Retatrutide research-chemical prices.
       </p>
+      <div className="mb-4 text-lg font-semibold tabular-nums text-ink">${price.toFixed(2)}/mg</div>
       <div className="mb-4 flex flex-wrap gap-1.5">
-        {GLP1_BASKET_COMPONENTS.map((c) => (
-          <span key={c} className="rounded-full bg-white/40 px-2.5 py-1 text-[11px] font-medium text-ink">
-            {c}
+        {GLP1_INDEX_WEIGHTS.map((w) => (
+          <span key={w.label} className="rounded-full bg-white/40 px-2.5 py-1 text-[11px] font-medium text-ink">
+            {w.label} {w.value}%
           </span>
         ))}
       </div>
@@ -181,7 +193,7 @@ function Glp1BasketCard() {
         href="/trade"
         className="block rounded-2xl border border-glass-border px-4 py-2.5 text-center text-sm font-medium text-ink hover:bg-white/25"
       >
-        Trade Basket
+        Trade GLP-1 Index
       </Link>
     </GlassCard>
   );

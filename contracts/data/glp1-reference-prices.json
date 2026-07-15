@@ -1,0 +1,32 @@
+{
+  "note": "Fallback $/mg prices used when SKIP_SCRAPE=1 or FALLBACK_ON_SCRAPE_ERROR=1. Live path scrapes PeptideScouter.com (see scripts/lib/scrape-peptidescouter.ts) and writes data/glp1-last-scrape.json. PeptidePricing.com is not scraped (Cloudflare bot protection) — prefer an internal API if you own it.",
+  "lastResearched": "2026-07-15",
+  "peptides": {
+    "semaglutide": {
+      "symbol": "SEMA-PERP",
+      "pricePerMg": 5.0,
+      "range": "3.80-6.50",
+      "source": "Manual research fallback: peptideware.com, peptideskingdom.com listings, 2026-07-15"
+    },
+    "tirzepatide": {
+      "symbol": "TIRZ-PERP",
+      "pricePerMg": 5.5,
+      "range": "3-28 (wide vendor variance)",
+      "source": "Manual research fallback: Q1 2026 cross-vendor median, 2026-07-15"
+    },
+    "retatrutide": {
+      "symbol": "RETA-PERP",
+      "pricePerMg": 6.37,
+      "range": "6-20 (wide vendor variance)",
+      "source": "Manual research fallback: Q1 2026 cross-vendor median, 2026-07-15"
+    }
+  },
+  "glp1Index": {
+    "symbol": "GLP1-IDX-PERP",
+    "weights": {
+      "semaglutide": 0.6,
+      "tirzepatide": 0.25,
+      "retatrutide": 0.15
+    }
+  }
+}

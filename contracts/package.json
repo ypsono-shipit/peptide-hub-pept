@@ -6,14 +6,19 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "node": "hardhat node",
-    "deploy:testnet": "hardhat run scripts/deploy.ts --network robinhoodTestnet"
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network robinhoodTestnet",
+    "scrape:glp1": "ts-node scripts/scrape-glp1-prices.ts",
+    "scrape:glp1:scouter": "SKIP_BASKET=1 ts-node scripts/scrape-glp1-prices.ts",
+    "scrape:glp1:basket": "SKIP_SCOUTER=1 ts-node scripts/scrape-glp1-prices.ts",
+    "push:glp1": "hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet",
+    "push:glp1:dry": "DRY_RUN=1 hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@types/chai": "^4.3.20",
     "@types/mocha": "^10.0.9",
-    "@types/node": "^22.7.0",
+    "@types/node": "^22.20.1",
     "chai": "^4.5.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.4",
@@ -22,6 +27,7 @@
     "typescript": "^5.6.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.2"
+    "@openzeppelin/contracts": "^5.0.2",
+    "cheerio": "^1.2.0"
   }
 }

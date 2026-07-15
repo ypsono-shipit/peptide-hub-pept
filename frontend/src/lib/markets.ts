@@ -8,15 +8,15 @@ export type Market = {
   volume24h: number;
   /** keccak256(<market key seed>) — shared by PeptideOracle (price) and PerpsEngine (market config); same key on both by construction. */
   oracleKey?: `0x${string}`;
+  /** $/mg for real peptide-chemical markets, $ (index/notional) for everything else. */
+  unit: "$" | "$/mg";
+  /** Priced (for index weighting / info) but no PerpsEngine market configured — not tradeable yet. */
+  comingSoon?: boolean;
 };
 
-// On-chain PeptideOracle market keys, pushed via contracts/scripts/
-// push-pept-price.ts and push-market-prices.ts. All four are admin-set
-// synthetic prices, not real feeds — Robinhood Chain's official token list
-// (docs.robinhood.com/chain/contracts) has zero biotech/pharma Stock Tokens
-// as of this writing, so there's nothing real to wire LLY/TSHA to yet.
-// PEPT-IDX's on-chain key was pushed under the seed "PEPT-USD", decoupled
-// from its "PEPT Index" display name/symbol.
+// On-chain PeptideOracle market keys. PEPT-IDX's key was pushed under the
+// seed "PEPT-USD", decoupled from its "PEPT Index" display name/symbol —
+// every other market's key matches its display symbol exactly.
 const PEPT_ORACLE_KEY = keccak256(toBytes("PEPT-USD"));
 
 export function getMarketByOracleKey(oracleKey: `0x${string}`): Market | undefined {
@@ -31,6 +31,25 @@ export const MOCK_MARKETS: Market[] = [
     change24h: 2.84,
     volume24h: 0,
     oracleKey: PEPT_ORACLE_KEY,
+    unit: "$",
+  },
+  {
+    symbol: "SEMA-PERP",
+    name: "Semaglutide",
+    price: 5.0,
+    change24h: 0,
+    volume24h: 0,
+    oracleKey: keccak256(toBytes("SEMA-PERP")),
+    unit: "$/mg",
+  },
+  {
+    symbol: "GLP1-IDX-PERP",
+    name: "GLP-1 Index (60% Sema / 25% Tirz / 15% Reta)",
+    price: 5.3305,
+    change24h: 0,
+    volume24h: 0,
+    oracleKey: keccak256(toBytes("GLP1-IDX-PERP")),
+    unit: "$/mg",
   },
   {
     symbol: "LLY-PERP",
@@ -39,6 +58,7 @@ export const MOCK_MARKETS: Market[] = [
     change24h: 1.91,
     volume24h: 3_420_000,
     oracleKey: keccak256(toBytes("LLY-PERP")),
+    unit: "$",
   },
   {
     symbol: "TSHA-PERP",
@@ -47,13 +67,26 @@ export const MOCK_MARKETS: Market[] = [
     change24h: -0.74,
     volume24h: 480_000,
     oracleKey: keccak256(toBytes("TSHA-PERP")),
+    unit: "$",
   },
   {
-    symbol: "GLP1-BASKET",
-    name: "GLP-1 Basket",
-    price: 118.05,
-    change24h: 3.21,
-    volume24h: 910_000,
-    oracleKey: keccak256(toBytes("GLP1-BASKET")),
+    symbol: "TIRZ-PERP",
+    name: "Tirzepatide",
+    price: 5.5,
+    change24h: 0,
+    volume24h: 0,
+    oracleKey: keccak256(toBytes("TIRZ-PERP")),
+    unit: "$/mg",
+    comingSoon: true,
+  },
+  {
+    symbol: "RETA-PERP",
+    name: "Retatrutide",
+    price: 6.37,
+    change24h: 0,
+    volume24h: 0,
+    oracleKey: keccak256(toBytes("RETA-PERP")),
+    unit: "$/mg",
+    comingSoon: true,
   },
 ];

@@ -8,13 +8,17 @@ export const PEPT_INDEX_STATS = {
   constituents: 12,
 };
 
-export const GLP1_BASKET_COMPONENTS = ["LLY", "NVO", "VKTX", "ALT", "Structure Therapeutics"];
+export const GLP1_INDEX_WEIGHTS = [
+  { label: "Semaglutide", value: 60 },
+  { label: "Tirzepatide", value: 25 },
+  { label: "Retatrutide", value: 15 },
+];
 
 export const PORTFOLIO_ALLOCATION = [
   { label: "PEPT Index", value: 42 },
-  { label: "LLY Perp", value: 28 },
+  { label: "SEMA Perp", value: 28 },
   { label: "TSHA Perp", value: 12 },
-  { label: "GLP1 Basket", value: 18 },
+  { label: "GLP1 Index", value: 18 },
 ];
 
 export const STATUS_BAR = {

@@ -33,3 +33,35 @@ cd frontend && npm install && npm run dev
 # Contracts
 cd contracts && npm install && npx hardhat compile
 ```
+
+## GLP-1 oracle price refresh (dual source, weighted)
+
+Prices are resolved from **two independent sources**, then **weight-averaged**:
+
+1. **PeptideScouter.com** — multi-vendor tables → **size-weighted** $/mg after IQR filter  
+2. **Vendor basket** — curated PDPs in `contracts/data/vendor-basket.json` → **size-weighted** $/mg after IQR  
+3. **Combine** = weighted average of sources (default 55% Scouter / 45% basket, scaled by sample count) — see `contracts/data/oracle-pricing.json`  
+4. **GLP1-IDX** = 60% SEMA + 25% TIRZ + 15% RETA  
+
+### Run on your machine (optional)
+
+```bash
+cd contracts
+npm run scrape:glp1          # dual-source scrape only
+npm run push:glp1:dry        # scrape + print, no txs
+npm run push:glp1            # scrape + push (needs DEPLOYER_PRIVATE_KEY)
+FORCE_PUSH=1 npm run push:glp1
+```
+
+### Run outside local setup (recommended): GitHub Actions
+
+Workflow: `.github/workflows/refresh-glp1-prices.yml`
+
+- **Schedule:** every **3 hours** UTC (`0 */3 * * *`) on GitHub-hosted runners  
+- **Manual:** Actions → “Refresh GLP-1 peptide oracle prices” → Run workflow  
+- **Secret required:** `DEPLOYER_PRIVATE_KEY` (oracle owner; push-only key recommended)  
+- **Artifacts:** each run uploads `glp1-last-scrape.json` for audit  
+
+This does **not** need your laptop on. Merge the workflow to the **default branch** so the schedule fires, set the secret on the GitHub repo, and you’re done.
+
+**Note:** PeptidePricing.com is not scraped (bot protection). Tune weights in `oracle-pricing.json`; add/remove vendors in `vendor-basket.json`.

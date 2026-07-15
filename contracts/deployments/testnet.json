@@ -10,18 +10,21 @@
     "Treasury": "0x3F0b6D1Be32D2819ABA3893053C4ec3b93116Be5",
     "BondDepository": "0x0B9EFc5DA4921B6d0249A06f3a1BB716636bD042",
     "Staking": "0xebbFEb218117858871f96f204DE1BBD33A921456",
-    "PeptideOracle": "0x937C0a5eD4F19d9F6A3A7EEcdC46ED12aD34F941",
-    "PerpsEngine": "0x5f6848B92A3a587EE2C4e9322F297f9a14753f3a",
+    "PeptideOracle": "0x59d62e2735Bd583F34A8AC2573bA952Df5849449",
+    "PerpsEngine": "0x7C06f25B8F82501D5cf150f7342B78Ab2B7f0E7B",
     "TestCollateral_tPUSD": "0xACD157418837F63E4FD3CDc86E026522352E7DCE"
   },
   "oraclePrices": {
-    "note": "All admin-pushed synthetic prices, not real feeds. LLY is confirmed real on Robinhood Chain MAINNET (0x8005d266423c7Ea827372c9c864491e5786600eA, verified on-chain: name()='Eli Lilly • Robinhood Token', symbol()='LLY') but has zero code on testnet (chain 46630) as of 2026-07-15 — not all mainnet Stock Tokens are mirrored to testnet. TSHA/GLP-1 basket still have no known real token on either network. Revisit LLY-PERP oracle wiring when this moves to mainnet.",
+    "note": "Admin-pushed prices. PEPT-USD/LLY-PERP/TSHA-PERP have no real source (30-day staleness). SEMA-PERP/GLP1-IDX-PERP/TIRZ-PERP/RETA-PERP are bootstrapped from real PeptidePricing.com + PeptideScouter.com cross-vendor medians (48h staleness — must be refreshed at least every 2 days to stay tradeable; run scripts/push-glp1-prices.ts). GLP1-BASKET (old stock-ticker theme) retired in favor of GLP1-IDX-PERP.",
     "PEPT-USD": "1.00",
     "LLY-PERP": "812.44",
     "TSHA-PERP": "6.72",
-    "GLP1-BASKET": "118.05",
-    "pushedAt": "2026-07-14T19:23:24.453Z",
-    "stalenessWindow": "30 days (pushed), 15 minutes (Chainlink) — see PeptideOracle.sol"
+    "SEMA-PERP": "5 USD/mg",
+    "GLP1-IDX-PERP": "5.3305 USD/mg (60% SEMA / 25% TIRZ / 15% RETA)",
+    "TIRZ-PERP": "5.5 USD/mg (reference only, not tradeable — Coming Soon)",
+    "RETA-PERP": "6.37 USD/mg (reference only, not tradeable — Coming Soon)",
+    "pushedAt": "2026-07-15T04:39:43.846Z",
+    "stalenessWindow": "30 days default (pushed, no real source), 48h (real peptide markets), 15 minutes (Chainlink)"
   },
   "mainnetReferences": {
     "note": "Addresses verified on Robinhood Chain mainnet (chain 4663, rpc.mainnet.chain.robinhood.com) for future migration — NOT usable on testnet.",
