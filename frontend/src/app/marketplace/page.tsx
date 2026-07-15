@@ -9,6 +9,7 @@ import { FilterBar } from "@/components/marketplace/FilterBar";
 import { PeptideListItem } from "@/components/marketplace/PeptideListItem";
 import { PeptideGridItem } from "@/components/marketplace/PeptideGridItem";
 import { ProductDetailPanel } from "@/components/marketplace/ProductDetailPanel";
+import { MyVouchers } from "@/components/marketplace/MyVouchers";
 import {
   PEPTIDES,
   PARTNER_LAB,
@@ -132,6 +133,7 @@ export default function MarketplacePage() {
 
         <div className="hidden w-[300px] shrink-0 flex-col gap-3 overflow-y-auto xl:flex">
           <ProductDetailPanel peptide={selected} />
+          <MyVouchers />
         </div>
       </div>
     </div>
@@ -153,9 +155,10 @@ function PartnerLabPanel() {
       </div>
       <p className="text-xs leading-relaxed text-ink-soft">{PARTNER_LAB.disclaimer}</p>
       <p className="text-xs leading-relaxed text-ink-soft">
-        Catalog and kit pricing follow the Research Only product line. Purchase is settled on
-        PEPT Trade with testnet {COLLATERAL_SYMBOL} — proceeds go to the on-chain treasury. This
-        is a demo marketplace on Robinhood Chain Testnet, not a live fulfillment channel.
+        Catalog and kit pricing follow the Research Only product line. Purchase is settled on PEPT
+        Trade with testnet {COLLATERAL_SYMBOL}: you receive a PEPT-KIT voucher NFT (one per kit)
+        that can later be redeemed for the physical research peptide. Proceeds go to the on-chain
+        treasury. Demo on Robinhood Chain Testnet — physical fulfillment not live yet.
       </p>
     </div>
   );

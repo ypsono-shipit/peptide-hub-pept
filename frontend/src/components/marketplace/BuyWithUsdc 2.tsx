@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { formatUnits, keccak256, parseUnits, stringToBytes } from "viem";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { cn } from "@/lib/cn";
 import { collateralContract, marketplaceShopContract } from "@/lib/contracts";
-import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL, TESTNET_CONTRACTS } from "@/lib/deployments";
+import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL } from "@/lib/deployments";
 import type { Peptide } from "@/lib/marketplaceData";
 
 export function productIdBytes(id: string): `0x${string}` {
@@ -13,6 +13,7 @@ export function productIdBytes(id: string): `0x${string}` {
 }
 
 export function priceToUsdcRaw(priceUsd: number): bigint {
+  // catalog prices are USD; USDC has 6 decimals on RH testnet
   return parseUnits(priceUsd.toFixed(2), COLLATERAL_DECIMALS);
 }
 
@@ -30,7 +31,6 @@ export function BuyWithUsdc({
   const { address, isConnected } = useAccount();
   const productId = useMemo(() => productIdBytes(peptide.id), [peptide.id]);
   const amount = useMemo(() => priceToUsdcRaw(peptide.priceFrom), [peptide.priceFrom]);
-  const [lastSuccess, setLastSuccess] = useState(false);
 
   const balance = useReadContract({
     ...collateralContract,
@@ -62,17 +62,15 @@ export function BuyWithUsdc({
     if (!isSuccess) return;
     balance.refetch();
     allowance.refetch();
-    setLastSuccess(true);
     reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
 
   const bal = (balance.data as bigint | undefined) ?? 0n;
   const allw = (allowance.data as bigint | undefined) ?? 0n;
-  const payAmount =
-    (onChainPrice.data as bigint | undefined) && (onChainPrice.data as bigint) > 0n
-      ? (onChainPrice.data as bigint)
-      : amount;
+  const payAmount = (onChainPrice.data as bigint | undefined) && (onChainPrice.data as bigint) > 0n
+    ? (onChainPrice.data as bigint)
+    : amount;
   const isListed = listed.data === undefined ? true : Boolean(listed.data);
   const needsApproval = allw < payAmount;
   const needsFunds = bal < payAmount;
@@ -81,7 +79,6 @@ export function BuyWithUsdc({
   const mint = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!address) return;
-    setLastSuccess(false);
     writeContract({
       ...collateralContract,
       functionName: "mint",
@@ -91,7 +88,6 @@ export function BuyWithUsdc({
 
   const approve = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setLastSuccess(false);
     writeContract({
       ...collateralContract,
       functionName: "approve",
@@ -101,7 +97,6 @@ export function BuyWithUsdc({
 
   const buy = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setLastSuccess(false);
     writeContract({
       ...marketplaceShopContract,
       functionName: "purchase",
@@ -178,15 +173,10 @@ export function BuyWithUsdc({
         className={cn(base, "bg-primary text-on-primary hover:bg-accent disabled:opacity-50")}
       >
         {busy
-          ? "Minting voucher…"
+          ? "Confirming…"
           : label ??
-            `Buy NFT · ${formatUnits(payAmount, COLLATERAL_DECIMALS)} ${COLLATERAL_SYMBOL}`}
+            `Buy · ${formatUnits(payAmount, COLLATERAL_DECIMALS)} ${COLLATERAL_SYMBOL}`}
       </button>
-      {lastSuccess && (
-        <span className="text-center text-[10px] text-ink">
-          Kit voucher NFT minted · redeem later for physical kit
-        </span>
-      )}
       {txHash && (
         <a
           href={`https://explorer.testnet.chain.robinhood.com/tx/${txHash}`}
@@ -196,17 +186,6 @@ export function BuyWithUsdc({
           onClick={(e) => e.stopPropagation()}
         >
           View tx ↗
-        </a>
-      )}
-      {lastSuccess && (
-        <a
-          href={`https://explorer.testnet.chain.robinhood.com/token/${TESTNET_CONTRACTS.PeptideVoucher}`}
-          target="_blank"
-          rel="noreferrer"
-          className="text-center text-[10px] text-muted underline"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Voucher contract ↗
         </a>
       )}
       {error && (

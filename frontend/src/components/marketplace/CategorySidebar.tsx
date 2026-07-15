@@ -30,8 +30,7 @@ export function CategorySidebar({
         <h1 className="text-base font-semibold text-ink">Marketplace</h1>
         <p className="mt-1 text-xs leading-relaxed text-ink-soft">
           <span className="font-medium text-ink">{MARKETPLACE_BRAND.name}</span>
-          . Research-grade peptides, &gt;99% purity. Pay kit prices in{" "}
-          {COLLATERAL_SYMBOL} on Robinhood testnet.
+          . Pay in {COLLATERAL_SYMBOL}, receive a redeemable kit NFT for the physical peptide.
         </p>
 
         <div className="relative mt-4">

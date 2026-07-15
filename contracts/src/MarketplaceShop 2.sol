@@ -5,17 +5,14 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {PeptideVoucher} from "./PeptideVoucher.sol";
 
 /// @title MarketplaceShop — USDC checkout for PEPT Trade x Research Only catalog
-/// @notice Buyers pay listed kit prices in testnet USDC and receive PeptideVoucher NFTs
-///         (one per kit) redeemable later for the physical peptide.
-/// @dev productId = keccak256(utf8 catalog id), e.g. ethers.id("semaglutide")
+/// @notice Buyers pay listed kit prices in testnet USDC. Proceeds go to `treasury`.
+/// @dev productId = keccak256(abi.encodePacked(catalog string id)), e.g. "semaglutide"
 contract MarketplaceShop is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable usdc;
-    PeptideVoucher public immutable voucher;
     address public treasury;
 
     /// @notice Price per kit in USDC base units (6 decimals on Robinhood testnet)
@@ -29,16 +26,13 @@ contract MarketplaceShop is Ownable, ReentrancyGuard {
         address indexed buyer,
         bytes32 indexed productId,
         uint256 quantity,
-        uint256 totalUsdc,
-        uint256 firstTokenId,
-        uint256 lastTokenId
+        uint256 totalUsdc
     );
 
-    constructor(address usdc_, address treasury_, address voucher_) Ownable(msg.sender) {
-        require(usdc_ != address(0) && treasury_ != address(0) && voucher_ != address(0), "Marketplace: zero");
+    constructor(address usdc_, address treasury_) Ownable(msg.sender) {
+        require(usdc_ != address(0) && treasury_ != address(0), "Marketplace: zero");
         usdc = IERC20(usdc_);
         treasury = treasury_;
-        voucher = PeptideVoucher(voucher_);
     }
 
     function setTreasury(address treasury_) external onlyOwner {
@@ -70,23 +64,14 @@ contract MarketplaceShop is Ownable, ReentrancyGuard {
         emit ProductDelisted(productId);
     }
 
-    /// @notice Purchase `quantity` kits — pay USDC, mint one PeptideVoucher NFT per kit.
+    /// @notice Purchase `quantity` kits of `productId` for listed USDC price.
     function purchase(bytes32 productId, uint256 quantity) external nonReentrant {
-        require(quantity > 0 && quantity <= 20, "Marketplace: qty");
+        require(quantity > 0, "Marketplace: qty");
         require(listed[productId], "Marketplace: not listed");
         uint256 unit = priceOf[productId];
         require(unit > 0, "Marketplace: price");
         uint256 total = unit * quantity;
         usdc.safeTransferFrom(msg.sender, treasury, total);
-
-        uint256 firstId;
-        uint256 lastId;
-        for (uint256 i = 0; i < quantity; i++) {
-            uint256 tokenId = voucher.mint(msg.sender, productId);
-            if (i == 0) firstId = tokenId;
-            lastId = tokenId;
-        }
-
-        emit Purchased(msg.sender, productId, quantity, total, firstId, lastId);
+        emit Purchased(msg.sender, productId, quantity, total);
     }
 }

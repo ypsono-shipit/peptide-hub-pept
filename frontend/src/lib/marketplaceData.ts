@@ -680,13 +680,13 @@ export const HOW_IT_WORKS = [
   },
   {
     step: 2,
-    title: "Review kit price",
-    description: "SKU, purity, and USDC price for each 10-vial kit",
+    title: "Pay in USDC",
+    description: "Buy a kit on Robinhood testnet at the listed USDC price",
   },
   {
     step: 3,
-    title: "Pay in USDC",
-    description: "Connect wallet and buy on Robinhood testnet — no external shop",
+    title: "Receive kit NFT",
+    description: "Get a PEPT-KIT voucher NFT — redeem later for the physical peptide",
   },
 ];
 

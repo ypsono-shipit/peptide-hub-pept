@@ -16,6 +16,8 @@ export const TESTNET_CONTRACTS = {
   USDC: "0xAc80194dc1aE8eF52df73e7e1864fB3C62290fe0",
   PLP: "0xAB3CCa9068c692A0756a215C28Ebe53034362adF",
   PerpsLiquidityPool: "0xeae35fFDfC6038aAED495B0563E25daA4b8951e2",
-  /** Pept Trade x Research Only — USDC kit checkout */
-  MarketplaceShop: "0x37d13C0E36d8ec634397e83aEA3B9E3eF52eA021",
+  /** Pept Trade x Research Only — USDC kit checkout (mints PeptideVoucher NFT) */
+  MarketplaceShop: "0xc45eFE5056a2829182145efD7773a72B2Daf1349",
+  /** Redeemable kit claim NFT (1 per purchase) */
+  PeptideVoucher: "0xa4b737d17c8F2B29Ff0BF5db9DCffE44A3F12Fdc",
 } as const;

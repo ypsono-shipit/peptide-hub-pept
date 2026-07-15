@@ -43,6 +43,8 @@ const config: HardhatUserConfig = {
     version: "0.8.24",
     settings: {
       optimizer: { enabled: true, runs: 200 },
+      // Robinhood testnet rejects Cancun-only opcodes (mcopy); stay on paris
+      evmVersion: "paris",
     },
   },
   paths: {

@@ -23,8 +23,8 @@ export function MarketplaceHero() {
             {MARKETPLACE_BRAND.name}
           </h2>
           <p className="mt-1 max-w-xl text-sm text-ink-soft">
-            {RESEARCH_ONLY.tagline}. Buy research kits on-chain with Robinhood testnet{" "}
-            {COLLATERAL_SYMBOL} at listed prices — no external checkout.
+            {RESEARCH_ONLY.tagline}. Pay kit prices in Robinhood testnet {COLLATERAL_SYMBOL} and
+            receive a redeemable PEPT-KIT NFT — claim the physical peptide when fulfillment opens.
           </p>
 
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">

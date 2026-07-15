@@ -68,13 +68,17 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
             ${peptide.priceFrom.toFixed(2)}
           </div>
           <div className="text-[11px] text-ink-soft">
-            {COLLATERAL_SYMBOL} · 10-vial kit · Robinhood testnet
+            {COLLATERAL_SYMBOL} · mints PEPT-KIT NFT · redeemable for physical kit
           </div>
         </div>
 
         <div className="mt-4">
           <BuyWithUsdc peptide={peptide} size="md" />
         </div>
+        <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">
+          Payment mints a kit voucher NFT to your wallet. Hold it until physical fulfillment opens,
+          then redeem the claim for the real 10-vial research kit.
+        </p>
 
         <p className="mt-3 text-[11px] leading-relaxed text-ink-soft">{RESEARCH_ONLY.disclaimer}</p>
       </GlassCard>

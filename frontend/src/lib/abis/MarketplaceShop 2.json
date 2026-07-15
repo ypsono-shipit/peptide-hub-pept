@@ -10,11 +10,6 @@
         "internalType": "address",
         "name": "treasury_",
         "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "voucher_",
-        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -134,18 +129,6 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "totalUsdc",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "firstTokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "lastTokenId",
         "type": "uint256"
       }
     ],
@@ -335,19 +318,6 @@
     "outputs": [
       {
         "internalType": "contract IERC20",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "voucher",
-    "outputs": [
-      {
-        "internalType": "contract PeptideVoucher",
         "name": "",
         "type": "address"
       }

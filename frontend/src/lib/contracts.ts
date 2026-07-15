@@ -8,6 +8,7 @@ import MOCK_ERC20_ABI from "./abis/MockERC20.json";
 import PLP_ABI from "./abis/PLP.json";
 import PERPS_LIQUIDITY_POOL_ABI from "./abis/PerpsLiquidityPool.json";
 import MARKETPLACE_SHOP_ABI from "./abis/MarketplaceShop.json";
+import PEPTIDE_VOUCHER_ABI from "./abis/PeptideVoucher.json";
 import { TESTNET_CONTRACTS } from "./deployments";
 
 export const peptContract = {
@@ -51,8 +52,14 @@ export const plpPoolContract = {
   abi: PERPS_LIQUIDITY_POOL_ABI as Abi,
 } as const;
 
-/** Pept Trade x Research Only catalog — pay kit price in testnet USDC. */
+/** Pept Trade x Research Only catalog — pay kit price in testnet USDC, mint voucher NFT. */
 export const marketplaceShopContract = {
   address: TESTNET_CONTRACTS.MarketplaceShop as `0x${string}`,
   abi: MARKETPLACE_SHOP_ABI as Abi,
+} as const;
+
+/** Redeemable peptide kit voucher (ERC-721). */
+export const peptideVoucherContract = {
+  address: TESTNET_CONTRACTS.PeptideVoucher as `0x${string}`,
+  abi: PEPTIDE_VOUCHER_ABI as Abi,
 } as const;

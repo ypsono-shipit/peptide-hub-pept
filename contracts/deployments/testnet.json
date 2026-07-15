@@ -16,7 +16,8 @@
     "PLP": "0xAB3CCa9068c692A0756a215C28Ebe53034362adF",
     "PerpsLiquidityPool": "0xeae35fFDfC6038aAED495B0563E25daA4b8951e2",
     "USDC": "0xAc80194dc1aE8eF52df73e7e1864fB3C62290fe0",
-    "MarketplaceShop": "0x37d13C0E36d8ec634397e83aEA3B9E3eF52eA021"
+    "MarketplaceShop": "0xc45eFE5056a2829182145efD7773a72B2Daf1349",
+    "PeptideVoucher": "0xa4b737d17c8F2B29Ff0BF5db9DCffE44A3F12Fdc"
   },
   "oraclePrices": {
     "note": "Admin-pushed prices. PEPT-USD/LLY-PERP/TSHA-PERP have no real source (30-day staleness). SEMA-PERP/GLP1-IDX-PERP/TIRZ-PERP/RETA-PERP are bootstrapped from real PeptidePricing.com + PeptideScouter.com cross-vendor medians (48h staleness — must be refreshed at least every 2 days to stay tradeable; run scripts/push-glp1-prices.ts). GLP1-BASKET (old stock-ticker theme) retired in favor of GLP1-IDX-PERP.",
@@ -51,10 +52,11 @@
     "note": "Robinhood testnet community USDC (6 dec, public mint). Not official Circle. Replaces tPUSD."
   },
   "marketplace": {
-    "listedAt": "2026-07-15T16:02:12.766Z",
+    "listedAt": "2026-07-15T16:23:01.400Z",
     "productCount": 31,
     "collateral": "USDC",
     "decimals": 6,
-    "note": "Pept Trade x Research Only — pay kit price in testnet USDC; proceeds to Treasury"
+    "voucher": "0xa4b737d17c8F2B29Ff0BF5db9DCffE44A3F12Fdc",
+    "note": "Pept Trade x Research Only — pay USDC, receive PeptideVoucher NFT redeemable for physical kit"
   }
 }
