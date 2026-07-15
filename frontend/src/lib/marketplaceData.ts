@@ -1,23 +1,29 @@
 /**
- * Marketplace catalog powered by Research Only partnership.
- * Source of truth for products/pricing: https://researchonly.io/shop/
- * Prices and kit structure captured from their public shop (10-vial kits, >99% purity).
- * Checkout is fulfilled on researchonly.io — PEPT Trade surfaces the catalog + deep links.
+ * Marketplace: Pept Trade x Research Only
+ * Catalog + kit prices mirror the Research Only product line (10-vial kits, >99% purity).
+ * Checkout is on-chain: pay the listed price in Robinhood testnet USDC via MarketplaceShop.
+ * Research Only is a brand partnership label — products are not deep-linked to their store.
  */
+
+export const MARKETPLACE_BRAND = {
+  name: "Pept Trade x Research Only",
+  shortName: "PT x RO",
+} as const;
 
 export const RESEARCH_ONLY = {
   name: "Research Only",
   shortName: "RO",
+  /** Partnership brand (catalog source) — checkout is PEPT Trade USDC, not external. */
   url: "https://researchonly.io",
   shopUrl: "https://researchonly.io/shop/",
   aboutUrl: "https://researchonly.io/about/",
   tagline: "Research-grade peptides · >99% purity · HPLC + MS tested",
   disclaimer:
-    "For research use only. Not for human or veterinary use, diagnostic, or therapeutic purposes.",
+    "For research use only. Not for human or veterinary use, diagnostic, or therapeutic purposes. Demo checkout on Robinhood Chain Testnet in USDC.",
   purity: ">99%",
   testing: "HPLC + MS, every lot",
   kitNote: "All compounds sold in kits of 10 vials",
-  shipping: "Free shipping worldwide",
+  shipping: "On-chain purchase · research use only",
   verified: true,
   region: "Global",
 } as const;
@@ -660,27 +666,27 @@ export const LABS: PartnerLab[] = [PARTNER_LAB];
 
 export const MARKETPLACE_STATS = {
   peptidesListed: String(PEPTIDES.length),
-  partnerLab: RESEARCH_ONLY.name,
+  partnerLab: MARKETPLACE_BRAND.name,
   purity: RESEARCH_ONLY.purity,
   kitNote: "10-vial kits",
-  shipping: "Free worldwide",
+  shipping: "USDC on-chain",
 };
 
 export const HOW_IT_WORKS = [
   {
     step: 1,
     title: "Browse the catalog",
-    description: "Filter Research Only compounds by research area",
+    description: "Filter Pept Trade x Research Only compounds by research area",
   },
   {
     step: 2,
-    title: "Review specs",
-    description: "SKU, purity, kit size, and RUO terms from our partner",
+    title: "Review kit price",
+    description: "SKU, purity, and USDC price for each 10-vial kit",
   },
   {
     step: 3,
-    title: "Order on Research Only",
-    description: "Checkout on researchonly.io with free worldwide shipping",
+    title: "Pay in USDC",
+    description: "Connect wallet and buy on Robinhood testnet — no external shop",
   },
 ];
 

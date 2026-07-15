@@ -9,7 +9,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: "PEPT Trade — Peptide Perpetuals",
-  description: "Trade peptide-themed perps on Robinhood Chain. Oracle-marked markets, USDC margin, PLP liquidity, Research Only marketplace.",
+  description: "Trade peptide-themed perps on Robinhood Chain. Oracle-marked markets, USDC margin, PLP liquidity, Pept Trade x Research Only marketplace.",
   icons: {
     icon: "/logo-asterisk.jpg",
     apple: "/logo-asterisk.jpg",

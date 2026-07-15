@@ -1,9 +1,14 @@
-"use client";
-
-import { Search, ExternalLink } from "lucide-react";
+import { Search } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { DynamicIcon } from "@/components/ui/DynamicIcon";
-import { CATEGORIES, HOW_IT_WORKS, RESEARCH_ONLY, categoryCounts } from "@/lib/marketplaceData";
+import {
+  CATEGORIES,
+  HOW_IT_WORKS,
+  MARKETPLACE_BRAND,
+  RESEARCH_ONLY,
+  categoryCounts,
+} from "@/lib/marketplaceData";
+import { COLLATERAL_SYMBOL } from "@/lib/deployments";
 import { cn } from "@/lib/cn";
 
 export function CategorySidebar({
@@ -24,16 +29,9 @@ export function CategorySidebar({
       <GlassCard className="p-5">
         <h1 className="text-base font-semibold text-ink">Marketplace</h1>
         <p className="mt-1 text-xs leading-relaxed text-ink-soft">
-          Powered by{" "}
-          <a
-            href={RESEARCH_ONLY.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-ink hover:underline"
-          >
-            Research Only
-          </a>
-          . Research-grade peptides, &gt;99% purity.
+          <span className="font-medium text-ink">{MARKETPLACE_BRAND.name}</span>
+          . Research-grade peptides, &gt;99% purity. Pay kit prices in{" "}
+          {COLLATERAL_SYMBOL} on Robinhood testnet.
         </p>
 
         <div className="relative mt-4">
@@ -84,15 +82,6 @@ export function CategorySidebar({
             </div>
           ))}
         </div>
-        <a
-          href={RESEARCH_ONLY.shopUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 flex items-center justify-center gap-1.5 rounded-2xl bg-primary px-3 py-2 text-xs font-semibold text-on-primary hover:bg-accent"
-        >
-          Shop on Research Only
-          <ExternalLink size={12} />
-        </a>
       </GlassCard>
 
       <GlassCard className="p-4">

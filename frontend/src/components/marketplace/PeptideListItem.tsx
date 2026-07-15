@@ -1,6 +1,7 @@
-import { ExternalLink } from "lucide-react";
 import { DynamicIcon } from "@/components/ui/DynamicIcon";
+import { BuyWithUsdc } from "@/components/marketplace/BuyWithUsdc";
 import { cn } from "@/lib/cn";
+import { COLLATERAL_SYMBOL } from "@/lib/deployments";
 import type { Peptide } from "@/lib/marketplaceData";
 
 export function PeptideListItem({
@@ -38,7 +39,9 @@ export function PeptideListItem({
         </div>
       </div>
 
-      <div className="hidden w-28 shrink-0 text-xs text-ink-soft sm:block">Research Only</div>
+      <div className="hidden w-28 shrink-0 text-xs text-ink-soft sm:block">
+        Pept Trade × RO
+      </div>
 
       <div className="w-24 shrink-0">
         {peptide.inStock && (
@@ -47,24 +50,19 @@ export function PeptideListItem({
             In Stock
           </div>
         )}
-        <div className="mt-0.5 text-[11px] text-ink-soft">RUO · 10 vials</div>
+        <div className="mt-0.5 text-[11px] text-ink-soft">RUO · {COLLATERAL_SYMBOL}</div>
       </div>
 
       <div className="w-28 shrink-0 text-right">
         <div className="text-xs text-ink-soft">{peptide.priceIsFrom ? "From" : "Price"}</div>
-        <div className="text-sm font-semibold tabular-nums text-ink">${peptide.priceFrom.toFixed(2)}</div>
+        <div className="text-sm font-semibold tabular-nums text-ink">
+          ${peptide.priceFrom.toFixed(2)}
+        </div>
       </div>
 
-      <a
-        href={peptide.partnerUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        className="flex shrink-0 items-center gap-1 rounded-2xl bg-primary px-3.5 py-2 text-xs font-semibold text-on-primary hover:bg-accent"
-      >
-        Buy
-        <ExternalLink size={12} />
-      </a>
+      <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+        <BuyWithUsdc peptide={peptide} size="sm" label="Buy" />
+      </div>
     </button>
   );
 }
@@ -86,4 +84,3 @@ function ProductThumb({ peptide }: { peptide: Peptide }) {
     </div>
   );
 }
-

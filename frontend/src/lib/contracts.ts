@@ -7,6 +7,7 @@ import PERPS_ENGINE_ABI from "./abis/PerpsEngine.json";
 import MOCK_ERC20_ABI from "./abis/MockERC20.json";
 import PLP_ABI from "./abis/PLP.json";
 import PERPS_LIQUIDITY_POOL_ABI from "./abis/PerpsLiquidityPool.json";
+import MARKETPLACE_SHOP_ABI from "./abis/MarketplaceShop.json";
 import { TESTNET_CONTRACTS } from "./deployments";
 
 export const peptContract = {
@@ -48,4 +49,10 @@ export const plpTokenContract = {
 export const plpPoolContract = {
   address: TESTNET_CONTRACTS.PerpsLiquidityPool as `0x${string}`,
   abi: PERPS_LIQUIDITY_POOL_ABI as Abi,
+} as const;
+
+/** Pept Trade x Research Only catalog — pay kit price in testnet USDC. */
+export const marketplaceShopContract = {
+  address: TESTNET_CONTRACTS.MarketplaceShop as `0x${string}`,
+  abi: MARKETPLACE_SHOP_ABI as Abi,
 } as const;

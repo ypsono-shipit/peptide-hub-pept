@@ -1,7 +1,14 @@
-import { ExternalLink, CheckCircle2, FlaskConical } from "lucide-react";
+import { CheckCircle2, FlaskConical } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { DynamicIcon } from "@/components/ui/DynamicIcon";
-import { PARTNER_LAB, RESEARCH_ONLY, type Peptide } from "@/lib/marketplaceData";
+import { BuyWithUsdc } from "@/components/marketplace/BuyWithUsdc";
+import {
+  MARKETPLACE_BRAND,
+  PARTNER_LAB,
+  RESEARCH_ONLY,
+  type Peptide,
+} from "@/lib/marketplaceData";
+import { COLLATERAL_SYMBOL } from "@/lib/deployments";
 
 export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
   return (
@@ -34,7 +41,9 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
           {peptide.bestseller && (
             <Badge className="bg-primary text-on-primary">Bestseller</Badge>
           )}
-          {peptide.inStock && <Badge className="border border-border-strong bg-panel text-ink">In Stock</Badge>}
+          {peptide.inStock && (
+            <Badge className="border border-border-strong bg-panel text-ink">In Stock</Badge>
+          )}
           <Badge className="bg-white/10 text-ink-soft">Research Use Only</Badge>
         </div>
 
@@ -49,25 +58,23 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
             <CheckCircle2 size={13} className="text-ink" /> {RESEARCH_ONLY.testing}
           </div>
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-ink" /> {RESEARCH_ONLY.shipping}
+            <CheckCircle2 size={13} className="text-ink" /> Pay with {COLLATERAL_SYMBOL} on-chain
           </div>
         </div>
 
         <div className="mt-4 rounded-2xl bg-white/8 px-3 py-2">
           <div className="text-[11px] text-ink-soft">{peptide.priceIsFrom ? "From" : "Price"}</div>
-          <div className="text-xl font-semibold tabular-nums text-ink">${peptide.priceFrom.toFixed(2)}</div>
-          <div className="text-[11px] text-ink-soft">USD · 10-vial kit on Research Only</div>
+          <div className="text-xl font-semibold tabular-nums text-ink">
+            ${peptide.priceFrom.toFixed(2)}
+          </div>
+          <div className="text-[11px] text-ink-soft">
+            {COLLATERAL_SYMBOL} · 10-vial kit · Robinhood testnet
+          </div>
         </div>
 
-        <a
-          href={peptide.partnerUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-accent"
-        >
-          Buy on Research Only
-          <ExternalLink size={14} />
-        </a>
+        <div className="mt-4">
+          <BuyWithUsdc peptide={peptide} size="md" />
+        </div>
 
         <p className="mt-3 text-[11px] leading-relaxed text-ink-soft">{RESEARCH_ONLY.disclaimer}</p>
       </GlassCard>
@@ -79,11 +86,11 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 text-sm font-medium text-ink">
-              {PARTNER_LAB.name}
+              {MARKETPLACE_BRAND.name}
               {PARTNER_LAB.verified && <CheckCircle2 size={13} className="text-ink" />}
             </div>
             <div className="text-[11px] text-ink-soft">
-              Exclusive marketplace partner · {PARTNER_LAB.productCount} compounds
+              Catalog partnership · {PARTNER_LAB.productCount} compounds · USDC checkout
             </div>
           </div>
         </div>
@@ -97,24 +104,21 @@ export function ProductDetailPanel({ peptide }: { peptide: Peptide }) {
             <div className="font-medium text-ink">{PARTNER_LAB.testing}</div>
           </div>
           <div className="col-span-2">
-            <div className="text-ink-soft">Shipping</div>
-            <div className="font-medium text-ink">{PARTNER_LAB.shipTime}</div>
+            <div className="text-ink-soft">Checkout</div>
+            <div className="font-medium text-ink">
+              {COLLATERAL_SYMBOL} on Robinhood Chain Testnet
+            </div>
           </div>
         </div>
-        <a
-          href={PARTNER_LAB.shopUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 flex w-full items-center justify-center gap-1 rounded-xl bg-white/12 py-2 text-xs font-semibold text-ink hover:bg-white/18"
-        >
-          View full shop
-          <ExternalLink size={12} />
-        </a>
       </GlassCard>
     </>
   );
 }
 
 function Badge({ children, className }: { children: React.ReactNode; className: string }) {
-  return <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${className}`}>{children}</span>;
+  return (
+    <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${className}`}>
+      {children}
+    </span>
+  );
 }
