@@ -155,7 +155,7 @@ Method:  getPrice(bytes32) → uint256 (18 decimals)`}
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-ink-soft">
             <li>CORS is open for GET. Prefer server-side calls for production keys.</li>
             <li>Rate limits: ~60 req/min demo, ~300 req/min standard (per instance).</li>
-            <li>History cadence is currently sparse (scrape/push); denser feeds are on the roadmap.</li>
+            <li>History cadence is currently sparse (vendor sample + push); denser feeds are on the roadmap.</li>
             <li>
               Responses include a <code className="font-mono text-xs">meta</code> object with version
               and auth tier.

@@ -181,8 +181,8 @@ curl -sS "https://pept.trade/api/v1/oracle/attest/SEMA-PERP" \\
               attestations, api.pept.trade routing
             </li>
             <li>
-              <strong className="text-ink">Next:</strong> Upstash Redis in prod, denser scrape cadence,
-              mainnet oracle, multi-reporter committee
+              <strong className="text-ink">Next:</strong> Upstash Redis in prod, higher-frequency
+              vendor sampling, mainnet oracle, multi-reporter committee
             </li>
             <li>
               <strong className="text-ink">Enterprise:</strong> SLA, private feeds, SOC2 path
