@@ -10,7 +10,7 @@ export async function GET() {
       { count, label: `${count.toLocaleString()} trader${count === 1 ? "" : "s"} in line` },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30",
+          "Cache-Control": "no-store, max-age=0",
         },
       },
     );

@@ -56,9 +56,15 @@ const mem = {
 async function countFromSheets(): Promise<number | null> {
   const base = sheetsUrl();
   if (!base) return null;
-  const url = base.includes("?") ? `${base}&action=count` : `${base}?action=count`;
+  const sep = base.includes("?") ? "&" : "?";
+  // cache-bust — Apps Script + CDN sometimes stick an old count
+  const url = `${base}${sep}action=count&_=${Date.now()}`;
   try {
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, {
+      cache: "no-store",
+      next: { revalidate: 0 },
+      headers: { "Cache-Control": "no-cache" },
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as { count?: number };
     if (typeof data.count === "number" && data.count >= 0) return data.count;
