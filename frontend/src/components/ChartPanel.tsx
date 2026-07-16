@@ -11,7 +11,7 @@ import {
 } from "lightweight-charts";
 import { cn } from "@/lib/cn";
 
-const TIMEFRAMES = ["1h", "4h", "1D", "1W"] as const;
+const TIMEFRAMES = ["5m", "15m", "1h", "4h", "1D", "1W"] as const;
 type Tf = (typeof TIMEFRAMES)[number];
 
 type Candle = {
@@ -44,34 +44,39 @@ export function ChartPanel({
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-  const [tf, setTf] = useState<Tf>("4h");
+  const [tf, setTf] = useState<Tf>("5m");
   const [candles, setCandles] = useState<Candle[]>([]);
   const [sampleCount, setSampleCount] = useState(0);
   const [status, setStatus] = useState<"loading" | "ok" | "empty" | "error">("loading");
 
-  // Fetch OHLC from oracle JSON history
+  // Fetch OHLC from oracle JSON history; poll so 5m cron shows new candles without refresh
   useEffect(() => {
     let cancelled = false;
-    setStatus("loading");
-    const q = new URLSearchParams({
-      market: symbol,
-      tf,
-      live: String(price),
-    });
-    fetch(`/api/ohlc?${q}`)
-      .then((r) => r.json())
-      .then((data: { candles?: Candle[]; sampleCount?: number }) => {
-        if (cancelled) return;
-        const c = data.candles ?? [];
-        setCandles(c);
-        setSampleCount(data.sampleCount ?? 0);
-        setStatus(c.length === 0 ? "empty" : "ok");
-      })
-      .catch(() => {
-        if (!cancelled) setStatus("error");
+    const load = (silent = false) => {
+      if (!silent) setStatus("loading");
+      const q = new URLSearchParams({
+        market: symbol,
+        tf,
+        live: String(price),
       });
+      fetch(`/api/ohlc?${q}`, { cache: "no-store" })
+        .then((r) => r.json())
+        .then((data: { candles?: Candle[]; sampleCount?: number }) => {
+          if (cancelled) return;
+          const c = data.candles ?? [];
+          setCandles(c);
+          setSampleCount(data.sampleCount ?? 0);
+          setStatus(c.length === 0 ? "empty" : "ok");
+        })
+        .catch(() => {
+          if (!cancelled && !silent) setStatus("error");
+        });
+    };
+    load(false);
+    const id = setInterval(() => load(true), 30_000);
     return () => {
       cancelled = true;
+      clearInterval(id);
     };
   }, [symbol, tf, price]);
 
@@ -189,7 +194,7 @@ export function ChartPanel({
         {status === "empty" && "No history yet; live oracle mark only (cron will fill this)"}
         {status === "ok" && (
           <>
-            Oracle history · {sampleCount} samples · {tf} OHLC (forward-filled)
+            Oracle history · {sampleCount} samples · {tf} OHLC · ~5m cadence
             {unit === "$/mg" ? " · $/mg" : ""} · live mark overlays last close
           </>
         )}

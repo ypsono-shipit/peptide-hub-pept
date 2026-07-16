@@ -8,9 +8,9 @@ name: Refresh GLP-1 peptide oracle prices
 
 on:
   schedule:
-    # Every hour UTC — denser chart history; still well inside 48h staleness.
-    # Marketing may say "every second"; actual keeper cadence is this cron.
-    - cron: "0 * * * *"
+    # Every 5 minutes UTC — densest GitHub Actions schedule allows (not 1m).
+    # Fills chart history for more candles; still inside oracle staleness windows.
+    - cron: "*/5 * * * *"
   workflow_dispatch:
     inputs:
       dry_run:

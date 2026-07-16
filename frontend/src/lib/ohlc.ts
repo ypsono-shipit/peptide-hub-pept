@@ -16,9 +16,11 @@ export type Candle = {
   close: number;
 };
 
-export type Timeframe = "1h" | "4h" | "1D" | "1W";
+export type Timeframe = "5m" | "15m" | "1h" | "4h" | "1D" | "1W";
 
 const TF_SECONDS: Record<Timeframe, number> = {
+  "5m": 5 * 60,
+  "15m": 15 * 60,
   "1h": 3600,
   "4h": 4 * 3600,
   "1D": 24 * 3600,
@@ -26,10 +28,11 @@ const TF_SECONDS: Record<Timeframe, number> = {
 };
 
 export function parseTimeframe(raw: string | null): Timeframe {
-  if (raw === "1h" || raw === "4h" || raw === "1D" || raw === "1W") return raw;
-  // Map fine TFs to coarser buckets for sparse oracle
-  if (raw === "1m" || raw === "5m" || raw === "15m") return "1h";
-  return "4h";
+  if (raw === "5m" || raw === "15m" || raw === "1h" || raw === "4h" || raw === "1D" || raw === "1W") {
+    return raw;
+  }
+  if (raw === "1m") return "5m";
+  return "5m";
 }
 
 /**
@@ -43,7 +46,9 @@ export function samplesToOhlc(
   opts?: { livePrice?: number; liveTs?: number; maxBars?: number },
 ): Candle[] {
   const interval = TF_SECONDS[tf];
-  const maxBars = opts?.maxBars ?? 120;
+  // More bars on fine TFs so denser cron shows a full chart
+  const defaultMax = tf === "5m" || tf === "15m" ? 360 : tf === "1h" ? 240 : 150;
+  const maxBars = opts?.maxBars ?? defaultMax;
 
   let pts = samples
     .filter((s) => s.market === market && Number.isFinite(s.price) && s.price > 0 && s.ts > 0)
@@ -60,20 +65,29 @@ export function samplesToOhlc(
 
   if (pts.length === 0) return [];
 
-  const start = Math.floor(pts[0]!.ts / interval) * interval;
+  // Prefer recent window so 5m charts aren't dominated by weeks of flat history
   const end = Math.floor(pts[pts.length - 1]!.ts / interval) * interval;
+  const idealStart = end - (maxBars - 1) * interval;
+  const dataStart = Math.floor(pts[0]!.ts / interval) * interval;
+  const start = Math.max(dataStart, idealStart);
 
-  // Group prices by bucket
   const buckets = new Map<number, number[]>();
   for (const p of pts) {
+    if (p.ts < start) continue;
     const b = Math.floor(p.ts / interval) * interval;
     const arr = buckets.get(b) ?? [];
     arr.push(p.price);
     buckets.set(b, arr);
   }
 
-  const candles: Candle[] = [];
+  // Seed prevClose from last sample before window (or first in window)
   let prevClose = pts[0]!.price;
+  for (const p of pts) {
+    if (p.ts < start) prevClose = p.price;
+    else break;
+  }
+
+  const candles: Candle[] = [];
 
   for (let t = start; t <= end; t += interval) {
     const prices = buckets.get(t);
@@ -85,7 +99,6 @@ export function samplesToOhlc(
       candles.push({ time: t, open, high, low, close });
       prevClose = close;
     } else {
-      // forward-fill flat candle
       candles.push({
         time: t,
         open: prevClose,
