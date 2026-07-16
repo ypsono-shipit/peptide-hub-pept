@@ -69,6 +69,9 @@ export default function LandingPage() {
           <Link href="/marketplace" className="hover:text-ink">
             Marketplace
           </Link>
+          <Link href="/docs/oracle" className="hover:text-ink">
+            Oracle API
+          </Link>
         </nav>
         <Link
           href="/trade"
@@ -209,6 +212,23 @@ export default function LandingPage() {
                 <p className="mt-2 text-sm leading-relaxed text-ink-soft">{f.body}</p>
               </div>
             ))}
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-border bg-panel p-6">
+            <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted">
+              B2B infrastructure
+            </div>
+            <h3 className="mt-2 text-xl font-semibold text-ink">Peptide Oracle API</h3>
+            <p className="mt-2 max-w-xl text-sm text-ink-soft">
+              Same dual-source marks we settle on-chain, exposed as REST for other protocols and
+              dashboards. Markets, live prices, history, and OHLC.
+            </p>
+            <Link
+              href="/docs/oracle"
+              className="mt-4 inline-flex text-sm font-semibold text-green hover:text-green-soft"
+            >
+              Read the Oracle API docs →
+            </Link>
           </div>
         </section>
 
