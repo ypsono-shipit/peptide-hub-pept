@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-07-16T05:40:30.280Z",
+  "scrapedAt": "2026-07-16T19:35:41.405Z",
   "method": "dual source: PeptideScouter + vendor basket",
   "sourceErrors": [],
   "peptides": {
@@ -76,11 +76,11 @@
       }
     },
     "retatrutide": {
-      "pricePerMg": 5.053,
-      "method": "weighted(peptidescouter@w=50.6+vendor_basket@w=12.6)",
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.3053(n=28) · divergence=33.0%",
+      "pricePerMg": 5.0415,
+      "method": "weighted(peptidescouter@w=50.6+vendor_basket@w=12.2)",
+      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2921(n=27) · divergence=32.7%",
       "singleSource": false,
-      "divergenceBps": 3299,
+      "divergenceBps": 3271,
       "divergenceWarning": false,
       "sources": [
         {
@@ -92,10 +92,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 6.3053,
-          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=28/28 vendors=8 · 2026-07-16",
-          "sampleCount": 28,
-          "weight": 12.6
+          "pricePerMg": 6.2921,
+          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=27/27 vendors=8 · 2026-07-16",
+          "sampleCount": 27,
+          "weight": 12.15
         }
       ],
       "scouter": {
@@ -104,10 +104,10 @@
         "inStockCount": 92
       },
       "basket": {
-        "pricePerMg": 6.3053,
-        "sampleCount": 28,
+        "pricePerMg": 6.2921,
+        "sampleCount": 27,
         "vendorCount": 8,
-        "offerCount": 28,
+        "offerCount": 27,
         "errors": []
       }
     }
@@ -119,6 +119,6 @@
       "tirzepatide": 0.25,
       "retatrutide": 0.15
     },
-    "pricePerMg": 4.6925
+    "pricePerMg": 4.6907
   }
 }
