@@ -74,6 +74,9 @@ jobs:
           SKIP_BASKET: ${{ inputs.skip_basket == true && '1' || '0' }}
           # Scheduled runs fail loud if scrape breaks (no silent stale JSON push).
           FALLBACK_ON_SCRAPE_ERROR: "0"
+          # B2B webhook fanout after successful pushes
+          ORACLE_API_FANOUT_URL: ${{ secrets.ORACLE_API_FANOUT_URL }}
+          ORACLE_ADMIN_SECRET: ${{ secrets.ORACLE_ADMIN_SECRET }}
         run: npx hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet
 
       - name: Upload scrape snapshot artifact
