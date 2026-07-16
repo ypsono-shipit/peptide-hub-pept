@@ -84,7 +84,7 @@ export default function OracleProductPage() {
             },
             {
               t: "Metered access",
-              d: "API keys with tiers, RPM/daily quotas, and Stripe checkout when you are ready to charge.",
+              d: "API keys with tiers, RPM/daily quotas. Contact us to upgrade.",
             },
           ].map((c) => (
             <div key={c.t} className="rounded-2xl border border-border bg-panel p-5">
@@ -122,14 +122,28 @@ export default function OracleProductPage() {
                     {t.limits.signedQuotes ? "Signed attestations" : "No signed quotes"}
                   </li>
                 </ul>
-                <p className="mt-4 text-[11px] text-muted">
-                  {t.id === "free"
-                    ? "Issue via admin API or contact us."
-                    : "Stripe Checkout when STRIPE_* env is set; otherwise admin-issued keys."}
-                </p>
+                <a
+                  href="https://t.me/xaitoshi"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex rounded-full border border-border-strong px-4 py-2 text-xs font-semibold text-ink transition hover:border-ink hover:bg-bg"
+                >
+                  Contact us
+                </a>
               </div>
             ))}
           </div>
+          <p className="mt-6 text-sm text-ink-soft">
+            Questions or custom limits?{" "}
+            <a
+              href="https://t.me/xaitoshi"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-ink underline underline-offset-4 hover:text-green"
+            >
+              Contact us on Telegram @xaitoshi
+            </a>
+          </p>
         </section>
 
         <section className="mt-20">
@@ -163,7 +177,7 @@ curl -sS "https://pept.trade/api/v1/oracle/attest/SEMA-PERP" \\
             </li>
             <li>
               <strong className="text-ink">v1.1 live:</strong> API keys, tiers, metering, webhooks,
-              attestations, Stripe hooks, api.pept.trade routing
+              attestations, api.pept.trade routing
             </li>
             <li>
               <strong className="text-ink">Next:</strong> Upstash Redis in prod, denser scrape cadence,
