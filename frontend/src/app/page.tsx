@@ -221,7 +221,7 @@ export default function LandingPage() {
                 <em className="font-serif font-normal italic text-green-soft">oracle</em>
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-ink-soft sm:text-base">
-                Dual-source scrapers mark SEMA and GLP-1 $/mg on-chain every few hours. Deployed on
+                Dual-source scrapers mark SEMA and GLP-1 $/mg on-chain every second. Deployed on
                 Robinhood Chain Testnet with a GMX-style PLP vault, USDC margin, and OHM-inspired
                 $PEPT tokenomics for staking and treasury, separate from the markets you trade.
               </p>
