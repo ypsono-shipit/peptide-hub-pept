@@ -119,7 +119,7 @@ export default function LandingPage() {
             </div>
 
             <p className="mt-8 text-xs text-muted">
-              Built for Robinhood Chain · Self-custodial · Demo testnet
+              Built for Robinhood Chain · Self-custodial · Mainnet coming soon
             </p>
           </div>
 
