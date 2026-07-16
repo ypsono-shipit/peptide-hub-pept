@@ -92,7 +92,7 @@ export default function WaitlistPage() {
       <header className="relative z-20 mx-auto flex w-full max-w-lg items-center justify-between px-5 py-5 sm:px-6">
         <Link href="/waitlist" className="flex items-center gap-2.5">
           <Image
-            src="/logo-asterisk.jpg"
+            src="/logo.png"
             alt="PEPT"
             width={32}
             height={32}

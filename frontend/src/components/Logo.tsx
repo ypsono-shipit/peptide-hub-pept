@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/cn";
 
-/** White asterisk mark on pure black. Brand monogram. */
+/** PEPT brand mark (white molecule / cluster on black). */
 export function Logo({
   size = 36,
   className,
@@ -18,7 +18,7 @@ export function Logo({
       style={{ width: size, height: size }}
     >
       <Image
-        src="/logo-asterisk.jpg"
+        src="/logo.png"
         alt="PEPT"
         width={size}
         height={size}

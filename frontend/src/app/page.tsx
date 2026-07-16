@@ -51,7 +51,7 @@ export default function LandingPage() {
       <header className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
         <Link href="/" className="flex items-center gap-2.5">
           <Image
-            src="/logo-asterisk.jpg"
+            src="/logo.png"
             alt="PEPT"
             width={36}
             height={36}
@@ -295,7 +295,7 @@ export default function LandingPage() {
       <footer className="relative z-10 border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-8 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <div className="flex items-center gap-2">
-            <Image src="/logo-asterisk.jpg" alt="" width={20} height={20} className="rounded" />
+            <Image src="/logo.png" alt="" width={20} height={20} className="rounded" />
             <span className="text-ink-soft">PEPT Trade</span>
             <span>·</span>
             <span>Peptide Hub</span>

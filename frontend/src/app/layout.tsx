@@ -9,10 +9,17 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: "PEPT Trade | Peptide Perpetuals",
-  description: "Trade peptide-themed perps on Robinhood Chain. Oracle-marked markets, USDC margin, PLP liquidity, Pept Trade x Research Only marketplace.",
+  description:
+    "Trade peptide-themed perps on Robinhood Chain. Oracle-marked markets, USDC margin, PLP liquidity, Pept Trade x Research Only marketplace.",
   icons: {
-    icon: "/logo-asterisk.jpg",
-    apple: "/logo-asterisk.jpg",
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo.png", sizes: "any", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon-32x32.png",
   },
 };
 
