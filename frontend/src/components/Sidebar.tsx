@@ -22,6 +22,7 @@ const NAV = [
   { href: "/liquidity", label: "Liquidity", icon: Droplets },
   { href: "/marketplace", label: "Marketplace", icon: Store },
   { href: "/stake", label: "Stake", icon: Coins },
+  { href: "/oracle/monitor", label: "Oracle", icon: LineChart },
 ];
 
 const BOTTOM = [

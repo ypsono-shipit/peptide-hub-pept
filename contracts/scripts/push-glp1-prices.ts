@@ -172,9 +172,17 @@ function writeDualSnapshot(dual: Awaited<ReturnType<typeof resolveAllDualSources
     },
   };
 
-  const outPath = path.join(__dirname, "../data/glp1-last-scrape.json");
-  fs.writeFileSync(outPath, JSON.stringify(snapshot, null, 2) + "\n");
-  console.log(`Wrote dual-source snapshot → ${outPath}`);
+  const payload = JSON.stringify(snapshot, null, 2) + "\n";
+  const outPaths = [
+    path.join(__dirname, "../data/glp1-last-scrape.json"),
+    // Frontend monitor dashboard (committed like price-history)
+    path.join(__dirname, "../../frontend/public/data/glp1-last-scrape.json"),
+  ];
+  for (const outPath of outPaths) {
+    fs.mkdirSync(path.dirname(outPath), { recursive: true });
+    fs.writeFileSync(outPath, payload);
+    console.log(`Wrote dual-source snapshot → ${outPath}`);
+  }
 }
 
 function summarizeDual(

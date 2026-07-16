@@ -22,6 +22,9 @@ export default function OracleProductPage() {
           PEPT TRADE
         </Link>
         <div className="flex gap-4 text-sm text-muted">
+          <Link href="/oracle/monitor" className="hover:text-ink">
+            Monitor
+          </Link>
           <Link href="/docs/oracle" className="hover:text-ink">
             Docs
           </Link>

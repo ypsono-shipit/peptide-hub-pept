@@ -100,11 +100,15 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Race-safe: other deploys may land while scrape/push runs
           git pull --rebase origin main || git pull --rebase --autostash origin main
-          git add contracts/data/price-history.json frontend/public/data/price-history.json || true
+          git add \
+            contracts/data/price-history.json \
+            frontend/public/data/price-history.json \
+            frontend/public/data/glp1-last-scrape.json \
+            || true
           if git diff --staged --quiet; then
-            echo "No history changes to commit"
+            echo "No history/scrape changes to commit"
           else
-            git commit -m "chore: append oracle price history [skip ci]"
+            git commit -m "chore: append oracle price history + scrape snapshot [skip ci]"
             # Retry push once after rebase if main moved
             for i in 1 2 3; do
               if git push origin HEAD:main; then

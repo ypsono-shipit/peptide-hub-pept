@@ -1,0 +1,124 @@
+{
+  "scrapedAt": "2026-07-16T05:40:30.280Z",
+  "method": "dual source: PeptideScouter + vendor basket",
+  "sourceErrors": [],
+  "peptides": {
+    "semaglutide": {
+      "pricePerMg": 5.06,
+      "method": "weighted(peptidescouter@w=14.9+vendor_basket@w=6.8)",
+      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$6.5581(n=15) · divergence=49.8%",
+      "singleSource": false,
+      "divergenceBps": 4976,
+      "divergenceWarning": true,
+      "sources": [
+        {
+          "name": "peptidescouter",
+          "pricePerMg": 4.3791,
+          "source": "PeptideScouter.com live scrape · semaglutide · size-weighted (IQR) n=27/27 · 2026-07-16",
+          "sampleCount": 27,
+          "weight": 14.850000000000001
+        },
+        {
+          "name": "vendor_basket",
+          "pricePerMg": 6.5581,
+          "source": "Vendor basket live scrape · semaglutide · size-weighted (IQR) n=15/16 vendors=8 · 2026-07-16",
+          "sampleCount": 15,
+          "weight": 6.75
+        }
+      ],
+      "scouter": {
+        "pricePerMg": 4.3791,
+        "sampleCount": 27,
+        "inStockCount": 27
+      },
+      "basket": {
+        "pricePerMg": 6.5581,
+        "sampleCount": 15,
+        "vendorCount": 8,
+        "offerCount": 16,
+        "errors": []
+      }
+    },
+    "tirzepatide": {
+      "pricePerMg": 3.5941,
+      "method": "weighted(peptidescouter@w=40.7+vendor_basket@w=14.0)",
+      "source": "Dual source weighted · peptidescouter=$3.0513(n=74) · vendor_basket=$5.1777(n=31) · divergence=69.7%",
+      "singleSource": false,
+      "divergenceBps": 6969,
+      "divergenceWarning": true,
+      "sources": [
+        {
+          "name": "peptidescouter",
+          "pricePerMg": 3.0513,
+          "source": "PeptideScouter.com live scrape · tirzepatide · size-weighted (IQR) n=74/76 · 2026-07-16",
+          "sampleCount": 74,
+          "weight": 40.7
+        },
+        {
+          "name": "vendor_basket",
+          "pricePerMg": 5.1777,
+          "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=31/36 vendors=8 · 2026-07-16",
+          "sampleCount": 31,
+          "weight": 13.950000000000001
+        }
+      ],
+      "scouter": {
+        "pricePerMg": 3.0513,
+        "sampleCount": 74,
+        "inStockCount": 76
+      },
+      "basket": {
+        "pricePerMg": 5.1777,
+        "sampleCount": 31,
+        "vendorCount": 8,
+        "offerCount": 36,
+        "errors": []
+      }
+    },
+    "retatrutide": {
+      "pricePerMg": 5.053,
+      "method": "weighted(peptidescouter@w=50.6+vendor_basket@w=12.6)",
+      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.3053(n=28) · divergence=33.0%",
+      "singleSource": false,
+      "divergenceBps": 3299,
+      "divergenceWarning": false,
+      "sources": [
+        {
+          "name": "peptidescouter",
+          "pricePerMg": 4.7412,
+          "source": "PeptideScouter.com live scrape · retatrutide · size-weighted (IQR) n=92/92 · 2026-07-16",
+          "sampleCount": 92,
+          "weight": 50.6
+        },
+        {
+          "name": "vendor_basket",
+          "pricePerMg": 6.3053,
+          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=28/28 vendors=8 · 2026-07-16",
+          "sampleCount": 28,
+          "weight": 12.6
+        }
+      ],
+      "scouter": {
+        "pricePerMg": 4.7412,
+        "sampleCount": 92,
+        "inStockCount": 92
+      },
+      "basket": {
+        "pricePerMg": 6.3053,
+        "sampleCount": 28,
+        "vendorCount": 8,
+        "offerCount": 28,
+        "errors": []
+      }
+    }
+  },
+  "glp1Index": {
+    "symbol": "GLP1-IDX-PERP",
+    "weights": {
+      "semaglutide": 0.6,
+      "tirzepatide": 0.25,
+      "retatrutide": 0.15
+    },
+    "pricePerMg": 4.6925
+  }
+}
