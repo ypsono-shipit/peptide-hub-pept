@@ -89,11 +89,13 @@ export default function LandingPage() {
               Robinhood Chain Testnet · Peptide perps
             </p>
 
-            <h1 className="max-w-4xl text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl md:text-7xl lg:text-[4.75rem]">
+            <h1 className="max-w-4xl text-[2.15rem] font-semibold leading-[1.08] tracking-tight text-ink sm:text-5xl md:text-6xl lg:text-[3.5rem] xl:text-[3.75rem]">
               Trade peptides
               <br />
-              while the world{" "}
-              <em className="font-serif font-normal italic text-green-soft">sleeps</em>
+              <span className="whitespace-nowrap">
+                while the world{" "}
+                <em className="font-serif font-normal italic text-green-soft">sleeps</em>
+              </span>
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">

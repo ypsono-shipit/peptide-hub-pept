@@ -8,9 +8,9 @@ name: Refresh GLP-1 peptide oracle prices
 
 on:
   schedule:
-    # Every 3 hours UTC — keeps feeds well inside the 48h on-chain staleness
-    # window even if a few runs fail.
-    - cron: "0 */3 * * *"
+    # Every hour UTC — denser chart history; still well inside 48h staleness.
+    # Marketing may say "every second"; actual keeper cadence is this cron.
+    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
       dry_run:
