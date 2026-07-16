@@ -56,6 +56,12 @@ const config: HardhatUserConfig = {
       chainId: 46630,
       accounts: deployerKey ? [deployerKey] : [],
     },
+    robinhoodMainnet: {
+      url: process.env.ROBINHOOD_MAINNET_RPC || "https://rpc.mainnet.chain.robinhood.com",
+      chainId: 4663,
+      accounts: deployerKey ? [deployerKey] : [],
+      timeout: 120_000,
+    },
   },
 };
 

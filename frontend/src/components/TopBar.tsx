@@ -2,10 +2,11 @@
 
 import { formatUnits } from "viem";
 import { useAccount, useConnect, useDisconnect, useReadContract } from "wagmi";
-import { Bell, ChevronDown } from "lucide-react";
+import { Bell } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { collateralContract } from "@/lib/contracts";
-import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL } from "@/lib/deployments";
+import { COLLATERAL_DECIMALS } from "@/lib/deployments";
+import { useAppContracts, useNetworkConfig } from "@/lib/useAppContracts";
+import { NetworkToggle } from "@/components/NetworkToggle";
 import type { Market } from "@/lib/markets";
 
 export function TopBar({
@@ -20,12 +21,14 @@ export function TopBar({
   const { address, isConnected } = useAccount();
   const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const { collateral } = useAppContracts();
+  const network = useNetworkConfig();
 
   const bal = useReadContract({
-    ...collateralContract,
+    ...collateral,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && network.contractsLive },
   });
 
   const change = market?.change24h ?? 0;
@@ -77,11 +80,7 @@ export function TopBar({
       )}
 
       <div className="ml-auto flex items-center gap-2">
-        <div className="hidden items-center gap-1.5 rounded-lg border border-border bg-panel px-2.5 py-1.5 text-xs text-ink-soft sm:flex">
-          <span className="h-1.5 w-1.5 rounded-full bg-green" />
-          Robinhood Testnet
-          <ChevronDown size={12} className="text-muted" />
-        </div>
+        <NetworkToggle />
         <button className="rounded-lg p-2 text-muted hover:bg-panel hover:text-ink">
           <Bell size={16} />
         </button>
@@ -99,7 +98,7 @@ export function TopBar({
             {bal.data !== undefined && (
               <span className="hidden text-muted md:inline">
                 {Number(formatUnits(bal.data as bigint, COLLATERAL_DECIMALS)).toFixed(2)}{" "}
-                {COLLATERAL_SYMBOL}
+                {network.collateralSymbol}
               </span>
             )}
           </button>

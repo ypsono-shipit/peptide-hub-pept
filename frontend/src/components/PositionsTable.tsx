@@ -5,7 +5,8 @@ import { cn } from "@/lib/cn";
 import { getMarketByOracleKey } from "@/lib/markets";
 import { useOraclePrice } from "@/lib/useOraclePrice";
 import type { OnChainPosition } from "@/lib/usePositions";
-import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL } from "@/lib/deployments";
+import { COLLATERAL_DECIMALS } from "@/lib/deployments";
+import { useNetworkConfig } from "@/lib/useAppContracts";
 
 function PositionRow({
   position,
@@ -16,6 +17,7 @@ function PositionRow({
   onClose?: (id: bigint) => void;
   closingId?: bigint;
 }) {
+  const network = useNetworkConfig();
   const market = getMarketByOracleKey(position.marketKey);
   const entryPrice = Number(formatEther(position.entryPrice));
   const sizeUsd = Number(formatEther(position.sizeUsd));
@@ -32,7 +34,7 @@ function PositionRow({
         {position.isLong ? "LONG" : "SHORT"}
       </td>
       <td className="px-3 py-2 font-mono text-xs tabular-nums text-ink">
-        {collateral.toLocaleString(undefined, { maximumFractionDigits: 2 })} {COLLATERAL_SYMBOL}
+        {collateral.toLocaleString(undefined, { maximumFractionDigits: 2 })} {network.collateralSymbol}
       </td>
       <td className="px-3 py-2 font-mono text-xs tabular-nums text-ink">${entryPrice.toFixed(2)}</td>
       <td className="px-3 py-2 font-mono text-xs tabular-nums text-ink">${markPrice.toFixed(2)}</td>

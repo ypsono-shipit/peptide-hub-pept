@@ -3,13 +3,8 @@
 import Link from "next/link";
 import { formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { plpPoolContract, plpTokenContract } from "@/lib/contracts";
-import {
-  COLLATERAL_DECIMALS,
-  COLLATERAL_SYMBOL,
-  PLP_SHARE_DECIMALS,
-  TESTNET_CONTRACTS,
-} from "@/lib/deployments";
+import { COLLATERAL_DECIMALS, PLP_SHARE_DECIMALS } from "@/lib/deployments";
+import { useAppContracts, useNetworkConfig } from "@/lib/useAppContracts";
 import { Panel } from "@/components/ui/Panel";
 
 function fmtUsdc(v: bigint | undefined) {
@@ -34,20 +29,52 @@ function shareOf(amount: bigint, user: bigint, supply: bigint): bigint {
 /** PLP balance, redeemable value, and attributed pool yield for the connected wallet. */
 export function PlpHoldingsCard() {
   const { address, isConnected } = useAccount();
+  const { plpToken, plpPool } = useAppContracts();
+  const network = useNetworkConfig();
+  const live = network.contractsLive;
+  const COLLATERAL_SYMBOL = network.collateralSymbol;
 
   const plpBal = useReadContract({
-    ...plpTokenContract,
+    ...plpToken,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && live },
   });
-  const plpSupply = useReadContract({ ...plpTokenContract, functionName: "totalSupply" });
-  const totalAssets = useReadContract({ ...plpPoolContract, functionName: "totalAssets" });
-  const fees = useReadContract({ ...plpPoolContract, functionName: "totalFeesReceived" });
-  const profits = useReadContract({ ...plpPoolContract, functionName: "totalProfitsPaid" });
-  const losses = useReadContract({ ...plpPoolContract, functionName: "totalLossesReceived" });
-  const oi = useReadContract({ ...plpPoolContract, functionName: "openInterestUsd" });
-  const maxOi = useReadContract({ ...plpPoolContract, functionName: "maxOpenInterest" });
+  const plpSupply = useReadContract({
+    ...plpToken,
+    functionName: "totalSupply",
+    query: { enabled: live },
+  });
+  const totalAssets = useReadContract({
+    ...plpPool,
+    functionName: "totalAssets",
+    query: { enabled: live },
+  });
+  const fees = useReadContract({
+    ...plpPool,
+    functionName: "totalFeesReceived",
+    query: { enabled: live },
+  });
+  const profits = useReadContract({
+    ...plpPool,
+    functionName: "totalProfitsPaid",
+    query: { enabled: live },
+  });
+  const losses = useReadContract({
+    ...plpPool,
+    functionName: "totalLossesReceived",
+    query: { enabled: live },
+  });
+  const oi = useReadContract({
+    ...plpPool,
+    functionName: "openInterestUsd",
+    query: { enabled: live },
+  });
+  const maxOi = useReadContract({
+    ...plpPool,
+    functionName: "maxOpenInterest",
+    query: { enabled: live },
+  });
 
   const shares = (plpBal.data as bigint | undefined) ?? 0n;
   const supply = (plpSupply.data as bigint | undefined) ?? 0n;
@@ -59,14 +86,12 @@ export function PlpHoldingsCard() {
   const redeemable = supply > 0n ? (shares * aum) / supply : 0n;
   const ownershipBps = supply > 0n ? Number((shares * 10_000n) / supply) / 100 : 0;
 
-  // LPs earn fees + trader losses; pay trader profits. Attributed by share ownership.
   const myFees = shareOf(feesRaw, shares, supply);
   const myLosses = shareOf(lossesRaw, shares, supply);
   const myProfitsPaid = shareOf(profitsRaw, shares, supply);
   const myNetYield = myFees + myLosses - myProfitsPaid;
 
-  // Approximate unrealized vs 1:1 share cost (valid while shares mint 1:1 with USDC units)
-  const costBasisApprox = shares; // same raw scale as USDC
+  const costBasisApprox = shares;
   const unrealized = redeemable - costBasisApprox;
 
   const openInt = (oi.data as bigint | undefined) ?? 0n;
@@ -85,13 +110,24 @@ export function PlpHoldingsCard() {
     );
   }
 
+  if (!live) {
+    return (
+      <Panel className="p-4">
+        <h3 className="text-sm font-semibold text-ink">PLP holdings</h3>
+        <p className="mt-1 text-xs text-muted">
+          Mainnet vault not deployed yet. Switch to Testnet or fund deploy.
+        </p>
+      </Panel>
+    );
+  }
+
   return (
     <Panel className="space-y-4 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-semibold text-ink">PLP holdings</h3>
           <p className="mt-0.5 text-[11px] text-muted">
-            Liquidity provider shares · earn fees &amp; trader losses
+            Liquidity provider shares · {network.shortLabel} · {COLLATERAL_SYMBOL}
           </p>
         </div>
         <Link
@@ -171,7 +207,7 @@ export function PlpHoldingsCard() {
       )}
 
       <a
-        href={`https://explorer.testnet.chain.robinhood.com/token/${TESTNET_CONTRACTS.PLP}?a=${address}`}
+        href={`${network.explorer}/token/${plpToken.address}?a=${address}`}
         target="_blank"
         rel="noreferrer"
         className="block text-center text-[10px] text-muted underline"

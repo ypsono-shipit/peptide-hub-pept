@@ -1,0 +1,30 @@
+{
+  "network": "robinhoodMainnet",
+  "chainId": 4663,
+  "rpcUrl": "https://rpc.mainnet.chain.robinhood.com",
+  "explorer": "https://robinhoodchain.blockscout.com",
+  "deployedAt": null,
+  "deployer": "0x4f442C8bA22952bC4271Ff9ECBa7B37CA188C1fB",
+  "status": "pending_deploy",
+  "note": "Run: cd contracts && npm run deploy:mainnet  (requires mainnet ETH on deployer)",
+  "contracts": {
+    "PEPT": "0x0000000000000000000000000000000000000000",
+    "Treasury": "0x0000000000000000000000000000000000000000",
+    "BondDepository": "0x0000000000000000000000000000000000000000",
+    "Staking": "0x0000000000000000000000000000000000000000",
+    "PeptideOracle": "0x0000000000000000000000000000000000000000",
+    "PerpsEngine": "0x0000000000000000000000000000000000000000",
+    "PLP": "0x0000000000000000000000000000000000000000",
+    "PerpsLiquidityPool": "0x0000000000000000000000000000000000000000",
+    "USDG": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+    "MarketplaceShop": "0x0000000000000000000000000000000000000000",
+    "PeptideVoucher": "0x0000000000000000000000000000000000000000"
+  },
+  "collateral": {
+    "symbol": "USDG",
+    "name": "Global Dollar",
+    "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+    "decimals": 6,
+    "note": "Robinhood Chain mainnet Global Dollar (USDG) for all platform payments"
+  }
+}

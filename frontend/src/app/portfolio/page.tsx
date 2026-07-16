@@ -9,11 +9,12 @@ import { AccountCard } from "@/components/AccountCard";
 import { MyVouchers } from "@/components/marketplace/MyVouchers";
 import { PlpHoldingsCard } from "@/components/PlpHoldingsCard";
 import { usePositions } from "@/lib/usePositions";
-import { perpsEngineContract } from "@/lib/contracts";
+import { useAppContracts } from "@/lib/useAppContracts";
 import { Panel } from "@/components/ui/Panel";
 
 export default function PortfolioPage() {
   const { address, isConnected } = useAccount();
+  const { perpsEngine } = useAppContracts();
   const { positions, refetch } = usePositions(address);
   const [closingId, setClosingId] = useState<bigint | undefined>();
   const { writeContract, data: hash } = useWriteContract();
@@ -59,7 +60,7 @@ export default function PortfolioPage() {
                     onClose={(id) => {
                       setClosingId(id);
                       writeContract({
-                        ...perpsEngineContract,
+                        ...perpsEngine,
                         functionName: "closePosition",
                         args: [id],
                       });

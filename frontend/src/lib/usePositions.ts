@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
-import { perpsEngineContract } from "./contracts";
+import { useAppContracts, useNetworkConfig } from "./useAppContracts";
 
 export type OnChainPosition = {
   id: bigint;
@@ -16,11 +16,16 @@ export type OnChainPosition = {
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-/** Scans positionId 1..nextPositionId-1 and returns the ones owned by `address`. Fine at testnet-demo scale; not how you'd do this against real volume (an indexer/subgraph would track positions by trader instead of scanning every id). */
+/** Scans positionId 1..nextPositionId-1 and returns the ones owned by `address`. */
 export function usePositions(address: `0x${string}` | undefined) {
+  const { perpsEngine } = useAppContracts();
+  const network = useNetworkConfig();
+  const live = network.contractsLive;
+
   const nextId = useReadContract({
-    ...perpsEngineContract,
+    ...perpsEngine,
     functionName: "nextPositionId",
+    query: { enabled: live },
   });
 
   const ids = useMemo(() => {
@@ -30,11 +35,11 @@ export function usePositions(address: `0x${string}` | undefined) {
 
   const positionsQuery = useReadContracts({
     contracts: ids.map((id) => ({
-      ...perpsEngineContract,
+      ...perpsEngine,
       functionName: "positions",
       args: [id],
     })),
-    query: { enabled: ids.length > 0 },
+    query: { enabled: live && ids.length > 0 },
   });
 
   const positions: OnChainPosition[] = useMemo(() => {
@@ -42,10 +47,37 @@ export function usePositions(address: `0x${string}` | undefined) {
     return positionsQuery.data
       .map((r, i) => {
         if (r.status !== "success") return null;
-        const [trader, marketKey, isLong, sizeUsd, collateral, entryPrice, entryFundingIndex, openedAt] =
-          r.result as readonly [`0x${string}`, `0x${string}`, boolean, bigint, bigint, bigint, bigint, bigint];
+        const [
+          trader,
+          marketKey,
+          isLong,
+          sizeUsd,
+          collateral,
+          entryPrice,
+          entryFundingIndex,
+          openedAt,
+        ] = r.result as readonly [
+          `0x${string}`,
+          `0x${string}`,
+          boolean,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+        ];
         if (trader.toLowerCase() !== address.toLowerCase() || trader === ZERO_ADDRESS) return null;
-        return { id: ids[i], trader, marketKey, isLong, sizeUsd, collateral, entryPrice, entryFundingIndex, openedAt };
+        return {
+          id: ids[i]!,
+          trader,
+          marketKey,
+          isLong,
+          sizeUsd,
+          collateral,
+          entryPrice,
+          entryFundingIndex,
+          openedAt,
+        };
       })
       .filter((p): p is OnChainPosition => p !== null);
   }, [positionsQuery.data, ids, address]);

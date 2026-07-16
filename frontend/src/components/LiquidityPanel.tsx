@@ -3,18 +3,22 @@
 import { useEffect, useState } from "react";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { collateralContract, plpPoolContract, plpTokenContract } from "@/lib/contracts";
-import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL, PLP_SHARE_DECIMALS } from "@/lib/deployments";
+import { COLLATERAL_DECIMALS, PLP_SHARE_DECIMALS } from "@/lib/deployments";
+import { useAppContracts, useNetworkConfig } from "@/lib/useAppContracts";
 import { cn } from "@/lib/cn";
 
 export function LiquidityPanel() {
   const { address, isConnected } = useAccount();
+  const { collateral, plpToken, plpPool } = useAppContracts();
+  const network = useNetworkConfig();
+  const COLLATERAL_SYMBOL = network.collateralSymbol;
   const [mode, setMode] = useState<"deposit" | "withdraw">("deposit");
   const [amount, setAmount] = useState("");
+  const live = network.contractsLive;
 
   const parsed = (() => {
     try {
-      // deposit: USDC (6); withdraw: PLP shares are 1:1 with raw USDC units (see PLP_SHARE_DECIMALS)
+      // deposit: USDC/USDG (6); withdraw: PLP shares 1:1 with raw collateral units
       if (!amount) return 0n;
       return mode === "deposit"
         ? parseUnits(amount, COLLATERAL_DECIMALS)
@@ -25,44 +29,76 @@ export function LiquidityPanel() {
   })();
 
   const usdcBal = useReadContract({
-    ...collateralContract,
+    ...collateral,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && live },
   });
   const plpBal = useReadContract({
-    ...plpTokenContract,
+    ...plpToken,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && live },
   });
-  const totalAssets = useReadContract({ ...plpPoolContract, functionName: "totalAssets" });
-  const maxOi = useReadContract({ ...plpPoolContract, functionName: "maxOpenInterest" });
-  const oi = useReadContract({ ...plpPoolContract, functionName: "openInterestUsd" });
-  const available = useReadContract({ ...plpPoolContract, functionName: "availableAssets" });
-  const fees = useReadContract({ ...plpPoolContract, functionName: "totalFeesReceived" });
-  const profits = useReadContract({ ...plpPoolContract, functionName: "totalProfitsPaid" });
-  const losses = useReadContract({ ...plpPoolContract, functionName: "totalLossesReceived" });
-  const plpSupply = useReadContract({ ...plpTokenContract, functionName: "totalSupply" });
+  const totalAssets = useReadContract({
+    ...plpPool,
+    functionName: "totalAssets",
+    query: { enabled: live },
+  });
+  const maxOi = useReadContract({
+    ...plpPool,
+    functionName: "maxOpenInterest",
+    query: { enabled: live },
+  });
+  const oi = useReadContract({
+    ...plpPool,
+    functionName: "openInterestUsd",
+    query: { enabled: live },
+  });
+  const available = useReadContract({
+    ...plpPool,
+    functionName: "availableAssets",
+    query: { enabled: live },
+  });
+  const fees = useReadContract({
+    ...plpPool,
+    functionName: "totalFeesReceived",
+    query: { enabled: live },
+  });
+  const profits = useReadContract({
+    ...plpPool,
+    functionName: "totalProfitsPaid",
+    query: { enabled: live },
+  });
+  const losses = useReadContract({
+    ...plpPool,
+    functionName: "totalLossesReceived",
+    query: { enabled: live },
+  });
+  const plpSupply = useReadContract({
+    ...plpToken,
+    functionName: "totalSupply",
+    query: { enabled: live },
+  });
 
   const allowance = useReadContract({
-    ...collateralContract,
+    ...collateral,
     functionName: "allowance",
-    args: address ? [address, plpPoolContract.address] : undefined,
-    query: { enabled: !!address },
+    args: address ? [address, plpPool.address] : undefined,
+    query: { enabled: !!address && live },
   });
 
   const previewDeposit = useReadContract({
-    ...plpPoolContract,
+    ...plpPool,
     functionName: "previewDeposit",
     args: [parsed],
-    query: { enabled: mode === "deposit" && parsed > 0n },
+    query: { enabled: live && mode === "deposit" && parsed > 0n },
   });
   const previewWithdraw = useReadContract({
-    ...plpPoolContract,
+    ...plpPool,
     functionName: "previewWithdraw",
     args: [parsed],
-    query: { enabled: mode === "withdraw" && parsed > 0n },
+    query: { enabled: live && mode === "withdraw" && parsed > 0n },
   });
 
   const { writeContract, data: txHash, isPending, reset } = useWriteContract();
@@ -111,9 +147,9 @@ export function LiquidityPanel() {
       : Number(formatUnits(v, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 });
 
   const mintFaucet = () => {
-    if (!address) return;
+    if (!address || !network.canMintCollateral) return;
     writeContract({
-      ...collateralContract,
+      ...collateral,
       functionName: "mint",
       args: [address, parseUnits("10000", COLLATERAL_DECIMALS)],
     });
@@ -121,24 +157,32 @@ export function LiquidityPanel() {
 
   const approve = () =>
     writeContract({
-      ...collateralContract,
+      ...collateral,
       functionName: "approve",
-      args: [plpPoolContract.address, parsed],
+      args: [plpPool.address, parsed],
     });
 
   const deposit = () =>
     writeContract({
-      ...plpPoolContract,
+      ...plpPool,
       functionName: "deposit",
       args: [parsed],
     });
 
   const withdraw = () =>
     writeContract({
-      ...plpPoolContract,
+      ...plpPool,
       functionName: "withdraw",
       args: [parsed],
     });
+
+  if (!live) {
+    return (
+      <div className="panel p-6 text-sm text-muted">
+        Mainnet PLP contracts are not deployed yet. Switch to Testnet or wait for mainnet deploy.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -157,8 +201,8 @@ export function LiquidityPanel() {
         <div>
           <h2 className="text-base font-semibold text-ink">Provide liquidity (PLP)</h2>
           <p className="mt-1 text-sm text-muted">
-            Deposit testnet {COLLATERAL_SYMBOL} to mint PLP. LPs backstop OI, earn fees and losses,
-            pay trader profits.
+            Deposit {COLLATERAL_SYMBOL} to mint PLP. LPs backstop OI, earn fees and losses, pay
+            trader profits.
           </p>
         </div>
 
@@ -213,14 +257,16 @@ export function LiquidityPanel() {
             )}
 
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={mintFaucet}
-                disabled={busy}
-                className="rounded-lg border border-border bg-bg px-4 py-2 text-xs font-semibold text-ink hover:bg-panel-hover disabled:opacity-50"
-              >
-                Mint 10k {COLLATERAL_SYMBOL}
-              </button>
+              {network.canMintCollateral && (
+                <button
+                  type="button"
+                  onClick={mintFaucet}
+                  disabled={busy}
+                  className="rounded-lg border border-border bg-bg px-4 py-2 text-xs font-semibold text-ink hover:bg-panel-hover disabled:opacity-50"
+                >
+                  Mint 10k {COLLATERAL_SYMBOL}
+                </button>
+              )}
               {mode === "deposit" && needsApproval ? (
                 <button
                   type="button"

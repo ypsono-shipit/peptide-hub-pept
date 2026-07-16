@@ -3,19 +3,30 @@
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useEffect } from "react";
-import { collateralContract, plpPoolContract } from "@/lib/contracts";
-import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL } from "@/lib/deployments";
+import { COLLATERAL_DECIMALS } from "@/lib/deployments";
+import { useAppContracts, useNetworkConfig } from "@/lib/useAppContracts";
 
 export function AccountCard() {
   const { address, isConnected } = useAccount();
+  const { collateral, plpPool } = useAppContracts();
+  const network = useNetworkConfig();
+
   const bal = useReadContract({
-    ...collateralContract,
+    ...collateral,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && network.contractsLive },
   });
-  const aum = useReadContract({ ...plpPoolContract, functionName: "totalAssets" });
-  const oi = useReadContract({ ...plpPoolContract, functionName: "openInterestUsd" });
+  const aum = useReadContract({
+    ...plpPool,
+    functionName: "totalAssets",
+    query: { enabled: network.contractsLive },
+  });
+  const oi = useReadContract({
+    ...plpPool,
+    functionName: "openInterestUsd",
+    query: { enabled: network.contractsLive },
+  });
 
   const { writeContract, data: hash, isPending, reset } = useWriteContract();
   const { isSuccess } = useWaitForTransactionReceipt({ hash });
@@ -41,8 +52,9 @@ export function AccountCard() {
           : "; "}
       </div>
       <div className="mt-0.5 text-[11px] text-muted">
-        Wallet {COLLATERAL_SYMBOL}
+        Wallet {network.collateralSymbol}
         {isConnected ? "" : " · connect wallet"}
+        {!network.contractsLive && isConnected ? " · mainnet deploy pending" : ""}
       </div>
       <div className="mt-2 space-y-1 border-t border-border pt-2 text-[11px] text-muted">
         <div className="flex justify-between">
@@ -51,7 +63,7 @@ export function AccountCard() {
             {aum.data !== undefined
               ? Number(formatUnits(aum.data as bigint, COLLATERAL_DECIMALS)).toLocaleString()
               : "; "}{" "}
-            {COLLATERAL_SYMBOL}
+            {network.collateralSymbol}
           </span>
         </div>
         <div className="flex justify-between">
@@ -63,20 +75,25 @@ export function AccountCard() {
           </span>
         </div>
       </div>
-      {isConnected && (
+      {isConnected && network.canMintCollateral && network.contractsLive && (
         <button
           disabled={isPending}
           onClick={() =>
             writeContract({
-              ...collateralContract,
+              ...collateral,
               functionName: "mint",
               args: [address, parseUnits("10000", COLLATERAL_DECIMALS)],
             })
           }
           className="mt-3 w-full rounded-lg border border-border bg-bg py-2 text-xs font-semibold text-ink hover:bg-panel-hover disabled:opacity-50"
         >
-          {isPending ? "Minting…" : `Deposit / Mint ${COLLATERAL_SYMBOL}`}
+          {isPending ? "Minting…" : `Deposit / Mint ${network.collateralSymbol}`}
         </button>
+      )}
+      {isConnected && !network.canMintCollateral && (
+        <p className="mt-3 text-[10px] leading-relaxed text-muted">
+          Mainnet uses real {network.collateralSymbol} ({network.collateralName}). No faucet mint.
+        </p>
       )}
     </div>
   );

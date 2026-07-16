@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { cn } from "@/lib/cn";
-import { collateralContract, perpsEngineContract } from "@/lib/contracts";
-import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL } from "@/lib/deployments";
+import { COLLATERAL_DECIMALS } from "@/lib/deployments";
+import { useAppContracts, useNetworkConfig } from "@/lib/useAppContracts";
 
 function sizeUsdFromMargin(collateralRaw: bigint, leverage: number): bigint {
   const scale = 10n ** BigInt(18 - COLLATERAL_DECIMALS);
@@ -26,6 +26,9 @@ export function OrderTicket({
   onPositionChanged?: () => void;
 }) {
   const { address, isConnected } = useAccount();
+  const { collateral, perpsEngine } = useAppContracts();
+  const network = useNetworkConfig();
+  const COLLATERAL_SYMBOL = network.collateralSymbol;
   const [side, setSide] = useState<"long" | "short">("long");
   const [leverage, setLeverage] = useState(10);
   const [size, setSize] = useState("1000");
@@ -50,16 +53,16 @@ export function OrderTicket({
   const sizeUsd = sizeUsdFromMargin(collateralAmount, leverage);
 
   const collateralBalance = useReadContract({
-    ...collateralContract,
+    ...collateral,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && network.contractsLive },
   });
   const allowance = useReadContract({
-    ...collateralContract,
+    ...collateral,
     functionName: "allowance",
-    args: address ? [address, perpsEngineContract.address] : undefined,
-    query: { enabled: !!address },
+    args: address ? [address, perpsEngine.address] : undefined,
+    query: { enabled: !!address && network.contractsLive },
   });
 
   const { writeContract, data: txHash, isPending, reset } = useWriteContract();
@@ -82,22 +85,24 @@ export function OrderTicket({
       ? Number(formatUnits(collateralBalance.data as bigint, COLLATERAL_DECIMALS))
       : 0;
 
-  const mint = () =>
+  const mint = () => {
+    if (!network.canMintCollateral) return;
     writeContract({
-      ...collateralContract,
+      ...collateral,
       functionName: "mint",
       args: [address, parseUnits("10000", COLLATERAL_DECIMALS)],
     });
+  };
   const approve = () =>
     writeContract({
-      ...collateralContract,
+      ...collateral,
       functionName: "approve",
-      args: [perpsEngineContract.address, collateralAmount],
+      args: [perpsEngine.address, collateralAmount],
     });
   const open = () => {
-    if (!marketKey) return;
+    if (!marketKey || !network.contractsLive) return;
     writeContract({
-      ...perpsEngineContract,
+      ...perpsEngine,
       functionName: "openPosition",
       args: [marketKey, side === "long", sizeUsd, collateralAmount],
     });
@@ -189,7 +194,7 @@ export function OrderTicket({
           </div>
         </div>
 
-        {isConnected && (
+        {isConnected && network.canMintCollateral && (
           <button
             onClick={mint}
             disabled={busy}
@@ -197,6 +202,9 @@ export function OrderTicket({
           >
             Mint 10,000 test {COLLATERAL_SYMBOL}
           </button>
+        )}
+        {isConnected && !network.contractsLive && (
+          <p className="text-[11px] text-muted">Mainnet contracts pending deploy.</p>
         )}
 
         <div className="flex items-center justify-between">
@@ -255,7 +263,7 @@ export function OrderTicket({
 
         {txHash && (
           <a
-            href={`https://explorer.testnet.chain.robinhood.com/tx/${txHash}`}
+            href={`${network.explorer}/tx/${txHash}`}
             target="_blank"
             rel="noreferrer"
             className="text-center text-[11px] text-muted underline"

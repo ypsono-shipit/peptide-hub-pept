@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { formatUnits, keccak256, parseUnits, stringToBytes } from "viem";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { cn } from "@/lib/cn";
-import { collateralContract, marketplaceShopContract } from "@/lib/contracts";
-import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL, TESTNET_CONTRACTS } from "@/lib/deployments";
+import { COLLATERAL_DECIMALS } from "@/lib/deployments";
+import { useAppContracts, useNetworkConfig } from "@/lib/useAppContracts";
 import type { Peptide } from "@/lib/marketplaceData";
 
 export function productIdBytes(id: string): `0x${string}` {
@@ -28,31 +28,36 @@ export function BuyWithUsdc({
   label?: string;
 }) {
   const { address, isConnected } = useAccount();
+  const { collateral, marketplaceShop, peptideVoucher, network } = useAppContracts();
+  const COLLATERAL_SYMBOL = network.collateralSymbol;
   const productId = useMemo(() => productIdBytes(peptide.id), [peptide.id]);
   const amount = useMemo(() => priceToUsdcRaw(peptide.priceFrom), [peptide.priceFrom]);
   const [lastSuccess, setLastSuccess] = useState(false);
+  const live = network.contractsLive;
 
   const balance = useReadContract({
-    ...collateralContract,
+    ...collateral,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && live },
   });
   const allowance = useReadContract({
-    ...collateralContract,
+    ...collateral,
     functionName: "allowance",
-    args: address ? [address, marketplaceShopContract.address] : undefined,
-    query: { enabled: !!address },
+    args: address ? [address, marketplaceShop.address] : undefined,
+    query: { enabled: !!address && live },
   });
   const onChainPrice = useReadContract({
-    ...marketplaceShopContract,
+    ...marketplaceShop,
     functionName: "priceOf",
     args: [productId],
+    query: { enabled: live },
   });
   const listed = useReadContract({
-    ...marketplaceShopContract,
+    ...marketplaceShop,
     functionName: "listed",
     args: [productId],
+    query: { enabled: live },
   });
 
   const { writeContract, data: txHash, isPending, reset, error } = useWriteContract();
@@ -80,10 +85,10 @@ export function BuyWithUsdc({
 
   const mint = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!address) return;
+    if (!address || !network.canMintCollateral) return;
     setLastSuccess(false);
     writeContract({
-      ...collateralContract,
+      ...collateral,
       functionName: "mint",
       args: [address, parseUnits("10000", COLLATERAL_DECIMALS)],
     });
@@ -93,9 +98,9 @@ export function BuyWithUsdc({
     e.stopPropagation();
     setLastSuccess(false);
     writeContract({
-      ...collateralContract,
+      ...collateral,
       functionName: "approve",
-      args: [marketplaceShopContract.address, payAmount],
+      args: [marketplaceShop.address, payAmount],
     });
   };
 
@@ -103,7 +108,7 @@ export function BuyWithUsdc({
     e.stopPropagation();
     setLastSuccess(false);
     writeContract({
-      ...marketplaceShopContract,
+      ...marketplaceShop,
       functionName: "purchase",
       args: [productId, 1n],
     });
@@ -113,6 +118,14 @@ export function BuyWithUsdc({
     size === "sm"
       ? "whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold"
       : "whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold";
+
+  if (!live) {
+    return (
+      <button type="button" disabled className={cn(base, "bg-panel text-muted", className)}>
+        Mainnet soon
+      </button>
+    );
+  }
 
   if (!peptide.inStock) {
     return (
@@ -128,7 +141,7 @@ export function BuyWithUsdc({
         type="button"
         disabled
         className={cn(base, "bg-panel text-muted", className)}
-        title="Connect wallet to buy with USDC"
+        title={`Connect wallet to buy with ${COLLATERAL_SYMBOL}`}
       >
         Connect to buy
       </button>
@@ -144,6 +157,13 @@ export function BuyWithUsdc({
   }
 
   if (needsFunds) {
+    if (!network.canMintCollateral) {
+      return (
+        <button type="button" disabled className={cn(base, "bg-panel text-muted", className)}>
+          Need {COLLATERAL_SYMBOL}
+        </button>
+      );
+    }
     return (
       <button
         type="button"
@@ -189,7 +209,7 @@ export function BuyWithUsdc({
       )}
       {txHash && (
         <a
-          href={`https://explorer.testnet.chain.robinhood.com/tx/${txHash}`}
+          href={`${network.explorer}/tx/${txHash}`}
           target="_blank"
           rel="noreferrer"
           className="text-center text-[10px] text-muted underline"
@@ -200,7 +220,7 @@ export function BuyWithUsdc({
       )}
       {lastSuccess && (
         <a
-          href={`https://explorer.testnet.chain.robinhood.com/token/${TESTNET_CONTRACTS.PeptideVoucher}`}
+          href={`${network.explorer}/token/${peptideVoucher.address}`}
           target="_blank"
           rel="noreferrer"
           className="text-center text-[10px] text-muted underline"

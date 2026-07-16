@@ -13,11 +13,10 @@ import { AccountCard } from "@/components/AccountCard";
 import { MOCK_MARKETS } from "@/lib/markets";
 import { useOraclePrice } from "@/lib/useOraclePrice";
 import { usePositions } from "@/lib/usePositions";
-import { perpsEngineContract } from "@/lib/contracts";
 import { cn } from "@/lib/cn";
 import { formatUnits } from "viem";
 import { useReadContract } from "wagmi";
-import { plpPoolContract } from "@/lib/contracts";
+import { useAppContracts } from "@/lib/useAppContracts";
 
 const MARKETS = MOCK_MARKETS.filter((m) => m.oracleKey);
 const TRADEABLE = MARKETS.filter((m) => !m.comingSoon);
@@ -29,10 +28,15 @@ export default function TradePage() {
   const market = MARKETS.find((m) => m.symbol === selected) ?? TRADEABLE[0]!;
   const { price, isLive } = useOraclePrice(market.oracleKey, market.price);
   const { address } = useAccount();
+  const { perpsEngine, plpPool, network } = useAppContracts();
   const { positions, refetch } = usePositions(address);
-  const canTrade = !market.comingSoon;
+  const canTrade = !market.comingSoon && network.contractsLive;
 
-  const oi = useReadContract({ ...plpPoolContract, functionName: "openInterestUsd" });
+  const oi = useReadContract({
+    ...plpPool,
+    functionName: "openInterestUsd",
+    query: { enabled: network.contractsLive },
+  });
 
   const [closingId, setClosingId] = useState<bigint | undefined>();
   const { writeContract, data: closeTxHash } = useWriteContract();
@@ -45,7 +49,7 @@ export default function TradePage() {
 
   const handleClose = (id: bigint) => {
     setClosingId(id);
-    writeContract({ ...perpsEngineContract, functionName: "closePosition", args: [id] });
+    writeContract({ ...perpsEngine, functionName: "closePosition", args: [id] });
   };
 
   const oiLabel =

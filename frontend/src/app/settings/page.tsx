@@ -2,24 +2,37 @@
 
 import { TopBar } from "@/components/TopBar";
 import { Panel } from "@/components/ui/Panel";
-import { COLLATERAL_SYMBOL, TESTNET_CONTRACTS } from "@/lib/deployments";
+import { useNetworkConfig } from "@/lib/useAppContracts";
+import { NetworkToggle } from "@/components/NetworkToggle";
 
 export default function SettingsPage() {
+  const network = useNetworkConfig();
+  const c = network.contracts;
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <TopBar />
       <div className="mx-auto w-full max-w-xl flex-1 space-y-4 overflow-y-auto p-4">
-        <h1 className="text-lg font-semibold text-ink">Settings</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-lg font-semibold text-ink">Settings</h1>
+          <NetworkToggle />
+        </div>
         <Panel className="space-y-3 p-4 text-sm">
-          <Row k="Network" v="Robinhood Chain Testnet (46630)" />
-          <Row k="Collateral" v={COLLATERAL_SYMBOL} />
-          <Row k="Oracle" v={TESTNET_CONTRACTS.PeptideOracle} mono />
-          <Row k="PerpsEngine" v={TESTNET_CONTRACTS.PerpsEngine} mono />
-          <Row k="PLP Pool" v={TESTNET_CONTRACTS.PerpsLiquidityPool} mono />
-          <Row k="USDC" v={TESTNET_CONTRACTS.USDC} mono />
+          <Row k="Network" v={`${network.label} (${network.chainId})`} />
+          <Row k="Collateral" v={`${network.collateralSymbol} · ${network.collateralName}`} />
+          <Row k="Contracts live" v={network.contractsLive ? "Yes" : "Pending deploy"} />
+          <Row k="Oracle" v={c.PeptideOracle} mono />
+          <Row k="PerpsEngine" v={c.PerpsEngine} mono />
+          <Row k="PLP Pool" v={c.PerpsLiquidityPool} mono />
+          <Row k={network.collateralSymbol} v={c.collateral} mono />
+          <Row k="Marketplace" v={c.MarketplaceShop} mono />
+          <Row k="Voucher NFT" v={c.PeptideVoucher} mono />
+          <Row k="Explorer" v={network.explorer} mono />
         </Panel>
         <p className="text-xs text-muted">
-          Testnet only. Oracle prices refresh via GitHub Actions every 3 hours. Market orders only.
+          {network.testnet
+            ? "Testnet: mintable USDC faucet, oracle refresh via GitHub Actions."
+            : "Mainnet: pay with real USDG (Global Dollar). No faucet mint."}
         </p>
       </div>
     </div>

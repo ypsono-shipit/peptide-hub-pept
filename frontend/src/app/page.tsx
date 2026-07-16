@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { MOCK_MARKETS } from "@/lib/markets";
 import { MARKETPLACE_BRAND } from "@/lib/marketplaceData";
+import { NetworkToggle } from "@/components/NetworkToggle";
 
 export const metadata: Metadata = {
   title: "PEPT Trade | Peptide Perpetuals on Robinhood Chain",
@@ -73,12 +74,15 @@ export default function LandingPage() {
             Oracle API
           </Link>
         </nav>
-        <Link
-          href="/trade"
-          className="rounded-full bg-green px-4 py-2 text-xs font-semibold text-black transition hover:bg-green-dim sm:text-sm"
-        >
-          Launch Terminal
-        </Link>
+        <div className="flex items-center gap-3">
+          <NetworkToggle />
+          <Link
+            href="/trade"
+            className="rounded-full bg-green px-4 py-2 text-xs font-semibold text-black transition hover:bg-green-dim sm:text-sm"
+          >
+            Launch Terminal
+          </Link>
+        </div>
       </header>
 
       {/* Hero: copy left, vial right */}

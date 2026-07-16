@@ -4,10 +4,9 @@ import { useMemo } from "react";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useEffect } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { peptideVoucherContract } from "@/lib/contracts";
 import { PEPTIDES } from "@/lib/marketplaceData";
 import { productIdBytes } from "@/components/marketplace/BuyWithUsdc";
-import { TESTNET_CONTRACTS } from "@/lib/deployments";
+import { useAppContracts, useNetworkConfig } from "@/lib/useAppContracts";
 import { cn } from "@/lib/cn";
 
 const PRODUCT_BY_ID = Object.fromEntries(
@@ -30,16 +29,20 @@ export function MyVouchers({
   compact = true,
 }: MyVouchersProps = {}) {
   const { address, isConnected } = useAccount();
+  const { peptideVoucher } = useAppContracts();
+  const network = useNetworkConfig();
+  const live = network.contractsLive;
 
   const totalMinted = useReadContract({
-    ...peptideVoucherContract,
+    ...peptideVoucher,
     functionName: "totalMinted",
+    query: { enabled: live },
   });
   const balance = useReadContract({
-    ...peptideVoucherContract,
+    ...peptideVoucher,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && live },
   });
 
   const total = Number((totalMinted.data as bigint | undefined) ?? 0n);
@@ -74,7 +77,9 @@ export function MyVouchers({
         </span>
       </div>
 
-      {total === 0 ? (
+      {!live ? (
+        <p className="text-xs text-muted">Mainnet voucher contracts pending deploy. Switch to Testnet.</p>
+      ) : total === 0 ? (
         <p className="text-xs text-muted">No vouchers minted yet. Buy a kit to receive PEPT-KIT.</p>
       ) : bal === 0 ? (
         <p className="text-xs text-muted">
@@ -91,34 +96,44 @@ export function MyVouchers({
           )}
         >
           {tokenIds.map((id) => (
-            <VoucherRow key={id} tokenId={id} owner={address!} />
+            <VoucherRow key={id} tokenId={id} owner={address!} voucher={peptideVoucher} />
           ))}
         </div>
       )}
 
-      <a
-        href={`https://explorer.testnet.chain.robinhood.com/token/${TESTNET_CONTRACTS.PeptideVoucher}?a=${address}`}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-3 block text-center text-[10px] text-muted underline"
-      >
-        View PEPT-KIT NFTs on explorer ↗
-      </a>
+      {live && (
+        <a
+          href={`${network.explorer}/token/${peptideVoucher.address}?a=${address}`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-3 block text-center text-[10px] text-muted underline"
+        >
+          View PEPT-KIT NFTs on explorer ↗
+        </a>
+      )}
     </GlassCard>
   );
 }
 
-function VoucherRow({ tokenId, owner }: { tokenId: number; owner: `0x${string}` }) {
+function VoucherRow({
+  tokenId,
+  owner,
+  voucher,
+}: {
+  tokenId: number;
+  owner: `0x${string}`;
+  voucher: { address: `0x${string}`; abi: readonly unknown[] | object };
+}) {
   const ownerOf = useReadContract({
-    ...peptideVoucherContract,
+    ...voucher,
     functionName: "ownerOf",
     args: [BigInt(tokenId)],
-  });
+  } as Parameters<typeof useReadContract>[0]);
   const data = useReadContract({
-    ...peptideVoucherContract,
+    ...voucher,
     functionName: "vouchers",
     args: [BigInt(tokenId)],
-  });
+  } as Parameters<typeof useReadContract>[0]);
   const { writeContract, data: txHash, isPending, reset } = useWriteContract();
   const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
@@ -177,7 +192,8 @@ function VoucherRow({ tokenId, owner }: { tokenId: number; owner: `0x${string}` 
         disabled={redeemed || isPending || confirming}
         onClick={() =>
           writeContract({
-            ...peptideVoucherContract,
+            address: voucher.address,
+            abi: voucher.abi as never,
             functionName: "redeem",
             args: [BigInt(tokenId)],
           })

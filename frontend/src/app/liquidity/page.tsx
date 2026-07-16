@@ -2,9 +2,12 @@
 
 import { TopBar } from "@/components/TopBar";
 import { LiquidityPanel } from "@/components/LiquidityPanel";
-import { TESTNET_CONTRACTS } from "@/lib/deployments";
+import { useNetworkConfig } from "@/lib/useAppContracts";
 
 export default function LiquidityPage() {
+  const network = useNetworkConfig();
+  const c = network.contracts;
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <TopBar />
@@ -12,18 +15,19 @@ export default function LiquidityPage() {
         <div>
           <h1 className="text-lg font-semibold text-ink">PLP Liquidity</h1>
           <p className="text-sm text-muted">
-            Deposit testnet USDC to backstop peptide perps open interest
+            Deposit {network.collateralSymbol} to backstop peptide perps open interest ·{" "}
+            {network.shortLabel}
           </p>
         </div>
         <LiquidityPanel />
         <div className="rounded-xl border border-border bg-panel p-3 font-mono text-[10px] leading-relaxed text-muted">
-          Pool {TESTNET_CONTRACTS.PerpsLiquidityPool}
+          Pool {c.PerpsLiquidityPool}
           <br />
-          PLP {TESTNET_CONTRACTS.PLP}
+          PLP {c.PLP}
           <br />
-          Engine {TESTNET_CONTRACTS.PerpsEngine}
+          Engine {c.PerpsEngine}
           <br />
-          USDC {TESTNET_CONTRACTS.USDC}
+          {network.collateralSymbol} {c.collateral}
         </div>
       </div>
     </div>
