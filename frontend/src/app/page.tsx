@@ -301,20 +301,6 @@ export default function LandingPage() {
             <span>·</span>
             <span>Peptide Hub</span>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/trade" className="hover:text-ink">
-              Trade
-            </Link>
-            <Link href="/marketplace" className="hover:text-ink">
-              Marketplace
-            </Link>
-            <Link href="/liquidity" className="hover:text-ink">
-              Liquidity
-            </Link>
-            <Link href="/stake" className="hover:text-ink">
-              Stake
-            </Link>
-          </div>
           <p className="text-faint">Testnet demo · Research use only kits</p>
         </div>
       </footer>
