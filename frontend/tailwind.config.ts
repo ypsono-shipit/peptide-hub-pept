@@ -53,6 +53,15 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
+        // Wordmark: Helvetica Neue Regular (system); Arial/system fallbacks elsewhere
+        brand: [
+          '"Helvetica Neue"',
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "system-ui",
+          "sans-serif",
+        ],
       },
     },
   },

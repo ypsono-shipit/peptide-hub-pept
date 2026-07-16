@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { TIER_PRICING, TIER_LIMITS } from "@/lib/oracle-api/tiers";
+import { BrandWordmark } from "@/components/BrandWordmark";
 
 export const metadata: Metadata = {
   title: "PEPT Oracle | B2B Peptide Pricing Infrastructure",
@@ -18,8 +19,8 @@ export default function OracleProductPage() {
   return (
     <div className="min-h-screen bg-bg text-ink">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-6 sm:px-8">
-        <Link href="/" className="text-sm font-semibold tracking-tight">
-          PEPT TRADE
+        <Link href="/" className="inline-flex items-center">
+          <BrandWordmark />
         </Link>
         <div className="flex gap-4 text-sm text-muted">
           <Link href="/oracle/monitor" className="hover:text-ink">

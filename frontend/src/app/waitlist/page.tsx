@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAccount, useConnect } from "wagmi";
+import { BrandWordmark } from "@/components/BrandWordmark";
 
 export default function WaitlistPage() {
   const { address, isConnected } = useAccount();
@@ -99,7 +100,7 @@ export default function WaitlistPage() {
             className="rounded-lg ring-1 ring-border"
             priority
           />
-          <span className="text-sm font-semibold tracking-tight text-ink">PEPT TRADE</span>
+          <BrandWordmark />
         </Link>
         <span className="rounded-full border border-border bg-panel px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">
           Waitlist

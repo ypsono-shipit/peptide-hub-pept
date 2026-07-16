@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/cn";
+import { BrandWordmark } from "@/components/BrandWordmark";
 
 type SourceQuote = {
   name: string;
@@ -147,7 +148,7 @@ export default function OracleMonitorPage() {
             height={32}
             className="rounded-lg ring-1 ring-border"
           />
-          <span className="text-sm font-semibold tracking-tight">PEPT TRADE</span>
+          <BrandWordmark />
         </Link>
         <nav className="flex flex-wrap items-center gap-3 text-sm text-muted">
           <Link href="/oracle" className="hover:text-ink">

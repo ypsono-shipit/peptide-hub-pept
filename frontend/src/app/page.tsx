@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { MOCK_MARKETS } from "@/lib/markets";
 import { MARKETPLACE_BRAND } from "@/lib/marketplaceData";
 import { NetworkToggle } from "@/components/NetworkToggle";
+import { BrandWordmark } from "@/components/BrandWordmark";
 
 export const metadata: Metadata = {
   title: "PEPT Trade | Peptide Perpetuals on Robinhood Chain",
@@ -58,7 +59,7 @@ export default function LandingPage() {
             className="rounded-lg ring-1 ring-border"
             priority
           />
-          <span className="text-sm font-semibold tracking-tight text-ink">PEPT TRADE</span>
+          <BrandWordmark />
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-muted md:flex">
           <a href="#markets" className="hover:text-ink">
@@ -296,7 +297,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-8 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <div className="flex items-center gap-2">
             <Image src="/logo.png" alt="" width={20} height={20} className="rounded" />
-            <span className="text-ink-soft">PEPT Trade</span>
+            <BrandWordmark className="text-ink-soft" />
             <span>·</span>
             <span>Peptide Hub</span>
           </div>

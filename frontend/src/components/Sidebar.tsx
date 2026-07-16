@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/Logo";
+import { BrandWordmark } from "@/components/BrandWordmark";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutGrid },
@@ -37,7 +38,7 @@ export function Sidebar() {
       <Link href="/dashboard" className="mb-6 flex items-center gap-2.5 px-3 lg:px-4">
         <Logo size={36} className="ring-1 ring-border" />
         <div className="hidden min-w-0 lg:block">
-          <div className="truncate text-sm font-semibold tracking-tight text-ink">PEPT TRADE</div>
+          <BrandWordmark className="block truncate" />
           <div className="truncate text-[10px] text-muted">Peptide Perpetuals</div>
         </div>
       </Link>
