@@ -14,8 +14,21 @@ const PRODUCT_BY_ID = Object.fromEntries(
   PEPTIDES.map((p) => [productIdBytes(p.id).toLowerCase(), p]),
 );
 
+type MyVouchersProps = {
+  /** Card title */
+  title?: string;
+  /** Supporting line under the title */
+  description?: string;
+  /** Taller scroll area on portfolio */
+  compact?: boolean;
+};
+
 /** List recent voucher token IDs owned by the connected wallet (scan minted range). */
-export function MyVouchers() {
+export function MyVouchers({
+  title = "My kit vouchers",
+  description = "NFT receipts for on-chain purchases · redeem later for the physical kit",
+  compact = true,
+}: MyVouchersProps = {}) {
   const { address, isConnected } = useAccount();
 
   const totalMinted = useReadContract({
@@ -30,8 +43,8 @@ export function MyVouchers() {
   });
 
   const total = Number((totalMinted.data as bigint | undefined) ?? 0n);
-  // Scan last 64 token ids for ownership (fine for testnet demo scale)
-  const scanFrom = Math.max(1, total - 63);
+  // Scan last 128 token ids for ownership (fine for testnet demo scale)
+  const scanFrom = Math.max(1, total - 127);
   const tokenIds = useMemo(() => {
     const ids: number[] = [];
     for (let i = scanFrom; i <= total; i++) ids.push(i);
@@ -41,7 +54,7 @@ export function MyVouchers() {
   if (!isConnected) {
     return (
       <GlassCard className="p-4">
-        <h3 className="text-sm font-semibold text-ink">My kit vouchers</h3>
+        <h3 className="text-sm font-semibold text-ink">{title}</h3>
         <p className="mt-1 text-xs text-ink-soft">Connect wallet to see redeemable peptide NFTs.</p>
       </GlassCard>
     );
@@ -53,10 +66,8 @@ export function MyVouchers() {
     <GlassCard className="p-4">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-ink">My kit vouchers</h3>
-          <p className="mt-0.5 text-[11px] text-ink-soft">
-            NFT receipts for on-chain purchases · redeem later for the physical kit
-          </p>
+          <h3 className="text-sm font-semibold text-ink">{title}</h3>
+          <p className="mt-0.5 text-[11px] text-ink-soft">{description}</p>
         </div>
         <span className="rounded-full border border-border-strong px-2 py-0.5 font-mono text-[10px] text-ink">
           {bal} owned
@@ -66,9 +77,19 @@ export function MyVouchers() {
       {total === 0 ? (
         <p className="text-xs text-muted">No vouchers minted yet. Buy a kit to receive PEPT-KIT.</p>
       ) : bal === 0 ? (
-        <p className="text-xs text-muted">You don&apos;t hold any kit vouchers yet.</p>
+        <p className="text-xs text-muted">
+          You don&apos;t hold any kit vouchers yet.{" "}
+          <a href="/marketplace" className="text-ink underline underline-offset-2">
+            Browse marketplace
+          </a>
+        </p>
       ) : (
-        <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
+        <div
+          className={cn(
+            "flex flex-col gap-2 overflow-y-auto",
+            compact ? "max-h-64" : "max-h-[28rem]",
+          )}
+        >
           {tokenIds.map((id) => (
             <VoucherRow key={id} tokenId={id} owner={address!} />
           ))}
@@ -76,12 +97,12 @@ export function MyVouchers() {
       )}
 
       <a
-        href={`https://explorer.testnet.chain.robinhood.com/token/${TESTNET_CONTRACTS.PeptideVoucher}`}
+        href={`https://explorer.testnet.chain.robinhood.com/token/${TESTNET_CONTRACTS.PeptideVoucher}?a=${address}`}
         target="_blank"
         rel="noreferrer"
         className="mt-3 block text-center text-[10px] text-muted underline"
       >
-        PeptideVoucher contract ↗
+        View PEPT-KIT NFTs on explorer ↗
       </a>
     </GlassCard>
   );
@@ -120,16 +141,36 @@ function VoucherRow({ tokenId, owner }: { tokenId: number; owner: `0x${string}` 
   const peptide = PRODUCT_BY_ID[productId];
   const name = peptide?.name ?? `Product ${productId.slice(0, 10)}…`;
 
+  const purchasedAt = tuple?.[1] ? Number(tuple[1]) * 1000 : 0;
+  const purchasedLabel = purchasedAt
+    ? new Date(purchasedAt).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-border bg-bg px-3 py-2">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border-strong bg-panel font-mono text-[10px] text-ink">
-        #{tokenId}
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-bg px-3 py-2.5">
+      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border-strong bg-panel">
+        {peptide?.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={peptide.imageUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <span className="font-mono text-[10px] text-ink">#{tokenId}</span>
+        )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-xs font-semibold text-ink">{name}</div>
         <div className="text-[10px] text-muted">
-          PEPT-KIT · {redeemed ? "Redeemed" : "Unredeemed claim"}
+          PEPT-KIT #{tokenId}
+          {purchasedLabel ? ` · ${purchasedLabel}` : ""}
+          {" · "}
+          {redeemed ? "Redeemed" : "Unredeemed claim"}
         </div>
+        {peptide?.kitLabel && (
+          <div className="mt-0.5 text-[10px] text-ink-soft">{peptide.kitLabel}</div>
+        )}
       </div>
       <button
         type="button"
