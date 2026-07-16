@@ -74,7 +74,7 @@ async function countFromSheets(): Promise<number | null> {
  */
 async function postJsonFollow(url: string, body: unknown, maxHops = 5): Promise<Response> {
   let current = url;
-  let payload = JSON.stringify(body);
+  const payload = JSON.stringify(body);
   for (let i = 0; i < maxHops; i++) {
     const res = await fetch(current, {
       method: "POST",

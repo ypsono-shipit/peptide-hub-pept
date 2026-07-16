@@ -5,7 +5,7 @@ import { formatUnits, keccak256, parseUnits, stringToBytes } from "viem";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { cn } from "@/lib/cn";
 import { COLLATERAL_DECIMALS } from "@/lib/deployments";
-import { useAppContracts, useNetworkConfig } from "@/lib/useAppContracts";
+import { useAppContracts } from "@/lib/useAppContracts";
 import type { Peptide } from "@/lib/marketplaceData";
 
 export function productIdBytes(id: string): `0x${string}` {
