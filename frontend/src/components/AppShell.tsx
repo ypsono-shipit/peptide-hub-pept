@@ -9,6 +9,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Marketing + public docs: full-bleed (no trade shell sidebar)
   const isMarketing =
     pathname === "/" ||
+    pathname === "/home" ||
+    pathname === "/waitlist" ||
     pathname === "/oracle" ||
     pathname === "/docs" ||
     pathname?.startsWith("/docs/");
