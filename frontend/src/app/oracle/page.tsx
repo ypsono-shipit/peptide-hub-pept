@@ -123,7 +123,7 @@ export default function OracleProductPage() {
                   </li>
                 </ul>
                 <a
-                  href="https://t.me/xaitoshi"
+                  href="https://t.me/blackswanhl"
                   target="_blank"
                   rel="noreferrer"
                   className="mt-5 inline-flex rounded-full border border-border-strong px-4 py-2 text-xs font-semibold text-ink transition hover:border-ink hover:bg-bg"
@@ -136,12 +136,12 @@ export default function OracleProductPage() {
           <p className="mt-6 text-sm text-ink-soft">
             Questions or custom limits?{" "}
             <a
-              href="https://t.me/xaitoshi"
+              href="https://t.me/blackswanhl"
               target="_blank"
               rel="noreferrer"
               className="font-semibold text-ink underline underline-offset-4 hover:text-green"
             >
-              Contact us on Telegram @xaitoshi
+              Contact us on Telegram @blackswanhl
             </a>
           </p>
         </section>
