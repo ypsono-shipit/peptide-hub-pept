@@ -151,7 +151,7 @@ export default function LandingPage() {
                   Markets
                 </h2>
                 <p className="mt-1 text-xl font-semibold tracking-tight text-ink sm:text-2xl">
-                  Peptide exposure. On-chain marks.
+                  Peptide exposure.
                 </p>
               </div>
               <Link href="/trade" className="shrink-0 text-xs font-medium text-ink underline-offset-4 hover:underline">
