@@ -281,13 +281,13 @@ export default function LandingPage() {
             <em className="font-serif font-normal italic text-green-soft">Neither do peptides.</em>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-ink-soft">
-            Enter the terminal: charts, order ticket, positions, and kit checkout.
+            Join the waitlist for early access to peptide perps, oracle marks, and kit checkout.
           </p>
           <Link
-            href="/trade"
+            href="/waitlist"
             className="mt-10 inline-flex rounded-full bg-green px-10 py-4 text-sm font-semibold text-black hover:bg-green-dim"
           >
-            Launch Terminal
+            Join waitlist
           </Link>
         </section>
       </main>

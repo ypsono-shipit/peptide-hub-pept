@@ -14,6 +14,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname === "/oracle" ||
     pathname === "/docs" ||
     pathname?.startsWith("/docs/");
+  // / and /home share the same full-bleed landing shell
 
   if (isMarketing) {
     return <div className="min-h-screen w-full bg-bg text-ink">{children}</div>;

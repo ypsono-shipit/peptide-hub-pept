@@ -220,7 +220,7 @@ export default function WaitlistPage() {
 
             <p className="text-center text-[11px] leading-relaxed text-muted">
               No spam. We only use this for access invites.{" "}
-              <Link href="/home" className="text-ink-soft underline underline-offset-2">
+              <Link href="/" className="text-ink-soft underline underline-offset-2">
                 About PEPT
               </Link>
             </p>
