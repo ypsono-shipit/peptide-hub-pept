@@ -5,11 +5,23 @@ dist/
 cache/
 artifacts/
 typechain-types/
+# Secrets — never commit (deployer keys, oracle secrets, etc.)
 .env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
 .env.local
+.env.oracle.secrets
+*.pem
+*.key
 *.log
 .DS_Store
 coverage/
 coverage.json
 # Ephemeral oracle scrape output (rebuilt each run)
 contracts/data/glp1-last-scrape.json
+# Local deploy notes / wallet dumps
+**/deployer*.txt
+**/*private*key*
