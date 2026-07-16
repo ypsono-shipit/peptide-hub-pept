@@ -197,8 +197,7 @@ export default function LandingPage() {
             meet <em className="font-serif font-normal italic text-green-soft">real</em> trading
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-ink-soft sm:text-base">
-            PEPT Trade is a peptide-native perps terminal and research-kit marketplace, not a generic
-            crypto perp fork with a biotech skin.
+            PEPT Trade is a peptide-native perps terminal and research-kit marketplace.
           </p>
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
