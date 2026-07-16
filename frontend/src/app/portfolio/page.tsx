@@ -7,6 +7,7 @@ import { TopBar } from "@/components/TopBar";
 import { PositionsTable } from "@/components/PositionsTable";
 import { AccountCard } from "@/components/AccountCard";
 import { MyVouchers } from "@/components/marketplace/MyVouchers";
+import { PlpHoldingsCard } from "@/components/PlpHoldingsCard";
 import { usePositions } from "@/lib/usePositions";
 import { perpsEngineContract } from "@/lib/contracts";
 import { Panel } from "@/components/ui/Panel";
@@ -30,11 +31,11 @@ export default function PortfolioPage() {
         <div>
           <h1 className="text-lg font-semibold text-ink">Portfolio</h1>
           <p className="text-sm text-muted">
-            Open perps positions and kit voucher NFTs on Robinhood testnet
+            Perps positions, PLP liquidity, and kit voucher NFTs on Robinhood testnet
           </p>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
+        <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
           <div className="space-y-6">
             <section className="space-y-3">
               <div className="flex items-end justify-between gap-3">
@@ -67,6 +68,24 @@ export default function PortfolioPage() {
                   />
                 )}
               </Panel>
+            </section>
+
+            <section className="space-y-3">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-ink">Liquidity (PLP)</h2>
+                  <p className="text-xs text-muted">
+                    Vault shares, redeemable value, and attributed yield
+                  </p>
+                </div>
+                <Link
+                  href="/liquidity"
+                  className="text-xs font-medium text-ink underline-offset-4 hover:underline"
+                >
+                  Vault →
+                </Link>
+              </div>
+              <PlpHoldingsCard />
             </section>
 
             <section className="space-y-3">
