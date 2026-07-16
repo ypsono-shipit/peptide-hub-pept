@@ -1,7 +1,8 @@
 /**
- * Waitlist persistence.
- * Primary: Supabase (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY)
- * Optional dual-write: GOOGLE_SHEETS_WEBHOOK_URL (Apps Script / Zapier / Make)
+ * Waitlist persistence (easiest → durable):
+ * 1. Supabase if SUPABASE_URL + key set
+ * 2. Google Sheets Apps Script if GOOGLE_SHEETS_WEBHOOK_URL set
+ * 3. In-memory fallback (local only; not durable on Vercel)
  */
 
 export type WaitlistEntry = {
@@ -15,7 +16,9 @@ export type WaitlistResult =
   | { ok: false; error: string; status?: number };
 
 function supabaseConfig() {
-  const url = process.env.SUPABASE_URL?.replace(/\/$/, "") || process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+  const url =
+    process.env.SUPABASE_URL?.replace(/\/$/, "") ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
     process.env.SUPABASE_ANON_KEY?.trim() ||
@@ -24,14 +27,17 @@ function supabaseConfig() {
   return { url, key };
 }
 
+function sheetsUrl() {
+  return process.env.GOOGLE_SHEETS_WEBHOOK_URL?.trim() || "";
+}
+
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
 function normalizeWallet(wallet: string | undefined | null) {
   const w = (wallet || "").trim();
-  if (!w) return null;
-  return w;
+  return w || null;
 }
 
 function normalizeX(handle: string | undefined | null) {
@@ -42,11 +48,31 @@ function normalizeX(handle: string | undefined | null) {
   return h || null;
 }
 
-async function sheetsWebhook(entry: WaitlistEntry) {
-  const url = process.env.GOOGLE_SHEETS_WEBHOOK_URL?.trim();
-  if (!url) return;
+const mem = {
+  emails: new Set<string>(),
+  rows: [] as { email: string; wallet: string | null; xHandle: string | null; at: number }[],
+};
+
+async function countFromSheets(): Promise<number | null> {
+  const base = sheetsUrl();
+  if (!base) return null;
+  const url = base.includes("?") ? `${base}&action=count` : `${base}?action=count`;
   try {
-    await fetch(url, {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { count?: number };
+    if (typeof data.count === "number" && data.count >= 0) return data.count;
+  } catch (e) {
+    console.warn("[waitlist] sheets count failed", e);
+  }
+  return null;
+}
+
+async function joinViaSheets(entry: WaitlistEntry): Promise<WaitlistResult | null> {
+  const base = sheetsUrl();
+  if (!base) return null;
+  try {
+    const res = await fetch(base, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -56,51 +82,67 @@ async function sheetsWebhook(entry: WaitlistEntry) {
         created_at: new Date().toISOString(),
       }),
     });
+    const data = (await res.json()) as {
+      ok?: boolean;
+      alreadyJoined?: boolean;
+      position?: number;
+      error?: string;
+    };
+    if (!res.ok || data.ok === false) {
+      return { ok: false, error: data.error || "Sheet write failed", status: 502 };
+    }
+    const position =
+      typeof data.position === "number" ? data.position : (await countFromSheets()) || 1;
+    return {
+      ok: true,
+      alreadyJoined: Boolean(data.alreadyJoined),
+      position,
+    };
   } catch (e) {
-    console.warn("[waitlist] sheets webhook failed", e);
+    console.warn("[waitlist] sheets join failed", e);
+    return { ok: false, error: "Could not reach spreadsheet.", status: 502 };
   }
 }
-
-/** In-memory fallback for local dev when Supabase is not configured (not durable on Vercel). */
-const mem = {
-  emails: new Set<string>(),
-  rows: [] as { email: string; wallet: string | null; xHandle: string | null; at: number }[],
-};
 
 export async function getWaitlistCount(): Promise<number> {
   const sb = supabaseConfig();
   if (sb) {
-    const head = await fetch(`${sb.url}/rest/v1/waitlist?select=id`, {
-      method: "HEAD",
-      headers: {
-        apikey: sb.key,
-        Authorization: `Bearer ${sb.key}`,
-        Prefer: "count=exact",
-      },
-      cache: "no-store",
-    });
-    const cr = head.headers.get("content-range");
-    if (cr?.includes("/")) {
-      const n = Number(cr.split("/")[1]);
-      if (Number.isFinite(n) && n >= 0) return n;
+    try {
+      const head = await fetch(`${sb.url}/rest/v1/waitlist?select=id`, {
+        method: "HEAD",
+        headers: {
+          apikey: sb.key,
+          Authorization: `Bearer ${sb.key}`,
+          Prefer: "count=exact",
+        },
+        cache: "no-store",
+      });
+      const cr = head.headers.get("content-range");
+      if (cr?.includes("/")) {
+        const n = Number(cr.split("/")[1]);
+        if (Number.isFinite(n) && n >= 0) return n;
+      }
+      const res = await fetch(`${sb.url}/rest/v1/waitlist?select=id`, {
+        headers: {
+          apikey: sb.key,
+          Authorization: `Bearer ${sb.key}`,
+          Prefer: "count=exact",
+          Range: "0-0",
+        },
+        cache: "no-store",
+      });
+      const contentRange = res.headers.get("content-range");
+      if (contentRange?.includes("/")) {
+        const n = Number(contentRange.split("/")[1]);
+        if (Number.isFinite(n) && n >= 0) return n;
+      }
+    } catch (e) {
+      console.warn("[waitlist] supabase count failed", e);
     }
-    // Fallback GET with range
-    const res = await fetch(`${sb.url}/rest/v1/waitlist?select=id`, {
-      headers: {
-        apikey: sb.key,
-        Authorization: `Bearer ${sb.key}`,
-        Prefer: "count=exact",
-        Range: "0-0",
-      },
-      cache: "no-store",
-    });
-    const contentRange = res.headers.get("content-range");
-    if (contentRange?.includes("/")) {
-      const n = Number(contentRange.split("/")[1]);
-      if (Number.isFinite(n) && n >= 0) return n;
-    }
-    return 0;
   }
+
+  const sheetCount = await countFromSheets();
+  if (sheetCount !== null) return sheetCount;
 
   return mem.emails.size;
 }
@@ -121,6 +163,7 @@ export async function joinWaitlist(input: {
     xHandle: normalizeX(input.xHandle),
   };
 
+  // Prefer Supabase when configured
   const sb = supabaseConfig();
   if (sb) {
     const res = await fetch(`${sb.url}/rest/v1/waitlist`, {
@@ -129,7 +172,7 @@ export async function joinWaitlist(input: {
         apikey: sb.key,
         Authorization: `Bearer ${sb.key}`,
         "Content-Type": "application/json",
-        Prefer: "return=representation,resolution=merge-duplicates",
+        Prefer: "return=representation",
       },
       body: JSON.stringify({
         email: entry.email,
@@ -138,13 +181,6 @@ export async function joinWaitlist(input: {
       }),
     });
 
-    if (res.status === 409 || res.status === 23505) {
-      const position = await getWaitlistCount();
-      await sheetsWebhook(entry);
-      return { ok: true, alreadyJoined: true, position };
-    }
-
-    // PostgREST unique violation body
     const text = await res.text();
     let json: { code?: string; message?: string; id?: string } | unknown[] | null = null;
     try {
@@ -156,21 +192,26 @@ export async function joinWaitlist(input: {
     if (!res.ok) {
       const code = (json as { code?: string })?.code;
       const msg = (json as { message?: string })?.message || text;
-      if (code === "23505" || /duplicate|unique/i.test(msg || "")) {
+      if (res.status === 409 || code === "23505" || /duplicate|unique/i.test(msg || "")) {
         const position = await getWaitlistCount();
         return { ok: true, alreadyJoined: true, position };
       }
       console.error("[waitlist] supabase insert failed", res.status, msg);
-      return { ok: false, error: "Could not save signup. Try again.", status: 502 };
+      // fall through to sheets
+    } else {
+      // dual-write sheets if also configured
+      void joinViaSheets(entry);
+      const position = await getWaitlistCount();
+      const id = Array.isArray(json) ? (json[0] as { id?: string })?.id : undefined;
+      return { ok: true, id, position };
     }
-
-    await sheetsWebhook(entry);
-    const position = await getWaitlistCount();
-    const id = Array.isArray(json) ? (json[0] as { id?: string })?.id : undefined;
-    return { ok: true, id, position };
   }
 
-  // Memory fallback (dev only)
+  // Google Sheets (recommended easy path)
+  const sheetResult = await joinViaSheets(entry);
+  if (sheetResult) return sheetResult;
+
+  // Memory fallback (dev / misconfigured prod)
   if (mem.emails.has(email)) {
     return { ok: true, alreadyJoined: true, position: mem.emails.size };
   }
@@ -181,9 +222,8 @@ export async function joinWaitlist(input: {
     xHandle: entry.xHandle,
     at: Date.now(),
   });
-  await sheetsWebhook(entry);
   console.warn(
-    "[waitlist] SUPABASE_URL not set — stored in process memory only (not durable on Vercel).",
+    "[waitlist] No SUPABASE_* or GOOGLE_SHEETS_WEBHOOK_URL — in-memory only (not durable on Vercel).",
   );
   return { ok: true, position: mem.emails.size };
 }
