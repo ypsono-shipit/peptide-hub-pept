@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
         name: "PEPT Peptide Oracle API",
         version: ORACLE_API_VERSION,
         description:
-          "B2B infrastructure for research-peptide $/mg marks. Dual-source scrapes settled on Robinhood Chain, served as REST for integrators.",
+          "B2B infrastructure for research-peptide $/mg marks. Pricing aggregated across 30+ vendors and laboratories, settled on Robinhood Chain, served as REST for integrators.",
         basePath: "/api/v1/oracle",
         hosts: {
           product: "https://pept.trade",

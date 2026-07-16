@@ -9,7 +9,7 @@ export function buildOpenApiSpec(baseUrl: string) {
       title: "PEPT Peptide Oracle API",
       version: ORACLE_API_VERSION,
       description:
-        "B2B research-peptide $/mg price infrastructure. Dual-source marks settled on Robinhood Chain.",
+        "B2B research-peptide $/mg price infrastructure. Multi-vendor marks aggregated across 30+ vendors and laboratories, settled on Robinhood Chain.",
       contact: { name: "PEPT Trade", url: "https://pept.trade" },
     },
     servers: [{ url: baseUrl }],

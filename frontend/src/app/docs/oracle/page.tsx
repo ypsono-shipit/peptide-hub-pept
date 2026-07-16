@@ -58,9 +58,9 @@ export default function OracleDocsPage() {
           PEPT Peptide Oracle API
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft sm:text-base">
-          Dual-source research peptide $/mg marks, settled on Robinhood Chain and served over REST
-          so other protocols, dashboards, and marketplaces can integrate without scraping vendors
-          themselves.
+          Research peptide $/mg marks aggregated across 30+ vendors and laboratories, settled on
+          Robinhood Chain and served over REST so other protocols, dashboards, and marketplaces can
+          integrate without crawling supplier catalogs themselves.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-3">

@@ -46,9 +46,10 @@ export default function OracleProductPage() {
           <em className="font-serif font-normal italic text-green">oracle</em>
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg">
-          Dual-source research peptide $/mg marks, settled on Robinhood Chain and delivered over REST
-          so your protocol does not scrape vendors. Live prices, history, OHLC, webhooks, and signed
-          attestations.
+          Institutional peptide price infrastructure: research $/mg quotes aggregated across 30+
+          vendors and laboratories, settled on Robinhood Chain, and delivered over REST so your
+          protocol never has to crawl supplier catalogs. Live prices, history, OHLC, webhooks, and
+          signed attestations.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-3">
@@ -75,16 +76,16 @@ export default function OracleProductPage() {
         <section className="mt-16 grid gap-4 sm:grid-cols-3">
           {[
             {
+              t: "Multi-vendor intelligence",
+              d: "Pricing scraped and normalized across 30+ research vendors and laboratories into a single $/mg mark.",
+            },
+            {
               t: "Settle on-chain",
               d: "Same PeptideOracle feed PEPT Trade uses for perps. Verify marketKey + getPrice.",
             },
             {
               t: "Ship faster",
               d: "REST for apps and indexers. Webhooks when marks move. Signed quotes for Pro+.",
-            },
-            {
-              t: "Metered access",
-              d: "API keys with tiers, RPM/daily quotas. Contact us to upgrade.",
             },
           ].map((c) => (
             <div key={c.t} className="rounded-2xl border border-border bg-panel p-5">

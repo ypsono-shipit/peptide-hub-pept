@@ -17,7 +17,7 @@ const FEATURES = [
   },
   {
     title: "Real $/mg marks",
-    body: "Dual-source scrapers feed PeptideOracle. SEMA and GLP1-IDX track research-grade peptide pricing.",
+    body: "PeptideOracle aggregates research pricing across 30+ vendors and laboratories. SEMA and GLP1-IDX track institutional-grade $/mg marks.",
   },
   {
     title: "USDC + PLP",
@@ -221,8 +221,8 @@ export default function LandingPage() {
             </div>
             <h3 className="mt-2 text-xl font-semibold text-ink">Peptide Oracle API</h3>
             <p className="mt-2 max-w-xl text-sm text-ink-soft">
-              Same dual-source marks we settle on-chain, exposed as REST for other protocols and
-              dashboards. Markets, live prices, history, and OHLC.
+              The same multi-vendor $/mg marks we settle on-chain, exposed as REST for other
+              protocols and dashboards. Markets, live prices, history, and OHLC.
             </p>
             <Link
               href="/docs/oracle"
@@ -242,7 +242,9 @@ export default function LandingPage() {
                 <em className="font-serif font-normal italic text-green-soft">oracle</em>
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-ink-soft sm:text-base">
-                Dual-source scrapers mark SEMA and GLP-1 $/mg on-chain every second.
+                Continuous price intelligence across 30+ research vendors and laboratories,
+                synthesized into on-chain $/mg marks for SEMA, GLP-1, and the broader peptide
+                complex.
               </p>
               <Link
                 href="/trade"
@@ -255,7 +257,7 @@ export default function LandingPage() {
               {[
                 { k: "Chain", v: "46630" },
                 { k: "Collateral", v: "USDC" },
-                { k: "Oracle", v: "Dual scrape" },
+                { k: "Oracle", v: "30+ vendors" },
                 { k: "LP", v: "PLP vault" },
               ].map((s) => (
                 <div key={s.k} className="rounded-2xl border border-border bg-bg px-4 py-5">

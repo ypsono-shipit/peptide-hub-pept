@@ -20,7 +20,7 @@ export const ORACLE_MARKETS: OracleMarketDef[] = [
     id: "SEMA-PERP",
     name: "Semaglutide",
     unit: "$/mg",
-    description: "Research-grade semaglutide street median ($/mg), dual-source weighted.",
+    description: "Research-grade semaglutide street median ($/mg), multi-vendor weighted across 30+ suppliers.",
     status: "live",
     decimals: 18,
     category: "glp1",
