@@ -34,7 +34,7 @@ export function parseTimeframe(raw: string | null): Timeframe {
 
 /**
  * Forward-fill samples into fixed buckets, then OHLC.
- * Empty buckets inherit previous close (stair-step — correct for infrequent oracle).
+ * Empty buckets inherit previous close (stair-step, correct for infrequent oracle).
  */
 export function samplesToOhlc(
   samples: PriceSample[],

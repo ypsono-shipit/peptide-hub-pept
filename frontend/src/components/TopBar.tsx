@@ -54,7 +54,7 @@ export function TopBar({
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
             <div>
               <div className="font-mono text-base font-semibold tabular-nums text-ink">
-                ${price?.toFixed(market.unit === "$/mg" ? 2 : 4) ?? "—"}
+                ${price?.toFixed(market.unit === "$/mg" ? 2 : 4) ?? "; "}
                 {market.unit === "$/mg" && (
                   <span className="ml-1 text-[10px] font-normal text-muted">/mg</span>
                 )}
@@ -64,7 +64,7 @@ export function TopBar({
                 {change.toFixed(2)}%
               </div>
             </div>
-            <Stat label="Mark Price" value={price !== undefined ? `$${price.toFixed(2)}` : "—"} />
+            <Stat label="Mark Price" value={price !== undefined ? `$${price.toFixed(2)}` : "; "} />
             <Stat
               label="24H Change"
               value={`${pos ? "+" : ""}${change.toFixed(2)}%`}
@@ -78,7 +78,7 @@ export function TopBar({
 
       <div className="ml-auto flex items-center gap-2">
         <div className="hidden items-center gap-1.5 rounded-lg border border-border bg-panel px-2.5 py-1.5 text-xs text-ink-soft sm:flex">
-          <span className="h-1.5 w-1.5 rounded-full bg-ink" />
+          <span className="h-1.5 w-1.5 rounded-full bg-green" />
           Robinhood Testnet
           <ChevronDown size={12} className="text-muted" />
         </div>

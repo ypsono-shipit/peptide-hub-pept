@@ -42,7 +42,7 @@ export function FilterBar({
         className="rounded-full bg-white/8 px-3 py-1.5 text-xs font-medium text-ink-soft outline-none hover:bg-white/15 hover:text-ink"
       >
         <option value="featured">Sort: Featured</option>
-        <option value="az">A–Z</option>
+        <option value="az">A-Z</option>
         <option value="price-asc">Price: low to high</option>
         <option value="price-desc">Price: high to low</option>
       </select>

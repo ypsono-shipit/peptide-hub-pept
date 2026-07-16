@@ -99,7 +99,7 @@ function Scene() {
   );
 }
 
-/** Interactive, drag-to-rotate 3D peptide capsule — real WebGL, not a static image. */
+/** Interactive, drag-to-rotate 3D peptide capsule. Real WebGL, not a static image. */
 export function PeptideCapsule3D() {
   return (
     <div className="h-[300px] w-full cursor-grab active:cursor-grabbing">

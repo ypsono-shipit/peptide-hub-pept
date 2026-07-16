@@ -99,14 +99,14 @@ export function ChartPanel({
       },
     });
 
-    // Monochrome candles: solid white up, hollow/gray down
+    // Green up / gray down candles
     const series = chart.addCandlestickSeries({
-      upColor: "#f5f5f5",
-      downColor: "#0a0a0a",
+      upColor: "#22c55e",
+      downColor: "#525252",
       borderVisible: true,
-      borderUpColor: "#f5f5f5",
+      borderUpColor: "#22c55e",
       borderDownColor: "#737373",
-      wickUpColor: "#f5f5f5",
+      wickUpColor: "#22c55e",
       wickDownColor: "#737373",
     });
 
@@ -185,8 +185,8 @@ export function ChartPanel({
       <div ref={containerRef} className="min-h-[280px] w-full flex-1" />
       <div className="border-t border-border px-3 py-1 text-[10px] text-faint">
         {status === "loading" && "Loading oracle history…"}
-        {status === "error" && "Failed to load history — showing live mark only"}
-        {status === "empty" && "No history yet — live oracle mark only (cron will fill this)"}
+        {status === "error" && "Failed to load history; showing live mark only"}
+        {status === "empty" && "No history yet; live oracle mark only (cron will fill this)"}
         {status === "ok" && (
           <>
             Oracle history · {sampleCount} samples · {tf} OHLC (forward-filled)

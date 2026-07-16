@@ -152,7 +152,7 @@ function PartnerLabPanel() {
       <p className="text-xs leading-relaxed text-ink-soft">
         Purchase with testnet {COLLATERAL_SYMBOL}: you receive a PEPT-KIT voucher NFT (one per kit)
         redeemable later for the physical research peptide. Proceeds go to the on-chain treasury.
-        Demo on Robinhood Chain Testnet — physical fulfillment not live yet.
+        Demo on Robinhood Chain Testnet. Physical fulfillment not live yet.
       </p>
     </div>
   );

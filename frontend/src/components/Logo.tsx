@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/cn";
 
-/** White asterisk mark on pure black — brand monogram. */
+/** White asterisk mark on pure black. Brand monogram. */
 export function Logo({
   size = 36,
   className,

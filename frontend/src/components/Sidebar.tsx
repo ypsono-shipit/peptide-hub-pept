@@ -52,11 +52,11 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
                 active
-                  ? "bg-panel-hover font-medium text-ink"
+                  ? "bg-panel-hover font-medium text-ink shadow-green"
                   : "text-muted hover:bg-panel hover:text-ink-soft",
               )}
             >
-              <Icon size={18} className="shrink-0" />
+              <Icon size={18} className={cn("shrink-0", active && "text-green")} />
               <span className="hidden lg:inline">{label}</span>
             </Link>
           );

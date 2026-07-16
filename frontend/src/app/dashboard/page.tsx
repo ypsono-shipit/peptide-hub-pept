@@ -19,7 +19,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-lg font-semibold text-ink">Overview</h1>
           <p className="text-sm text-muted">
-            Peptide perpetuals on Robinhood Chain Testnet · oracle-marked · USDC margin. $PEPT is the
+            Peptide perpetuals on Robinhood Chain Testnet. Oracle-marked. USDC margin. $PEPT is the
             platform token (OHM-style), not a perp.
           </p>
         </div>
@@ -66,7 +66,7 @@ function MarketRow({ market }: { market: (typeof MOCK_MARKETS)[number] }) {
             </span>
           ) : (
             isLive && (
-              <span className="rounded bg-panel-hover px-1.5 py-0.5 text-[9px] text-positive">
+              <span className="rounded bg-green-muted px-1.5 py-0.5 text-[9px] font-semibold text-green-soft">
                 LIVE
               </span>
             )
@@ -92,7 +92,7 @@ function MarketRow({ market }: { market: (typeof MOCK_MARKETS)[number] }) {
           {market.change24h.toFixed(2)}%
         </div>
       ) : (
-        <div className="w-16 text-right text-[10px] text-muted">—</div>
+        <div className="w-16 text-right text-[10px] text-muted">; </div>
       )}
     </Link>
   );

@@ -122,7 +122,7 @@ export function OrderTicket({
             onClick={() => setSide("long")}
             className={cn(
               "rounded-md py-2 text-sm font-semibold",
-              side === "long" ? "bg-primary text-on-primary" : "text-muted hover:text-ink",
+              side === "long" ? "bg-green text-black" : "text-muted hover:text-ink",
             )}
           >
             Buy / Long
@@ -146,7 +146,7 @@ export function OrderTicket({
               key={t}
               onClick={() => setOrderType(t)}
               disabled={t !== "market"}
-              title={t !== "market" ? "Coming soon — oracle market orders only" : undefined}
+              title={t !== "market" ? "Coming soon; oracle market orders only" : undefined}
               className={cn(
                 "flex-1 rounded-md py-1.5 capitalize",
                 orderType === t && t === "market"
@@ -241,7 +241,7 @@ export function OrderTicket({
             className={cn(
               "w-full rounded-lg py-3 text-sm font-semibold disabled:opacity-50",
               side === "long"
-                ? "bg-primary text-on-primary hover:bg-accent"
+                ? "bg-green text-black hover:bg-green-dim"
                 : "border border-ink bg-transparent text-ink hover:bg-panel-hover",
             )}
           >

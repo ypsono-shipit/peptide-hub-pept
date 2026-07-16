@@ -1,4 +1,4 @@
-// Presentational demo figures — not fetched from anywhere real. TVL/OI/etc.
+// Presentational demo figures, not fetched from anywhere real. TVL/OI/etc.
 // have no on-chain source yet (Treasury and PerpsEngine are fresh/empty on
 // testnet); these exist purely to give the dashboard the density the design
 // calls for. Replace with real reads once there's real usage to report.

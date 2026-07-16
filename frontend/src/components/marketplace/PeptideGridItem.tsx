@@ -52,7 +52,7 @@ export function PeptideGridItem({
         )}
       </div>
 
-      {/* Compact body — no huge empty padding */}
+      {/* Compact body */}
       <div className="flex flex-1 flex-col gap-2 p-3">
         <div>
           <h3 className="text-sm font-semibold leading-snug text-ink">{peptide.name}</h3>

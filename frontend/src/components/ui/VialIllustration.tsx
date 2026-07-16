@@ -1,4 +1,4 @@
-// Stand-in for the spec's product photography — no real image asset, so
+// Stand-in for the spec's product photography; no real image asset, so
 // this is an abstract glass-vial composition in the same visual language
 // as the rest of the app (soft gradients, glass highlights).
 export function VialIllustration() {

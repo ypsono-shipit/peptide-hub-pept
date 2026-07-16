@@ -64,7 +64,7 @@ function Scene() {
   );
 }
 
-/** Research Only product vial — slow Y-axis spin (WebGL). */
+/** Research Only product vial, slow Y-axis spin (WebGL). */
 export function ResearchOnlyVial3D() {
   return (
     <div className="h-full min-h-[200px] w-full">

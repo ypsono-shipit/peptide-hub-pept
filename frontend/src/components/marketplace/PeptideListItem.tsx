@@ -82,7 +82,7 @@ export function PeptideListItem({
         </div>
       </div>
 
-      {/* Price + CTA — desktop */}
+      {/* Price + CTA (desktop) */}
       <div className="col-span-2 flex items-center justify-between gap-4 border-t border-border pt-3 sm:col-span-1 sm:flex-col sm:items-end sm:justify-center sm:border-0 sm:pt-0 sm:pl-2">
         <div className="hidden items-center gap-1.5 text-xs text-ink-soft sm:flex">
           {peptide.inStock ? (

@@ -60,7 +60,7 @@ export default function TradePage() {
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 lg:flex-row lg:overflow-hidden">
         {/* Center column */}
         <div className="flex min-w-0 flex-1 flex-col gap-3 lg:overflow-y-auto">
-          {/* Market tabs — live + coming soon (TIRZ / RETA) */}
+          {/* Market tabs: live + coming soon (TIRZ / RETA) */}
           <div className="flex flex-wrap gap-1">
             {MARKETS.map((m) => (
               <button

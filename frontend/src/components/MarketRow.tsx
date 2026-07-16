@@ -15,7 +15,7 @@ export function MarketRow({ market }: { market: Market }) {
       <td className="px-3 py-3">
         <div className="flex items-center gap-1.5 font-medium text-ink">
           {market.symbol}
-          {isLive && <span className="h-1.5 w-1.5 rounded-full bg-ink" title="Live on-chain price" />}
+          {isLive && <span className="h-1.5 w-1.5 rounded-full bg-green" title="Live on-chain price" />}
         </div>
         <div className="text-xs text-ink-soft">{market.name}</div>
       </td>

@@ -17,7 +17,7 @@ export default function StakePage() {
         </div>
         <StakePanel />
         <Panel className="p-3 text-xs text-muted">
-          Bond markets are not configured — no reserve Stock Tokens on testnet yet.
+          Bond markets are not configured; no reserve Stock Tokens on testnet yet.
         </Panel>
       </div>
     </div>

@@ -150,7 +150,7 @@ function VoucherRow({ tokenId, owner }: { tokenId: number; owner: `0x${string}` 
         title={
           redeemed
             ? "Already redeemed"
-            : "Mark as redeemed (demo — physical fulfillment not yet live)"
+            : "Mark as redeemed (demo; physical fulfillment not yet live)"
         }
       >
         {redeemed ? "Redeemed" : isPending || confirming ? "…" : "Redeem"}

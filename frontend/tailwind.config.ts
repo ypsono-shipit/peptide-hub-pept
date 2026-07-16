@@ -5,7 +5,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Strict monochrome — black / white / gray only
+        // Dark terminal + green accents
         bg: "#000000",
         panel: "#0a0a0a",
         "panel-hover": "#141414",
@@ -15,17 +15,20 @@ const config: Config = {
         faint: "#525252",
         ink: "#f5f5f5",
         "ink-soft": "#a3a3a3",
-        // White CTAs; on-primary is black ink on white fills
+        // Primary CTAs stay white; green for live/positive accents
         primary: "#ffffff",
         accent: "#e5e5e5",
         "on-primary": "#000000",
-        // PnL / long-short: white vs mid-gray (no hue)
-        positive: "#f5f5f5",
-        "positive-dim": "#d4d4d4",
+        green: "#22c55e",
+        "green-dim": "#16a34a",
+        "green-soft": "#4ade80",
+        "green-muted": "#14532d",
+        // PnL / long: green up, gray down
+        positive: "#22c55e",
+        "positive-dim": "#16a34a",
         negative: "#737373",
         "negative-dim": "#525252",
         cloud: "#ffffff",
-        // legacy aliases
         glass: "#0a0a0a",
         "glass-strong": "#141414",
         "glass-border": "#1f1f1f",
@@ -39,6 +42,7 @@ const config: Config = {
         glass: "none",
         "glass-sm": "none",
         panel: "0 0 0 1px #1f1f1f",
+        green: "0 0 0 1px rgba(34, 197, 94, 0.35)",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],

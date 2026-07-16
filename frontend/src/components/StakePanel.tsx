@@ -102,19 +102,19 @@ export function StakePanel() {
         <div className="rounded-lg bg-bg p-2.5">
           <div className="text-muted">Wallet PEPT</div>
           <div className="mt-1 font-mono tabular-nums text-ink">
-            {peptBalance.data !== undefined ? formatEther(peptBalance.data as bigint) : "—"}
+            {peptBalance.data !== undefined ? formatEther(peptBalance.data as bigint) : "; "}
           </div>
         </div>
         <div className="rounded-lg bg-bg p-2.5">
           <div className="text-muted">Staked</div>
           <div className="mt-1 font-mono tabular-nums text-ink">
-            {staked.data !== undefined ? formatEther(staked.data as bigint) : "—"}
+            {staked.data !== undefined ? formatEther(staked.data as bigint) : "; "}
           </div>
         </div>
         <div className="rounded-lg bg-bg p-2.5">
           <div className="text-muted">Pending</div>
           <div className="mt-1 font-mono tabular-nums text-ink">
-            {pendingReward.data !== undefined ? formatEther(pendingReward.data as bigint) : "—"}
+            {pendingReward.data !== undefined ? formatEther(pendingReward.data as bigint) : "; "}
           </div>
         </div>
       </div>

@@ -43,7 +43,7 @@ export function Sparkline({
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} fill="none">
       <polyline
         points={points}
-        stroke={positive ? "#f5f5f5" : "#737373"}
+        stroke={positive ? "#22c55e" : "#737373"}
         strokeWidth={1.75}
         strokeLinecap="round"
         strokeLinejoin="round"

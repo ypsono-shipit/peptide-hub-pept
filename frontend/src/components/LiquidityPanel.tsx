@@ -95,17 +95,17 @@ export function LiquidityPanel() {
 
   const fmtUsdc = (v: bigint | undefined) =>
     v === undefined
-      ? "—"
+      ? "; "
       : Number(formatUnits(v, COLLATERAL_DECIMALS)).toLocaleString(undefined, {
           maximumFractionDigits: 2,
         });
   const fmtPlp = (v: bigint | undefined) =>
     v === undefined
-      ? "—"
+      ? "; "
       : Number(formatUnits(v, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 });
   const fmtUsd18 = (v: bigint | undefined) =>
     v === undefined
-      ? "—"
+      ? "; "
       : Number(formatUnits(v, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 });
 
   const mintFaucet = () => {

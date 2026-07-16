@@ -2,7 +2,7 @@
  * Marketplace: Pept Trade x Research Only
  * Catalog + kit prices mirror the Research Only product line (10-vial kits, >99% purity).
  * Checkout is on-chain: pay the listed price in Robinhood testnet USDC via MarketplaceShop.
- * Research Only is a brand partnership label — products are not deep-linked to their store.
+ * Research Only is a brand partnership label; products are not deep-linked to their store.
  */
 
 export const MARKETPLACE_BRAND = {
@@ -13,7 +13,7 @@ export const MARKETPLACE_BRAND = {
 export const RESEARCH_ONLY = {
   name: "Research Only",
   shortName: "RO",
-  /** Partnership brand (catalog source) — checkout is PEPT Trade USDC, not external. */
+  /** Partnership brand (catalog source); checkout is PEPT Trade USDC, not external. */
   url: "https://researchonly.io",
   shopUrl: "https://researchonly.io/shop/",
   aboutUrl: "https://researchonly.io/about/",
@@ -146,7 +146,7 @@ export const PEPTIDES: Peptide[] = [
     sku: "RO-049",
     name: "PT-141",
     category: "aesthetic",
-    description: "Bremelanotide — melanocortin agonist",
+    description: "Bremelanotide, melanocortin agonist",
     kitLabel: "10 Vials",
     dosage: "10mg",
     purity: ">99%",
@@ -363,7 +363,7 @@ export const PEPTIDES: Peptide[] = [
     sku: "RO-057",
     name: "SS-31",
     category: "longevity",
-    description: "Elamipretide — mitochondrial peptide",
+    description: "Elamipretide, mitochondrial peptide",
     kitLabel: "10 Vials",
     dosage: "10mg",
     purity: ">99%",
@@ -660,7 +660,7 @@ export const PARTNER_LAB: PartnerLab = {
   disclaimer: RESEARCH_ONLY.disclaimer,
 };
 
-/** @deprecated multi-lab mock removed — single partner is Research Only */
+/** @deprecated multi-lab mock removed; single partner is Research Only */
 export type Lab = PartnerLab;
 export const LABS: PartnerLab[] = [PARTNER_LAB];
 
@@ -686,7 +686,7 @@ export const HOW_IT_WORKS = [
   {
     step: 3,
     title: "Receive kit NFT",
-    description: "Get a PEPT-KIT voucher — redeem later for the physical peptide",
+    description: "Get a PEPT-KIT voucher; redeem later for the physical peptide",
   },
 ];
 

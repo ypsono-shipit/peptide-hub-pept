@@ -52,7 +52,7 @@ export const plpPoolContract = {
   abi: PERPS_LIQUIDITY_POOL_ABI as Abi,
 } as const;
 
-/** Pept Trade x Research Only catalog — pay kit price in testnet USDC, mint voucher NFT. */
+/** Pept Trade x Research Only catalog: pay kit price in testnet USDC, mint voucher NFT. */
 export const marketplaceShopContract = {
   address: TESTNET_CONTRACTS.MarketplaceShop as `0x${string}`,
   abi: MARKETPLACE_SHOP_ABI as Abi,

@@ -38,7 +38,7 @@ export function AccountCard() {
       <div className="font-mono text-xl font-semibold tabular-nums text-ink">
         {isConnected
           ? `$${usdc.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-          : "—"}
+          : "; "}
       </div>
       <div className="mt-0.5 text-[11px] text-muted">
         Wallet {COLLATERAL_SYMBOL}
@@ -50,7 +50,7 @@ export function AccountCard() {
           <span className="font-mono text-ink-soft">
             {aum.data !== undefined
               ? Number(formatUnits(aum.data as bigint, COLLATERAL_DECIMALS)).toLocaleString()
-              : "—"}{" "}
+              : "; "}{" "}
             {COLLATERAL_SYMBOL}
           </span>
         </div>
@@ -59,7 +59,7 @@ export function AccountCard() {
           <span className="font-mono text-ink-soft">
             {oi.data !== undefined
               ? `$${Number(formatUnits(oi.data as bigint, 18)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-              : "—"}
+              : "; "}
           </span>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { MOCK_MARKETS } from "@/lib/markets";
 import { MARKETPLACE_BRAND } from "@/lib/marketplaceData";
 
 export const metadata: Metadata = {
-  title: "PEPT Trade — Peptide Perpetuals on Robinhood Chain",
+  title: "PEPT Trade | Peptide Perpetuals on Robinhood Chain",
   description:
     "Oracle-marked peptide perps, USDC margin, PLP liquidity, and Pept Trade x Research Only kits. Launch the terminal on Robinhood Chain Testnet.",
 };
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const FEATURES = [
   {
     title: "Peptide perps",
-    body: "Trade SEMA, GLP-1 index, and biotech markets with isolated margin and oracle marks — on-chain, 24/7.",
+    body: "Trade SEMA, GLP-1 index, and biotech markets with isolated margin and oracle marks, on-chain, 24/7.",
   },
   {
     title: "Real $/mg marks",
@@ -25,7 +25,7 @@ const FEATURES = [
   },
   {
     title: "Kit vouchers",
-    body: `${MARKETPLACE_BRAND.name} — pay listed kit prices, receive a PEPT-KIT NFT redeemable for the physical peptide.`,
+    body: `${MARKETPLACE_BRAND.name}: pay listed kit prices, receive a PEPT-KIT NFT redeemable for the physical peptide.`,
   },
 ];
 
@@ -72,13 +72,13 @@ export default function LandingPage() {
         </nav>
         <Link
           href="/trade"
-          className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-on-primary transition hover:bg-accent sm:text-sm"
+          className="rounded-full bg-green px-4 py-2 text-xs font-semibold text-black transition hover:bg-green-dim sm:text-sm"
         >
           Launch Terminal
         </Link>
       </header>
 
-      {/* Hero — copy left, vial right */}
+      {/* Hero: copy left, vial right */}
       <main className="relative z-10">
         <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-10 px-5 pb-16 pt-8 sm:px-8 sm:pt-12 lg:grid-cols-[1fr_minmax(280px,42%)] lg:gap-12 lg:pb-20">
           <div className="flex flex-col justify-center">
@@ -90,18 +90,18 @@ export default function LandingPage() {
               Trade peptides
               <br />
               while the world{" "}
-              <em className="font-serif font-normal italic text-ink-soft">sleeps</em>
+              <em className="font-serif font-normal italic text-green-soft">sleeps</em>
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
-              Oracle-marked perpetual markets for research peptides — USDC margin, PLP liquidity, and a
+              Oracle-marked perpetual markets for research peptides: USDC margin, PLP liquidity, and a
               kit marketplace that mints redeemable NFT vouchers. $PEPT powers the platform.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <Link
                 href="/trade"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-on-primary transition hover:bg-accent"
+                className="inline-flex items-center justify-center rounded-full bg-green px-7 py-3.5 text-sm font-semibold text-black transition hover:bg-green-dim"
               >
                 Launch Terminal
               </Link>
@@ -118,7 +118,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Vial bottle — right column */}
+          {/* Vial bottle on the right */}
           <div className="relative mx-auto flex w-full max-w-md items-center justify-center lg:mx-0 lg:max-w-none lg:justify-end">
             <div
               aria-hidden
@@ -166,7 +166,7 @@ export default function LandingPage() {
                         Soon
                       </span>
                     ) : (
-                      <span className="rounded bg-panel-hover px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-ink">
+                      <span className="rounded bg-green-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-green-soft">
                         Live
                       </span>
                     )}
@@ -187,11 +187,11 @@ export default function LandingPage() {
         {/* Product */}
         <section id="product" className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
           <h2 className="max-w-2xl text-3xl font-semibold tracking-tight text-ink sm:text-4xl md:text-5xl">
-            Where <em className="font-serif font-normal italic text-ink-soft">real</em> peptides
-            meet <em className="font-serif font-normal italic text-ink-soft">real</em> trading
+            Where <em className="font-serif font-normal italic text-green-soft">real</em> peptides
+            meet <em className="font-serif font-normal italic text-green-soft">real</em> trading
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-ink-soft sm:text-base">
-            PEPT Trade is a peptide-native perps terminal and research-kit marketplace — not a generic
+            PEPT Trade is a peptide-native perps terminal and research-kit marketplace, not a generic
             crypto perp fork with a biotech skin.
           </p>
 
@@ -216,16 +216,16 @@ export default function LandingPage() {
           <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:items-center">
             <div>
               <h2 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-                Built to <em className="font-serif font-normal italic text-ink-soft">last</em>.
+                Built to <em className="font-serif font-normal italic text-green-soft">last</em>.
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-ink-soft sm:text-base">
                 Deployed on Robinhood Chain Testnet with a GMX-style liquidity pool, dual-source
-                oracle, and OHM-inspired $PEPT tokenomics for staking and treasury — separate from the
+                oracle, and OHM-inspired $PEPT tokenomics for staking and treasury, separate from the
                 markets you trade.
               </p>
               <Link
                 href="/trade"
-                className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-semibold text-on-primary hover:bg-accent"
+                className="mt-8 inline-flex rounded-full bg-green px-6 py-3 text-sm font-semibold text-black hover:bg-green-dim"
               >
                 Launch Terminal
               </Link>
@@ -251,14 +251,14 @@ export default function LandingPage() {
           <h2 className="text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
             Markets never sleep.
             <br />
-            <em className="font-serif font-normal italic text-ink-soft">Neither do peptides.</em>
+            <em className="font-serif font-normal italic text-green-soft">Neither do peptides.</em>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-ink-soft">
-            Enter the monochrome terminal — charts, order ticket, positions, and kit checkout.
+            Enter the terminal: charts, order ticket, positions, and kit checkout.
           </p>
           <Link
             href="/trade"
-            className="mt-10 inline-flex rounded-full bg-primary px-10 py-4 text-sm font-semibold text-on-primary hover:bg-accent"
+            className="mt-10 inline-flex rounded-full bg-green px-10 py-4 text-sm font-semibold text-black hover:bg-green-dim"
           >
             Launch Terminal
           </Link>

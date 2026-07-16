@@ -6,7 +6,7 @@ export type Market = {
   price: number;
   change24h: number;
   volume24h: number;
-  /** keccak256(<market key seed>) — shared by PeptideOracle + PerpsEngine. */
+  /** keccak256(<market key seed>), shared by PeptideOracle + PerpsEngine. */
   oracleKey?: `0x${string}`;
   /** $/mg for peptide-chemical markets, $ for equity-style notionals. */
   unit: "$" | "$/mg";
@@ -20,7 +20,7 @@ export function getMarketByOracleKey(oracleKey: `0x${string}`): Market | undefin
 
 /**
  * Tradeable peptide perps + coming-soon GLP-1 names.
- * $PEPT is the platform / OHM-fork token — not a perp market.
+ * $PEPT is the platform / OHM-fork token, not a perp market.
  * Keys: keccak256(utf8(symbol)) e.g. keccak256("TIRZ-PERP").
  */
 export const MOCK_MARKETS: Market[] = [
