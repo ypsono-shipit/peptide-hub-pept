@@ -68,26 +68,60 @@ async function countFromSheets(): Promise<number | null> {
   return null;
 }
 
+/**
+ * Google Apps Script web apps often 302 POST → googleusercontent; some runtimes
+ * rewrite that to GET and drop the body. Follow redirects manually, re-POSTing.
+ */
+async function postJsonFollow(url: string, body: unknown, maxHops = 5): Promise<Response> {
+  let current = url;
+  let payload = JSON.stringify(body);
+  for (let i = 0; i < maxHops; i++) {
+    const res = await fetch(current, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      redirect: "manual",
+    });
+    if (res.status >= 300 && res.status < 400) {
+      const loc = res.headers.get("location");
+      if (!loc) break;
+      current = new URL(loc, current).toString();
+      continue;
+    }
+    return res;
+  }
+  // Last resort: default follow
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    redirect: "follow",
+  });
+}
+
 async function joinViaSheets(entry: WaitlistEntry): Promise<WaitlistResult | null> {
   const base = sheetsUrl();
   if (!base) return null;
   try {
-    const res = await fetch(base, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: entry.email,
-        wallet: entry.wallet,
-        x_handle: entry.xHandle,
-        created_at: new Date().toISOString(),
-      }),
+    const res = await postJsonFollow(base, {
+      email: entry.email,
+      wallet: entry.wallet,
+      x_handle: entry.xHandle,
+      created_at: new Date().toISOString(),
     });
-    const data = (await res.json()) as {
+    const text = await res.text();
+    let data: {
       ok?: boolean;
       alreadyJoined?: boolean;
       position?: number;
       error?: string;
-    };
+    } = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      console.warn("[waitlist] sheets non-JSON response", text.slice(0, 200));
+      return { ok: false, error: "Sheet write failed (bad response).", status: 502 };
+    }
     if (!res.ok || data.ok === false) {
       return { ok: false, error: data.error || "Sheet write failed", status: 502 };
     }
