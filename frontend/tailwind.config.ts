@@ -1,11 +1,17 @@
 import type { Config } from "tailwindcss";
 
+/** Robinhood neon lime (Pantone 389 C) */
+const RH_NEON = "#CCFF00";
+const RH_NEON_DIM = "#B8E600";
+const RH_NEON_SOFT = "#D4FF33";
+const RH_NEON_MUTED = "#2A3300";
+
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       colors: {
-        // Dark terminal + green accents
+        // Dark terminal + Robinhood neon accents
         bg: "#000000",
         panel: "#0a0a0a",
         "panel-hover": "#141414",
@@ -15,17 +21,17 @@ const config: Config = {
         faint: "#525252",
         ink: "#f5f5f5",
         "ink-soft": "#a3a3a3",
-        // Primary CTAs stay white; green for live/positive accents
         primary: "#ffffff",
         accent: "#e5e5e5",
         "on-primary": "#000000",
-        green: "#22c55e",
-        "green-dim": "#16a34a",
-        "green-soft": "#4ade80",
-        "green-muted": "#14532d",
-        // PnL / long: green up, gray down
-        positive: "#22c55e",
-        "positive-dim": "#16a34a",
+        // Robinhood neon #CCFF00 (rgb 204,255,0)
+        green: RH_NEON,
+        "green-dim": RH_NEON_DIM,
+        "green-soft": RH_NEON_SOFT,
+        "green-muted": RH_NEON_MUTED,
+        // PnL / long: neon up, gray down
+        positive: RH_NEON,
+        "positive-dim": RH_NEON_DIM,
         negative: "#737373",
         "negative-dim": "#525252",
         cloud: "#ffffff",
@@ -42,7 +48,7 @@ const config: Config = {
         glass: "none",
         "glass-sm": "none",
         panel: "0 0 0 1px #1f1f1f",
-        green: "0 0 0 1px rgba(34, 197, 94, 0.35)",
+        green: "0 0 0 1px rgba(204, 255, 0, 0.4)",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],

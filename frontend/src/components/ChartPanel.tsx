@@ -99,14 +99,14 @@ export function ChartPanel({
       },
     });
 
-    // Green up / gray down candles
+    // Robinhood neon up / gray down candles
     const series = chart.addCandlestickSeries({
-      upColor: "#22c55e",
+      upColor: "#CCFF00",
       downColor: "#525252",
       borderVisible: true,
-      borderUpColor: "#22c55e",
+      borderUpColor: "#CCFF00",
       borderDownColor: "#737373",
-      wickUpColor: "#22c55e",
+      wickUpColor: "#CCFF00",
       wickDownColor: "#737373",
     });
 
