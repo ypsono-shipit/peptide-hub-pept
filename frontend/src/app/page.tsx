@@ -78,43 +78,63 @@ export default function LandingPage() {
         </Link>
       </header>
 
-      {/* Hero — Arcus-style big type */}
+      {/* Hero — copy left, vial right */}
       <main className="relative z-10">
-        <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-center px-5 pb-20 pt-10 sm:px-8 sm:pt-16">
-          <p className="mb-6 text-[11px] font-medium uppercase tracking-[0.2em] text-muted sm:text-xs">
-            Robinhood Chain Testnet · Peptide perps
-          </p>
+        <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-10 px-5 pb-16 pt-8 sm:px-8 sm:pt-12 lg:grid-cols-[1fr_minmax(280px,42%)] lg:gap-12 lg:pb-20">
+          <div className="flex flex-col justify-center">
+            <p className="mb-6 text-[11px] font-medium uppercase tracking-[0.2em] text-muted sm:text-xs">
+              Robinhood Chain Testnet · Peptide perps
+            </p>
 
-          <h1 className="max-w-4xl text-[2.75rem] font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl md:text-7xl lg:text-[5.25rem]">
-            Trade peptides
-            <br />
-            while the world{" "}
-            <em className="font-serif font-normal italic text-ink-soft">sleeps</em>
-          </h1>
+            <h1 className="max-w-4xl text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl md:text-7xl lg:text-[4.75rem]">
+              Trade peptides
+              <br />
+              while the world{" "}
+              <em className="font-serif font-normal italic text-ink-soft">sleeps</em>
+            </h1>
 
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
-            Oracle-marked perpetual markets for research peptides — USDC margin, PLP liquidity, and a
-            kit marketplace that mints redeemable NFT vouchers. $PEPT powers the platform.
-          </p>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
+              Oracle-marked perpetual markets for research peptides — USDC margin, PLP liquidity, and a
+              kit marketplace that mints redeemable NFT vouchers. $PEPT powers the platform.
+            </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <Link
-              href="/trade"
-              className="inline-flex items-center justify-center rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-on-primary transition hover:bg-accent"
-            >
-              Launch Terminal
-            </Link>
-            <Link
-              href="/marketplace"
-              className="inline-flex items-center justify-center rounded-full border border-border-strong px-7 py-3.5 text-sm font-semibold text-ink transition hover:border-ink hover:bg-panel"
-            >
-              Browse Kits
-            </Link>
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <Link
+                href="/trade"
+                className="inline-flex items-center justify-center rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-on-primary transition hover:bg-accent"
+              >
+                Launch Terminal
+              </Link>
+              <Link
+                href="/marketplace"
+                className="inline-flex items-center justify-center rounded-full border border-border-strong px-7 py-3.5 text-sm font-semibold text-ink transition hover:border-ink hover:bg-panel"
+              >
+                Browse Kits
+              </Link>
+            </div>
+
+            <p className="mt-8 text-xs text-muted">
+              Built for Robinhood Chain · Self-custodial · Demo testnet
+            </p>
           </div>
 
-          <p className="mt-8 text-xs text-muted">
-            Built for Robinhood Chain · Self-custodial · Demo testnet
-          </p>
+          {/* Vial bottle — right column */}
+          <div className="relative mx-auto flex w-full max-w-md items-center justify-center lg:mx-0 lg:max-w-none lg:justify-end">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-8 rounded-full bg-white/[0.04] blur-3xl"
+            />
+            <div className="relative aspect-[3/4] w-full max-w-[340px] overflow-hidden rounded-3xl border border-border bg-black sm:max-w-[400px] lg:max-w-none lg:w-[min(100%,420px)]">
+              <Image
+                src="/pept-vial.jpg"
+                alt="PEPT research peptide vial"
+                fill
+                priority
+                sizes="(max-width: 1024px) 340px, 420px"
+                className="object-cover object-center"
+              />
+            </div>
+          </div>
         </section>
 
         {/* Markets strip */}
