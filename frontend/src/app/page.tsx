@@ -188,6 +188,7 @@ export default function LandingPage() {
         <section id="product" className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
           <h2 className="max-w-2xl text-3xl font-semibold tracking-tight text-ink sm:text-4xl md:text-5xl">
             Where <em className="font-serif font-normal italic text-green-soft">real</em> peptides
+            <br />
             meet <em className="font-serif font-normal italic text-green-soft">real</em> trading
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-ink-soft sm:text-base">
