@@ -7,7 +7,7 @@ import { fetchOnChainQuote } from "@/lib/oracle-api/onchain";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const g = gate(req);
+  const g = await gate(req, "health");
   if (!g.ok) return g.response;
 
   const hist = await loadHistory();
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
         history: meta,
         feeds,
       },
-      g,
+      g.auth,
     ),
   );
 }

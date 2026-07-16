@@ -4,6 +4,7 @@ import { getMarketDef } from "@/lib/oracle-api/registry";
 import { loadHistory, latestSample } from "@/lib/oracle-api/history";
 import { fetchOnChainQuote } from "@/lib/oracle-api/onchain";
 import { parseTimeframe, samplesToOhlc } from "@/lib/ohlc";
+import { TIER_LIMITS } from "@/lib/oracle-api/tiers";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export async function GET(
   req: NextRequest,
   ctx: { params: Promise<{ market: string }> },
 ) {
-  const g = gate(req);
+  const g = await gate(req, "ohlc");
   if (!g.ok) return g.response;
 
   const { market: raw } = await ctx.params;
@@ -27,7 +28,8 @@ export async function GET(
   const sp = req.nextUrl.searchParams;
   const tf = parseTimeframe(sp.get("tf"));
   const wantLive = sp.get("live") !== "0" && sp.get("live") !== "false";
-  const maxBars = Math.min(Math.max(Number(sp.get("limit") ?? 150), 10), 500);
+  const cap = TIER_LIMITS[g.auth.tier].ohlcLimit;
+  const maxBars = Math.min(Math.max(Number(sp.get("limit") ?? cap), 10), cap);
 
   const hist = await loadHistory();
   let livePrice: number | undefined;
@@ -56,7 +58,7 @@ export async function GET(
         livePrice: livePrice ?? null,
         candles,
       },
-      g,
+      g.auth,
     ),
   );
 }

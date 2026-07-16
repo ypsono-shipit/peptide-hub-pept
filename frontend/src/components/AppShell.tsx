@@ -8,7 +8,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   // Marketing + public docs: full-bleed (no trade shell sidebar)
   const isMarketing =
-    pathname === "/" || pathname === "/docs" || pathname?.startsWith("/docs/");
+    pathname === "/" ||
+    pathname === "/oracle" ||
+    pathname === "/docs" ||
+    pathname?.startsWith("/docs/");
 
   if (isMarketing) {
     return <div className="min-h-screen w-full bg-bg text-ink">{children}</div>;

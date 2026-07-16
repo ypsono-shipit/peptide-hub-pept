@@ -7,7 +7,7 @@ import { fetchOnChainQuote } from "@/lib/oracle-api/onchain";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const g = gate(req);
+  const g = await gate(req, "prices");
   if (!g.ok) return g.response;
 
   const prices = await Promise.all(
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     }),
   );
 
-  return json(withMeta({ count: prices.length, prices }, g));
+  return json(withMeta({ count: prices.length, prices }, g.auth));
 }
 
 export async function OPTIONS() {

@@ -5,7 +5,7 @@ import { ORACLE_MARKETS, marketKeyOf } from "@/lib/oracle-api/registry";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const g = gate(req);
+  const g = await gate(req, "markets");
   if (!g.ok) return g.response;
 
   const markets = ORACLE_MARKETS.map((m) => ({
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     marketKey: marketKeyOf(m.id),
   }));
 
-  return json(withMeta({ count: markets.length, markets }, g));
+  return json(withMeta({ count: markets.length, markets }, g.auth));
 }
 
 export async function OPTIONS() {

@@ -280,6 +280,33 @@ async function main() {
   if (historySamples.length > 0) {
     const paths = appendPriceSamples(historySamples);
     console.log(`Appended ${historySamples.length} samples to price history:`, paths);
+
+    // Notify B2B webhook subscribers (optional; set ORACLE_API_FANOUT_URL + ORACLE_ADMIN_SECRET)
+    const fanoutUrl = process.env.ORACLE_API_FANOUT_URL;
+    const adminSecret = process.env.ORACLE_ADMIN_SECRET;
+    if (fanoutUrl && adminSecret && !dryRun) {
+      try {
+        const res = await fetch(fanoutUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-Secret": adminSecret,
+          },
+          body: JSON.stringify({
+            prices: historySamples.map((s) => ({
+              market: s.market,
+              price: s.price,
+              unit: "$/mg",
+              asOf: s.ts,
+              source: s.source,
+            })),
+          }),
+        });
+        console.log(`Webhook fanout: ${res.status} ${await res.text().then((t) => t.slice(0, 200))}`);
+      } catch (e) {
+        console.warn("Webhook fanout failed (non-fatal):", e);
+      }
+    }
   }
 
   if (anyPaused) {

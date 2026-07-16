@@ -69,7 +69,7 @@ export default function LandingPage() {
           <Link href="/marketplace" className="hover:text-ink">
             Marketplace
           </Link>
-          <Link href="/docs/oracle" className="hover:text-ink">
+          <Link href="/oracle" className="hover:text-ink">
             Oracle API
           </Link>
         </nav>

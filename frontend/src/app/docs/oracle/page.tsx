@@ -71,10 +71,16 @@ export default function OracleDocsPage() {
             Open API index
           </Link>
           <Link
-            href="/"
+            href="/oracle"
             className="rounded-full border border-border-strong px-5 py-2.5 text-sm font-semibold text-ink hover:bg-panel"
           >
-            PEPT Trade home
+            Product & pricing
+          </Link>
+          <Link
+            href="/api/v1/oracle/openapi.json"
+            className="rounded-full border border-border-strong px-5 py-2.5 text-sm font-semibold text-ink hover:bg-panel"
+          >
+            OpenAPI
           </Link>
         </div>
 
