@@ -19,7 +19,7 @@ import { appendPriceSamples, type PriceSample } from "./lib/price-history";
  *
  * Env flags:
  *   DRY_RUN=1              Scrape + print only; no chain txs
- *   FORCE_PUSH=1           Use forcePushPrice (bypasses 30% circuit breaker)
+ *   (forcePushPrice removed — circuit breaker cannot be bypassed)
  *   SKIP_SCRAPE=1          Use data/glp1-reference-prices.json only
  *   SKIP_SCOUTER=1         Vendor basket only
  *   SKIP_BASKET=1          PeptideScouter only
@@ -252,16 +252,15 @@ async function main() {
       console.log(`  ${row.symbol}: no readable prior price (new/paused/stale)`);
     }
 
-    const tx = forcePush
-      ? await oracle.forcePushPrice(marketKey, priceWei, row.source)
-      : await oracle.pushPrice(marketKey, priceWei, row.source);
+    // forcePushPrice removed: large moves pause the feed instead of applying.
+    const tx = await oracle.pushPrice(marketKey, priceWei, row.source);
     await tx.wait();
 
     const feed = await oracle.feeds(marketKey);
     if (feed.paused) {
       anyPaused = true;
       console.warn(
-        `⚠ ${row.symbol}: circuit breaker paused (push deviated >30%) — review then FORCE_PUSH=1`,
+        `⚠ ${row.symbol}: circuit breaker paused (push deviated >30%) — unpause after review, then push a smaller step`,
       );
     } else {
       const onChain = await oracle.latestPrice(marketKey);
@@ -311,7 +310,7 @@ async function main() {
 
   if (anyPaused) {
     console.warn(
-      "\nOne or more feeds are paused. Trading on those markets reverts until admin forcePushPrice / unpause.",
+      "\nOne or more feeds are paused. Trading reverts until a pusher unpause()s, then push in ≤30% steps.",
     );
   }
 }

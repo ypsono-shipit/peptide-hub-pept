@@ -87,18 +87,33 @@ describe("PLP + PerpsEngine (18-dec collateral)", () => {
     const size = ethers.parseEther("100");
     const collat = ethers.parseEther("50");
     await (await engine.connect(trader).openPosition(marketKey, true, size, collat)).wait();
-    await (await oracle.forcePushPrice(marketKey, ethers.parseEther("6"), "up")).wait();
+    // Within 30% circuit breaker; wait min push interval
+    await ethers.provider.send("evm_increaseTime", [6 * 60]);
+    await ethers.provider.send("evm_mine", []);
+    await (await oracle.pushPrice(marketKey, ethers.parseEther("6"), "up")).wait();
     const balBefore = await collateral.balanceOf(trader.address);
     await (await engine.connect(trader).closePosition(1)).wait();
     expect(await collateral.balanceOf(trader.address)).to.be.gt(balBefore);
     expect(await pool.totalProfitsPaid()).to.be.gt(0);
 
-    await (await oracle.forcePushPrice(marketKey, ethers.parseEther("5"), "reset")).wait();
+    await ethers.provider.send("evm_increaseTime", [6 * 60]);
+    await ethers.provider.send("evm_mine", []);
+    await (await oracle.pushPrice(marketKey, ethers.parseEther("5"), "reset")).wait();
     await (await engine.connect(trader).openPosition(marketKey, false, size, collat)).wait();
     const lossesBefore = await pool.totalLossesReceived();
-    await (await oracle.forcePushPrice(marketKey, ethers.parseEther("6"), "up2")).wait();
+    await ethers.provider.send("evm_increaseTime", [6 * 60]);
+    await ethers.provider.send("evm_mine", []);
+    await (await oracle.pushPrice(marketKey, ethers.parseEther("6"), "up2")).wait();
     await (await engine.connect(trader).closePosition(2)).wait();
     expect(await pool.totalLossesReceived()).to.be.gt(lossesBefore);
+  });
+
+  it("locks engine so owner cannot re-point coverProfit", async () => {
+    const { owner, pool, engine } = await fixture();
+    await expect(pool.connect(owner).setEngine(owner.address)).to.be.revertedWith(
+      "PLP pool: engine locked",
+    );
+    expect(await pool.perpsEngine()).to.equal(await engine.getAddress());
   });
 });
 

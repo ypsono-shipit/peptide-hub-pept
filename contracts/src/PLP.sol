@@ -9,16 +9,24 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title PLP — Peptide Liquidity Provider shares
+/// @dev Minter is one-shot: after setMinter, it cannot be changed (even by owner).
 contract PLP is ERC20, Ownable {
     address public minter;
+    bool public minterLocked;
 
     event MinterSet(address indexed minter);
+    event MinterLocked(address indexed minter);
 
     constructor() ERC20("Peptide LP", "PLP") Ownable(msg.sender) {}
 
+    /// @notice One-time minter assignment (pool). Irreversible once set.
     function setMinter(address minter_) external onlyOwner {
+        require(!minterLocked, "PLP: minter locked");
+        require(minter_ != address(0), "PLP: zero");
         minter = minter_;
+        minterLocked = true;
         emit MinterSet(minter_);
+        emit MinterLocked(minter_);
     }
 
     function mint(address to, uint256 amount) external {
@@ -34,8 +42,8 @@ contract PLP is ERC20, Ownable {
 
 /// @title PerpsLiquidityPool
 /// @notice Collateral vault backstopping peptide perps OI (GMX-style).
-///         Supports 6- or 18-decimal collateral (e.g. USDC vs tPUSD).
-///         Open interest is tracked in 18-decimal USD notionals.
+///         Engine is one-shot; owner cannot re-point coverProfit after setup.
+///         Max single profit payout is capped vs vault AUM to limit oracle-drain.
 contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -46,9 +54,13 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
     uint256 public immutable toUsdScale;
 
     address public perpsEngine;
+    bool public engineLocked;
 
     uint256 public maxUtilizationBps = 5_000;
     uint256 public reserveBps = 2_000;
+    /// @notice Max fraction of vault AUM payable in one coverProfit call (default 5%).
+    uint256 public maxProfitPerPayoutBps = 500;
+    bool public paramsLocked;
 
     /// @notice Aggregate OI in 18-decimal USD (matches PerpsEngine.sizeUsd).
     uint256 public openInterestUsd;
@@ -58,8 +70,11 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
     uint256 public totalLossesReceived;
 
     event EngineSet(address indexed engine);
+    event EngineLocked(address indexed engine);
     event MaxUtilizationSet(uint256 bps);
     event ReserveBpsSet(uint256 bps);
+    event MaxProfitPerPayoutSet(uint256 bps);
+    event ParamsLocked();
     event Deposited(address indexed user, uint256 assets, uint256 shares);
     event Withdrawn(address indexed user, uint256 assets, uint256 shares);
     event OpenInterestUpdated(uint256 openInterestUsd);
@@ -82,21 +97,42 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
         toUsdScale = 10 ** (18 - uint256(dec));
     }
 
+    /// @notice One-time engine assignment. Irreversible — owner cannot later
+    ///         point coverProfit at a malicious contract.
     function setEngine(address engine) external onlyOwner {
+        require(!engineLocked, "PLP pool: engine locked");
+        require(engine != address(0), "PLP pool: zero");
         perpsEngine = engine;
+        engineLocked = true;
         emit EngineSet(engine);
+        emit EngineLocked(engine);
     }
 
     function setMaxUtilizationBps(uint256 bps) external onlyOwner {
+        require(!paramsLocked, "PLP pool: params locked");
         require(bps > 0 && bps <= 10_000, "PLP pool: bad util");
         maxUtilizationBps = bps;
         emit MaxUtilizationSet(bps);
     }
 
     function setReserveBps(uint256 bps) external onlyOwner {
+        require(!paramsLocked, "PLP pool: params locked");
         require(bps <= 10_000, "PLP pool: bad reserve");
         reserveBps = bps;
         emit ReserveBpsSet(bps);
+    }
+
+    function setMaxProfitPerPayoutBps(uint256 bps) external onlyOwner {
+        require(!paramsLocked, "PLP pool: params locked");
+        require(bps > 0 && bps <= 10_000, "PLP pool: bad cap");
+        maxProfitPerPayoutBps = bps;
+        emit MaxProfitPerPayoutSet(bps);
+    }
+
+    /// @notice Freeze utilization / reserve / profit-cap knobs forever.
+    function lockParams() external onlyOwner {
+        paramsLocked = true;
+        emit ParamsLocked();
     }
 
     function totalAssets() public view returns (uint256) {
@@ -116,7 +152,6 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
     /// @notice Assets (raw token units) LPs may withdraw.
     function availableAssets() public view returns (uint256) {
         uint256 bal = totalAssets();
-        // Reserve haircut on OI, converted back to asset units
         uint256 reservedUsd = (openInterestUsd * reserveBps) / 10_000;
         uint256 utilFloorUsd = openInterestUsd == 0
             ? 0
@@ -174,9 +209,14 @@ contract PerpsLiquidityPool is Ownable, ReentrancyGuard {
         emit LossReceived(amount);
     }
 
+    /// @notice Pay trader profit from vault. Only the locked PerpsEngine.
+    ///         Capped per call so a single manipulated mark cannot empty the vault.
     function coverProfit(address to, uint256 amount) external onlyEngine nonReentrant {
         require(amount > 0, "PLP pool: zero profit");
-        require(amount <= totalAssets(), "PLP pool: insolvent");
+        uint256 bal = totalAssets();
+        require(amount <= bal, "PLP pool: insolvent");
+        uint256 cap = (bal * maxProfitPerPayoutBps) / 10_000;
+        require(amount <= cap, "PLP pool: profit cap");
         totalProfitsPaid += amount;
         asset.safeTransfer(to, amount);
         emit ProfitCovered(to, amount);

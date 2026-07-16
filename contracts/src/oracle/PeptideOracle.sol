@@ -12,64 +12,96 @@ interface AggregatorV3Interface {
 }
 
 /// @title PeptideOracle
-/// @notice Price source for markets without a native Chainlink feed —
-///         research-peptide $/mg indices (Semaglutide, GLP-1 basket, etc.)
-///         and other synthetic markets. Chainlink feeds are used directly
-///         wherever available; this contract only covers the gap. Uses a
-///         simple owner-pushed price with per-market staleness and a
-///         deviation circuit breaker — a committee/multi-reporter design
-///         (median-of-N, TWAP, signed attestations) should replace this
-///         before real funds are at risk; see GMX's oracle keeper design
-///         for a battle-tested pattern.
+/// @notice Price source for markets without a native Chainlink feed.
+/// @dev Hardening vs single-owner manipulation:
+///      - No forcePushPrice (cannot bypass deviation circuit breaker)
+///      - pushPrice only by authorized *pushers* (not Owner alone after setup)
+///      - Owner can add pushers then lockPushers() + renounceOwnership so even
+///        the deployer key cannot change prices or the pusher set
 contract PeptideOracle is Ownable {
     struct Feed {
-        address chainlinkFeed; // address(0) if this market uses the pushed price instead
+        address chainlinkFeed;
         uint256 pushedPrice; // 18 decimals
         uint256 updatedAt;
-        uint256 stalenessWindow; // seconds; 0 means "use DEFAULT_PUSHED_STALENESS"
-        string source; // e.g. "PeptidePricing.com + PeptideScouter.com median"
-        bool paused; // set by the deviation circuit breaker; blocks getPrice until admin review
+        uint256 stalenessWindow; // 0 → DEFAULT_PUSHED_STALENESS
+        string source;
+        bool paused;
     }
 
-    // Chainlink feeds update every few seconds/minutes, so a tight window
-    // catches a genuinely broken feed.
     uint256 public constant CHAINLINK_MAX_STALENESS = 15 minutes;
-    // Fallback for markets with no live source behind them (one-off
-    // bootstrap prices) — no cadence to hold them to, so a long default.
-    // Markets with a real (if manual/periodic) price feed, like the GLP-1
-    // peptide markets, should set a tighter window via setStalenessWindow.
     uint256 public constant DEFAULT_PUSHED_STALENESS = 30 days;
-    // A single update moving price more than this from the last one gets
-    // rejected (feed paused, not applied) rather than taking effect
-    // immediately — catches fat-finger and bad-source pushes.
+    /// @notice Max move per push vs last price; larger moves pause the feed.
     uint256 public constant MAX_DEVIATION_BPS = 3000; // 30%
+    /// @notice Minimum seconds between successful pushes per market.
+    uint256 public constant MIN_PUSH_INTERVAL = 5 minutes;
 
-    mapping(bytes32 => Feed) public feeds; // market key -> feed
+    mapping(bytes32 => Feed) public feeds;
+    mapping(address => bool) public pushers;
+    bool public pushersLocked;
+    uint256 public pusherCount;
 
     event ChainlinkFeedSet(bytes32 indexed marketKey, address feed);
-    event PricePushed(bytes32 indexed marketKey, uint256 price, string source);
+    event PricePushed(bytes32 indexed marketKey, uint256 price, string source, address indexed pusher);
     event StalenessWindowSet(bytes32 indexed marketKey, uint256 window);
     event CircuitBreakerTripped(bytes32 indexed marketKey, uint256 lastPrice, uint256 rejectedPrice, uint256 deviationBps);
     event FeedUnpaused(bytes32 indexed marketKey);
+    event PusherSet(address indexed pusher, bool allowed);
+    event PushersLocked();
 
-    constructor() Ownable(msg.sender) {}
+    constructor() Ownable(msg.sender) {
+        // Deployer is an initial pusher so bootstrap works; remove + lock after multi-sig setup.
+        pushers[msg.sender] = true;
+        pusherCount = 1;
+        emit PusherSet(msg.sender, true);
+    }
+
+    modifier onlyPusher() {
+        require(pushers[msg.sender], "Oracle: not pusher");
+        _;
+    }
+
+    function setPusher(address account, bool allowed) external onlyOwner {
+        require(!pushersLocked, "Oracle: pushers locked");
+        require(account != address(0), "Oracle: zero");
+        bool was = pushers[account];
+        if (was == allowed) return;
+        pushers[account] = allowed;
+        if (allowed) pusherCount += 1;
+        else {
+            require(pusherCount > 1, "Oracle: need one pusher");
+            pusherCount -= 1;
+        }
+        emit PusherSet(account, allowed);
+    }
+
+    /// @notice Freeze the pusher set forever (pair with renounceOwnership for no admin path).
+    function lockPushers() external onlyOwner {
+        require(pusherCount >= 1, "Oracle: no pushers");
+        pushersLocked = true;
+        emit PushersLocked();
+    }
 
     function setChainlinkFeed(bytes32 marketKey, address feed) external onlyOwner {
+        require(!pushersLocked, "Oracle: config locked"); // reuse lock as general config freeze after setup
         feeds[marketKey].chainlinkFeed = feed;
         emit ChainlinkFeedSet(marketKey, feed);
     }
 
     function setStalenessWindow(bytes32 marketKey, uint256 window) external onlyOwner {
+        require(!pushersLocked, "Oracle: config locked");
         feeds[marketKey].stalenessWindow = window;
         emit StalenessWindowSet(marketKey, window);
     }
 
-    /// @notice Owner/keeper-pushed price for markets with no Chainlink feed.
-    ///         If this update deviates >30% from the last price, it is
-    ///         rejected and the feed is paused instead of taking effect —
-    ///         call forcePushPrice to override after manual review.
-    function pushPrice(bytes32 marketKey, uint256 price, string calldata source) external onlyOwner {
+    /// @notice Authorized pusher updates price. Deviation >30% pauses feed (no apply).
+    ///         There is no force override — bad pushes cannot hard-set extreme prices.
+    function pushPrice(bytes32 marketKey, uint256 price, string calldata source) external onlyPusher {
+        require(price > 0, "Oracle: zero price");
         Feed storage f = feeds[marketKey];
+
+        if (f.updatedAt != 0) {
+            require(block.timestamp >= f.updatedAt + MIN_PUSH_INTERVAL, "Oracle: too soon");
+        }
 
         if (f.updatedAt != 0 && f.pushedPrice > 0) {
             uint256 diff = price > f.pushedPrice ? price - f.pushedPrice : f.pushedPrice - price;
@@ -84,13 +116,8 @@ contract PeptideOracle is Ownable {
         _applyPrice(f, marketKey, price, source);
     }
 
-    /// @notice Admin override that bypasses the deviation circuit breaker —
-    ///         use after manually verifying a legitimate large price move.
-    function forcePushPrice(bytes32 marketKey, uint256 price, string calldata source) external onlyOwner {
-        _applyPrice(feeds[marketKey], marketKey, price, source);
-    }
-
-    function unpause(bytes32 marketKey) external onlyOwner {
+    /// @notice Unpause after circuit breaker. Only a pusher (not a separate force-set path).
+    function unpause(bytes32 marketKey) external onlyPusher {
         feeds[marketKey].paused = false;
         emit FeedUnpaused(marketKey);
     }
@@ -100,10 +127,9 @@ contract PeptideOracle is Ownable {
         f.updatedAt = block.timestamp;
         f.source = source;
         f.paused = false;
-        emit PricePushed(marketKey, price, source);
+        emit PricePushed(marketKey, price, source, msg.sender);
     }
 
-    /// @return price 18-decimal price
     function getPrice(bytes32 marketKey) public view returns (uint256 price) {
         Feed storage f = feeds[marketKey];
         require(!f.paused, "Oracle: circuit breaker paused, needs admin review");
@@ -122,7 +148,6 @@ contract PeptideOracle is Ownable {
         return f.pushedPrice;
     }
 
-    /// @notice Alias for getPrice, matching common oracle naming.
     function latestPrice(bytes32 marketKey) external view returns (uint256) {
         return getPrice(marketKey);
     }

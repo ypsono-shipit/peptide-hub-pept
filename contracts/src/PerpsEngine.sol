@@ -47,6 +47,8 @@ contract PerpsEngine is Ownable, ReentrancyGuard {
     PeptideOracle public immutable oracle;
     Treasury public immutable treasury;
     PerpsLiquidityPool public liquidityPool;
+    /// @notice Once true, liquidityPool cannot be changed (even by owner).
+    bool public liquidityPoolLocked;
 
     mapping(bytes32 => Market) public markets;
     mapping(bytes32 => uint256) public cumulativeFundingIndex;
@@ -58,6 +60,7 @@ contract PerpsEngine is Ownable, ReentrancyGuard {
 
     event MarketSet(bytes32 indexed marketKey, bool active, uint256 maxLeverageBps);
     event LiquidityPoolSet(address indexed pool);
+    event LiquidityPoolLocked(address indexed pool);
     event PositionOpened(
         uint256 indexed positionId,
         address indexed trader,
@@ -80,9 +83,14 @@ contract PerpsEngine is Ownable, ReentrancyGuard {
         toUsdScale = 10 ** (18 - uint256(dec));
     }
 
+    /// @notice One-time pool wiring. Irreversible after first set.
     function setLiquidityPool(address pool) external onlyOwner {
+        require(!liquidityPoolLocked, "PerpsEngine: pool locked");
+        require(pool != address(0), "PerpsEngine: zero pool");
         liquidityPool = PerpsLiquidityPool(pool);
+        liquidityPoolLocked = true;
         emit LiquidityPoolSet(pool);
+        emit LiquidityPoolLocked(pool);
     }
 
     function setMarket(
