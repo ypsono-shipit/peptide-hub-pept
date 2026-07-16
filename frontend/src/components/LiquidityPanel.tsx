@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { collateralContract, plpPoolContract, plpTokenContract } from "@/lib/contracts";
-import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL } from "@/lib/deployments";
+import { COLLATERAL_DECIMALS, COLLATERAL_SYMBOL, PLP_SHARE_DECIMALS } from "@/lib/deployments";
 import { cn } from "@/lib/cn";
 
 export function LiquidityPanel() {
@@ -14,11 +14,11 @@ export function LiquidityPanel() {
 
   const parsed = (() => {
     try {
-      // deposit: USDC units; withdraw: PLP is 18-dec shares
+      // deposit: USDC (6); withdraw: PLP shares are 1:1 with raw USDC units (see PLP_SHARE_DECIMALS)
       if (!amount) return 0n;
       return mode === "deposit"
         ? parseUnits(amount, COLLATERAL_DECIMALS)
-        : parseUnits(amount, 18);
+        : parseUnits(amount, PLP_SHARE_DECIMALS);
     } catch {
       return 0n;
     }
@@ -102,7 +102,9 @@ export function LiquidityPanel() {
   const fmtPlp = (v: bigint | undefined) =>
     v === undefined
       ? "; "
-      : Number(formatUnits(v, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 });
+      : Number(formatUnits(v, PLP_SHARE_DECIMALS)).toLocaleString(undefined, {
+          maximumFractionDigits: 2,
+        });
   const fmtUsd18 = (v: bigint | undefined) =>
     v === undefined
       ? "; "

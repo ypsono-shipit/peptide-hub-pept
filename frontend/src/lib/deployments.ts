@@ -4,6 +4,14 @@
 export const COLLATERAL_DECIMALS = 6;
 export const COLLATERAL_SYMBOL = "USDC";
 
+/**
+ * PLP ERC20 reports 18 decimals, but PerpsLiquidityPool mints/burns shares 1:1
+ * with raw collateral units (previewDeposit returns `assets` when empty, then
+ * assets * supply / aum). Display and parse PLP amounts with this scale so
+ * 1000 USDC → "1000 PLP", not 1e-9.
+ */
+export const PLP_SHARE_DECIMALS = COLLATERAL_DECIMALS;
+
 export const TESTNET_CONTRACTS = {
   PEPT: "0x240260c893CbB930aeCAce55E6d12f2e8EaD7A10",
   Treasury: "0x3F0b6D1Be32D2819ABA3893053C4ec3b93116Be5",
