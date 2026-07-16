@@ -216,12 +216,13 @@ export default function LandingPage() {
           <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:items-center">
             <div>
               <h2 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-                Built to <em className="font-serif font-normal italic text-green-soft">last</em>.
+                The first peptide pricing{" "}
+                <em className="font-serif font-normal italic text-green-soft">oracle</em>
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-ink-soft sm:text-base">
-                Deployed on Robinhood Chain Testnet with a GMX-style liquidity pool, dual-source
-                oracle, and OHM-inspired $PEPT tokenomics for staking and treasury, separate from the
-                markets you trade.
+                Dual-source scrapers mark SEMA and GLP-1 $/mg on-chain every few hours. Deployed on
+                Robinhood Chain Testnet with a GMX-style PLP vault, USDC margin, and OHM-inspired
+                $PEPT tokenomics for staking and treasury, separate from the markets you trade.
               </p>
               <Link
                 href="/trade"
