@@ -1,8 +1,17 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 
+/** Landing `/` is full-bleed; app routes keep the terminal shell. */
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLanding = pathname === "/";
+
+  if (isLanding) {
+    return <div className="min-h-screen w-full bg-bg text-ink">{children}</div>;
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-bg">
       <Sidebar />
