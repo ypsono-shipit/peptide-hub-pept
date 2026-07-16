@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-/** "PEPT TRADE" in Helvetica Neue Regular. */
+/** "pept trade" wordmark in Helvetica Neue Regular (no caps). */
 export function BrandWordmark({
   className,
   as: Tag = "span",
@@ -11,11 +11,11 @@ export function BrandWordmark({
   return (
     <Tag
       className={cn(
-        "font-brand text-sm font-normal uppercase tracking-[0.06em] text-ink",
+        "font-brand text-sm font-normal normal-case tracking-[0.04em] text-ink",
         className,
       )}
     >
-      PEPT TRADE
+      pept trade
     </Tag>
   );
 }
