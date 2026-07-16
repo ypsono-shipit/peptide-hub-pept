@@ -1,78 +1,41 @@
 "use client";
 
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { useChainId } from "wagmi";
 import { cn } from "@/lib/cn";
-import { CHAIN_MAINNET, CHAIN_TESTNET, NETWORKS } from "@/lib/deployments";
+import { CHAIN_MAINNET, getNetwork } from "@/lib/deployments";
 
 /**
- * Top-right testnet ↔ mainnet switcher.
- * Switches the wallet chain when connected; still updates UI chain via switchChain.
+ * Network indicator (top-right). Shows the active chain only.
+ * Hover tooltip surfaces mainnet status — no side-by-side toggle.
  */
 export function NetworkToggle({ className }: { className?: string }) {
   const chainId = useChainId();
-  const { isConnected } = useAccount();
-  const { switchChain, isPending, error } = useSwitchChain();
+  const network = getNetwork(chainId);
+  const onMainnet = chainId === CHAIN_MAINNET;
 
-  const active: "testnet" | "mainnet" =
-    chainId === CHAIN_MAINNET ? "mainnet" : "testnet";
-
-  const select = (target: "testnet" | "mainnet") => {
-    const id = target === "mainnet" ? CHAIN_MAINNET : CHAIN_TESTNET;
-    if (id === chainId) return;
-    if (switchChain) {
-      switchChain({ chainId: id });
-    }
-  };
-
-  const mainnetLive = NETWORKS[CHAIN_MAINNET]?.contractsLive ?? false;
+  const tooltip = onMainnet
+    ? "Robinhood Chain mainnet · USDG payments"
+    : network.contractsLive
+      ? "Robinhood Chain Testnet · Mainnet coming soon (USDG)"
+      : "Robinhood Chain Testnet · Mainnet coming soon";
 
   return (
-    <div className={cn("flex flex-col items-end gap-0.5", className)}>
-      <div
-        className="flex items-center rounded-lg border border-border bg-panel p-0.5 text-[11px] font-semibold"
-        role="group"
-        aria-label="Network"
-      >
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => select("testnet")}
-          className={cn(
-            "rounded-md px-2.5 py-1.5 transition",
-            active === "testnet"
-              ? "bg-panel-hover text-ink shadow-sm"
-              : "text-muted hover:text-ink",
-          )}
-        >
-          Testnet
-        </button>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => select("mainnet")}
-          title={
-            mainnetLive
-              ? "Robinhood Chain mainnet · USDG"
-              : "Mainnet contracts pending deploy — switch still works for wallet"
-          }
-          className={cn(
-            "rounded-md px-2.5 py-1.5 transition",
-            active === "mainnet"
-              ? "bg-green/15 text-green-soft ring-1 ring-green/40"
-              : "text-muted hover:text-ink",
-          )}
-        >
-          Mainnet
-          {!mainnetLive && (
-            <span className="ml-1 text-[9px] font-normal text-muted">soon</span>
-          )}
-        </button>
-      </div>
-      <div className="hidden text-[9px] text-muted sm:block">
-        {active === "mainnet" ? "USDG · 4663" : "USDC · 46630"}
-        {isConnected ? "" : " · connect to switch wallet"}
-        {error ? ` · ${error.message.slice(0, 40)}` : ""}
-      </div>
+    <div
+      className={cn(
+        "flex items-center gap-1.5 rounded-lg border border-border bg-panel px-2.5 py-1.5 text-[11px] font-semibold text-ink-soft",
+        className,
+      )}
+      title={tooltip}
+      aria-label={tooltip}
+    >
+      <span
+        className={cn(
+          "h-1.5 w-1.5 shrink-0 rounded-full",
+          onMainnet ? "bg-green" : "bg-green/70",
+        )}
+      />
+      <span className="hidden sm:inline">{network.shortLabel}</span>
+      <span className="sm:hidden">{onMainnet ? "Main" : "Test"}</span>
     </div>
   );
 }
