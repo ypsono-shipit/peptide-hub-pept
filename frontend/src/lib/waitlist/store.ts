@@ -69,41 +69,39 @@ async function countFromSheets(): Promise<number | null> {
 }
 
 /**
- * Google Apps Script web apps often 302 POST → googleusercontent; some runtimes
- * rewrite that to GET and drop the body. Follow redirects manually, re-POSTing.
+ * Google Apps Script web apps: POST /exec → 302 Location → GET that URL for JSON body.
+ * (Re-POSTing the redirect or following as GET-from-POST often 404s.)
  */
-async function postJsonFollow(url: string, body: unknown, maxHops = 5): Promise<Response> {
-  let current = url;
+async function postAppsScript(url: string, body: unknown): Promise<Response> {
   const payload = JSON.stringify(body);
-  for (let i = 0; i < maxHops; i++) {
-    const res = await fetch(current, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: payload,
-      redirect: "manual",
-    });
-    if (res.status >= 300 && res.status < 400) {
-      const loc = res.headers.get("location");
-      if (!loc) break;
-      current = new URL(loc, current).toString();
-      continue;
-    }
-    return res;
-  }
-  // Last resort: default follow
-  return fetch(url, {
+  const post = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    // text/plain avoids some GAS content-type quirks
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: payload,
-    redirect: "follow",
+    redirect: "manual",
   });
+
+  if (post.status >= 200 && post.status < 300) {
+    return post;
+  }
+
+  if (post.status >= 300 && post.status < 400) {
+    const loc = post.headers.get("location");
+    if (loc) {
+      const next = new URL(loc, url).toString();
+      return fetch(next, { method: "GET", redirect: "follow", cache: "no-store" });
+    }
+  }
+
+  return post;
 }
 
 async function joinViaSheets(entry: WaitlistEntry): Promise<WaitlistResult | null> {
   const base = sheetsUrl();
   if (!base) return null;
   try {
-    const res = await postJsonFollow(base, {
+    const res = await postAppsScript(base, {
       email: entry.email,
       wallet: entry.wallet,
       x_handle: entry.xHandle,
