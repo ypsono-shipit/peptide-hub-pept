@@ -1,15 +1,15 @@
 {
-  "scrapedAt": "2026-07-17T15:46:15.343Z",
+  "scrapedAt": "2026-07-17T16:48:59.918Z",
   "method": "dual source: PeptideScouter + vendor basket",
   "sourceErrors": [],
   "peptides": {
     "semaglutide": {
-      "pricePerMg": 4.3711,
-      "method": "weighted(peptidescouter@w=14.9+vendor_basket@w=4.0)",
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$4.3419(n=9) · divergence=0.9%",
+      "pricePerMg": 5.06,
+      "method": "weighted(peptidescouter@w=14.9+vendor_basket@w=6.8)",
+      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$6.5581(n=15) · divergence=49.8%",
       "singleSource": false,
-      "divergenceBps": 86,
-      "divergenceWarning": false,
+      "divergenceBps": 4976,
+      "divergenceWarning": true,
       "sources": [
         {
           "name": "peptidescouter",
@@ -20,10 +20,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 4.3419,
-          "source": "Vendor basket live scrape · semaglutide · size-weighted (IQR) n=9/9 vendors=5 · 2026-07-17",
-          "sampleCount": 9,
-          "weight": 4.05
+          "pricePerMg": 6.5581,
+          "source": "Vendor basket live scrape · semaglutide · size-weighted (IQR) n=15/16 vendors=8 · 2026-07-17",
+          "sampleCount": 15,
+          "weight": 6.75
         }
       ],
       "scouter": {
@@ -32,25 +32,19 @@
         "inStockCount": 27
       },
       "basket": {
-        "pricePerMg": 4.3419,
-        "sampleCount": 9,
-        "vendorCount": 5,
-        "offerCount": 9,
-        "errors": [
-          {
-            "vendor": "PeptidesKingdom",
-            "url": "https://peptideskingdom.com/product/semaglutide/",
-            "error": "HTTP 403"
-          }
-        ]
+        "pricePerMg": 6.5581,
+        "sampleCount": 15,
+        "vendorCount": 8,
+        "offerCount": 16,
+        "errors": []
       }
     },
     "tirzepatide": {
-      "pricePerMg": 3.3777,
-      "method": "weighted(peptidescouter@w=40.7+vendor_basket@w=9.5)",
-      "source": "Dual source weighted · peptidescouter=$3.0513(n=74) · vendor_basket=$4.7833(n=21) · divergence=56.8%",
+      "pricePerMg": 3.6049,
+      "method": "weighted(peptidescouter@w=40.7+vendor_basket@w=14.0)",
+      "source": "Dual source weighted · peptidescouter=$3.0513(n=74) · vendor_basket=$5.22(n=31) · divergence=71.1%",
       "singleSource": false,
-      "divergenceBps": 5676,
+      "divergenceBps": 7107,
       "divergenceWarning": true,
       "sources": [
         {
@@ -62,10 +56,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 4.7833,
-          "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=21/25 vendors=5 · 2026-07-17",
-          "sampleCount": 21,
-          "weight": 9.450000000000001
+          "pricePerMg": 5.22,
+          "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=31/36 vendors=8 · 2026-07-17",
+          "sampleCount": 31,
+          "weight": 13.950000000000001
         }
       ],
       "scouter": {
@@ -74,25 +68,19 @@
         "inStockCount": 76
       },
       "basket": {
-        "pricePerMg": 4.7833,
-        "sampleCount": 21,
-        "vendorCount": 5,
-        "offerCount": 25,
-        "errors": [
-          {
-            "vendor": "PeptidesKingdom",
-            "url": "https://peptideskingdom.com/product/tirzepatide/",
-            "error": "HTTP 403"
-          }
-        ]
+        "pricePerMg": 5.22,
+        "sampleCount": 31,
+        "vendorCount": 8,
+        "offerCount": 36,
+        "errors": []
       }
     },
     "retatrutide": {
-      "pricePerMg": 4.8877,
-      "method": "weighted(peptidescouter@w=50.6+vendor_basket@w=8.6)",
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$5.755(n=19) · divergence=21.4%",
+      "pricePerMg": 5.0415,
+      "method": "weighted(peptidescouter@w=50.6+vendor_basket@w=12.2)",
+      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2921(n=27) · divergence=32.7%",
       "singleSource": false,
-      "divergenceBps": 2138,
+      "divergenceBps": 3271,
       "divergenceWarning": false,
       "sources": [
         {
@@ -104,10 +92,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 5.755,
-          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=19/19 vendors=5 · 2026-07-17",
-          "sampleCount": 19,
-          "weight": 8.55
+          "pricePerMg": 6.2921,
+          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=27/27 vendors=8 · 2026-07-17",
+          "sampleCount": 27,
+          "weight": 12.15
         }
       ],
       "scouter": {
@@ -116,17 +104,11 @@
         "inStockCount": 92
       },
       "basket": {
-        "pricePerMg": 5.755,
-        "sampleCount": 19,
-        "vendorCount": 5,
-        "offerCount": 19,
-        "errors": [
-          {
-            "vendor": "PeptidesKingdom",
-            "url": "https://peptideskingdom.com/product/retatrutide/",
-            "error": "HTTP 403"
-          }
-        ]
+        "pricePerMg": 6.2921,
+        "sampleCount": 27,
+        "vendorCount": 8,
+        "offerCount": 27,
+        "errors": []
       }
     }
   },
@@ -137,6 +119,6 @@
       "tirzepatide": 0.25,
       "retatrutide": 0.15
     },
-    "pricePerMg": 4.2002
+    "pricePerMg": 4.6934
   }
 }
