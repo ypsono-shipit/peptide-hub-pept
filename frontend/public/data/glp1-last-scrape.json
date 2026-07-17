@@ -1,14 +1,14 @@
 {
-  "scrapedAt": "2026-07-17T20:36:32.269Z",
+  "scrapedAt": "2026-07-17T21:26:40.708Z",
   "method": "dual source: PeptideScouter + vendor basket",
   "sourceErrors": [],
   "peptides": {
     "semaglutide": {
-      "pricePerMg": 5.06,
-      "method": "weighted(peptidescouter@w=14.9+vendor_basket@w=6.8)",
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$6.5581(n=15) · divergence=49.8%",
+      "pricePerMg": 4.0963,
+      "method": "weighted(peptidescouter@w=14.9+vendor_basket@w=2.3)",
+      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$2.23(n=5) · divergence=96.4%",
       "singleSource": false,
-      "divergenceBps": 4976,
+      "divergenceBps": 9637,
       "divergenceWarning": true,
       "sources": [
         {
@@ -20,10 +20,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 6.5581,
-          "source": "Vendor basket live scrape · semaglutide · size-weighted (IQR) n=15/16 vendors=8 · 2026-07-17",
-          "sampleCount": 15,
-          "weight": 6.75
+          "pricePerMg": 2.23,
+          "source": "Vendor basket live scrape · semaglutide · size-weighted (IQR) n=5/6 vendors=4 · 2026-07-17",
+          "sampleCount": 5,
+          "weight": 2.25
         }
       ],
       "scouter": {
@@ -32,19 +32,30 @@
         "inStockCount": 27
       },
       "basket": {
-        "pricePerMg": 6.5581,
-        "sampleCount": 15,
-        "vendorCount": 8,
-        "offerCount": 16,
-        "errors": []
+        "pricePerMg": 2.23,
+        "sampleCount": 5,
+        "vendorCount": 4,
+        "offerCount": 6,
+        "errors": [
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/semaglutide/",
+            "error": "HTTP 403"
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp1sm/",
+            "error": "HTTP 403"
+          }
+        ]
       }
     },
     "tirzepatide": {
-      "pricePerMg": 3.6049,
-      "method": "weighted(peptidescouter@w=40.7+vendor_basket@w=14.0)",
-      "source": "Dual source weighted · peptidescouter=$3.0513(n=74) · vendor_basket=$5.22(n=31) · divergence=71.1%",
+      "pricePerMg": 3.5638,
+      "method": "weighted(peptidescouter@w=40.7+vendor_basket@w=7.7)",
+      "source": "Dual source weighted · peptidescouter=$3.0513(n=74) · vendor_basket=$6.2906(n=17) · divergence=106.2%",
       "singleSource": false,
-      "divergenceBps": 7107,
+      "divergenceBps": 10616,
       "divergenceWarning": true,
       "sources": [
         {
@@ -56,10 +67,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 5.22,
-          "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=31/36 vendors=8 · 2026-07-17",
-          "sampleCount": 31,
-          "weight": 13.950000000000001
+          "pricePerMg": 6.2906,
+          "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=17/20 vendors=4 · 2026-07-17",
+          "sampleCount": 17,
+          "weight": 7.65
         }
       ],
       "scouter": {
@@ -68,19 +79,30 @@
         "inStockCount": 76
       },
       "basket": {
-        "pricePerMg": 5.22,
-        "sampleCount": 31,
-        "vendorCount": 8,
-        "offerCount": 36,
-        "errors": []
+        "pricePerMg": 6.2906,
+        "sampleCount": 17,
+        "vendorCount": 4,
+        "offerCount": 20,
+        "errors": [
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/tirzepatide/",
+            "error": "HTTP 403"
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp2tz/",
+            "error": "HTTP 403"
+          }
+        ]
       }
     },
     "retatrutide": {
-      "pricePerMg": 5.0415,
-      "method": "weighted(peptidescouter@w=50.6+vendor_basket@w=12.2)",
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2921(n=27) · divergence=32.7%",
+      "pricePerMg": 4.8665,
+      "method": "weighted(peptidescouter@w=50.6+vendor_basket@w=6.8)",
+      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$5.8058(n=15) · divergence=22.4%",
       "singleSource": false,
-      "divergenceBps": 3271,
+      "divergenceBps": 2245,
       "divergenceWarning": false,
       "sources": [
         {
@@ -92,10 +114,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 6.2921,
-          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=27/27 vendors=8 · 2026-07-17",
-          "sampleCount": 27,
-          "weight": 12.15
+          "pricePerMg": 5.8058,
+          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=15/15 vendors=4 · 2026-07-17",
+          "sampleCount": 15,
+          "weight": 6.75
         }
       ],
       "scouter": {
@@ -104,11 +126,22 @@
         "inStockCount": 92
       },
       "basket": {
-        "pricePerMg": 6.2921,
-        "sampleCount": 27,
-        "vendorCount": 8,
-        "offerCount": 27,
-        "errors": []
+        "pricePerMg": 5.8058,
+        "sampleCount": 15,
+        "vendorCount": 4,
+        "offerCount": 15,
+        "errors": [
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/retatrutide/",
+            "error": "HTTP 403"
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp3rt/",
+            "error": "HTTP 403"
+          }
+        ]
       }
     }
   },
@@ -119,6 +152,6 @@
       "tirzepatide": 0.25,
       "retatrutide": 0.15
     },
-    "pricePerMg": 4.6934
+    "pricePerMg": 4.0787
   }
 }
