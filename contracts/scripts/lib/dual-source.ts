@@ -176,29 +176,38 @@ export async function resolveAllDualSources(opts: DualResolveOptions = {}): Prom
   const scouter: Partial<Record<PeptideSlug, PeptideAggregate>> = {};
   const basket: Partial<Record<PeptideSlug, VendorBasketAggregate>> = {};
 
-  if (!opts.skipScouter) {
-    for (const slug of slugs) {
-      try {
-        scouter[slug] = await scrapePeptideScouter(slug);
-      } catch (err) {
-        sourceErrors.push(
-          `scouter/${slug}: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
-    }
-  }
-
-  if (!opts.skipBasket) {
-    for (const slug of slugs) {
-      try {
-        basket[slug] = await scrapeVendorBasket(slug, { config: basketConfig });
-      } catch (err) {
-        sourceErrors.push(
-          `basket/${slug}: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
-    }
-  }
+  // Scouter + basket in parallel; each source scrapes its 3 peptides in parallel.
+  // Basket product pages themselves are concurrency-pooled (see vendor-basket.json).
+  await Promise.all([
+    (async () => {
+      if (opts.skipScouter) return;
+      await Promise.all(
+        slugs.map(async (slug) => {
+          try {
+            scouter[slug] = await scrapePeptideScouter(slug);
+          } catch (err) {
+            sourceErrors.push(
+              `scouter/${slug}: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
+        }),
+      );
+    })(),
+    (async () => {
+      if (opts.skipBasket) return;
+      await Promise.all(
+        slugs.map(async (slug) => {
+          try {
+            basket[slug] = await scrapeVendorBasket(slug, { config: basketConfig });
+          } catch (err) {
+            sourceErrors.push(
+              `basket/${slug}: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
+        }),
+      );
+    })(),
+  ]);
 
   const results = {} as Record<PeptideSlug, DualSourceResult>;
   for (const slug of slugs) {

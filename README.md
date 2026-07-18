@@ -66,15 +66,37 @@ npm run push:glp1            # scrape + push (needs DEPLOYER_PRIVATE_KEY)
 FORCE_PUSH=1 npm run push:glp1
 ```
 
-### Run outside local setup (recommended): GitHub Actions
+### Run outside local setup (recommended): GitHub Actions + external 5m cron
 
 Workflow: `.github/workflows/refresh-glp1-prices.yml`
 
-- **Schedule:** every **3 hours** UTC (`0 */3 * * *`) on GitHub-hosted runners  
-- **Manual:** Actions → “Refresh GLP-1 peptide oracle prices” → Run workflow  
-- **Secret required:** `DEPLOYER_PRIVATE_KEY` (oracle owner; push-only key recommended)  
+- **What each run does:** dual-source scrape (PeptideScouter + `vendor-basket.json`) → `pushPrice` on PeptideOracle → append `frontend/public/data/price-history.json` for `/trade` charts + `/oracle`  
+- **On-chain floor:** PeptideOracle `MIN_PUSH_INTERVAL` is **5 minutes**  
+- **Secret (Actions):** `DEPLOYER_PRIVATE_KEY` (oracle owner; push-only key recommended)  
 - **Artifacts:** each run uploads `glp1-last-scrape.json` for audit  
 
-This does **not** need your laptop on. Merge the workflow to the **default branch** so the schedule fires, set the secret on the GitHub repo, and you’re done.
+#### Why “last scrape” is often 45–90+ minutes old
+
+GitHub’s built-in `schedule: "*/5 * * * *"` is **best-effort**. Under load it is delayed or dropped (we measured ~18 schedule runs/day vs 288 expected). The monitor is correct when it shows ~1h age — the job simply did not fire.
+
+#### True every-5-minutes cadence (required for dense `/trade` candles)
+
+Trigger the same workflow via **`workflow_dispatch`** from any reliable external cron:
+
+1. Create a GitHub PAT with **`actions: write`** (fine-scoped to this repo is fine).  
+2. On the frontend host (Vercel env), set:
+   - `CRON_SECRET` — random shared secret  
+   - `ORACLE_DISPATCH_TOKEN` — that PAT  
+   - optional: `ORACLE_DISPATCH_REPO=ypsono-shipit/peptide-hub-pept`  
+3. Call every 5 minutes:
+
+```bash
+curl -X POST "https://<your-frontend>/api/cron/refresh-oracle" \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+Free option: [cron-job.org](https://cron-job.org) → URL above, interval 5 minutes, header `Authorization: Bearer <CRON_SECRET>`.
+
+GHA `schedule` remains as a backup; external dispatch is what actually hits 5m.
 
 **Note:** PeptidePricing.com is not scraped (bot protection). Tune weights in `oracle-pricing.json`; add/remove vendors in `vendor-basket.json`.

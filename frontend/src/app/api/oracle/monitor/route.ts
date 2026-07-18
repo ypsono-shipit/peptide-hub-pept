@@ -269,11 +269,19 @@ export async function GET() {
       },
       cadence: {
         cron: "*/5 * * * *",
-        note: "GitHub Actions every 5 minutes; chart samples append on successful push",
+        // GHA schedule is best-effort (~hourly under load). True 5m needs external
+        // cron → POST /api/cron/refresh-oracle (workflow_dispatch).
+        note:
+          ageMinutes != null && ageMinutes > 10
+            ? `STALE: last scrape ${ageMinutes}m ago. GitHub schedule often delays; wire external cron → /api/cron/refresh-oracle for true 5m updates`
+            : "Target every 5 minutes via external cron → workflow_dispatch; GHA schedule alone is unreliable",
+        healthy: ageMinutes != null ? ageMinutes <= 10 : false,
+        targetMinutes: 5,
+        staleAfterMinutes: 10,
       },
     },
     {
-      headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
+      headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" },
     },
   );
 }

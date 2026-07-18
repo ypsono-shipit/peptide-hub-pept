@@ -26,7 +26,9 @@ import { appendPriceSamples, type PriceSample } from "./lib/price-history";
  *   FALLBACK_ON_SCRAPE_ERROR=1
  *                          If dual scrape fails entirely, push reference JSON
  *
- * Scheduled by .github/workflows/refresh-glp1-prices.yml (every 12h).
+ * Scheduled by .github/workflows/refresh-glp1-prices.yml (every 5 minutes UTC).
+ * Vendor basket: contracts/data/vendor-basket.json (expanded multi-vendor PDPs).
+ * On success: on-chain pushPrice + append price-history.json (feeds /trade charts + /oracle).
  */
 
 type PriceRow = {
@@ -261,26 +263,50 @@ async function main() {
     }
 
     // forcePushPrice removed: large moves pause the feed instead of applying.
-    const tx = await oracle.pushPrice(marketKey, priceWei, row.source);
-    await tx.wait();
+    try {
+      const tx = await oracle.pushPrice(marketKey, priceWei, row.source);
+      await tx.wait();
 
-    const feed = await oracle.feeds(marketKey);
-    if (feed.paused) {
-      anyPaused = true;
-      console.warn(
-        `⚠ ${row.symbol}: circuit breaker paused (push deviated >30%) — unpause after review, then push a smaller step`,
-      );
-    } else {
-      const onChain = await oracle.latestPrice(marketKey);
-      const priceNum = Number(ethers.formatEther(onChain));
-      console.log(`✓ ${row.symbol}: $${priceNum}/mg  tx=${tx.hash}`);
-      historySamples.push({
-        market: row.symbol,
-        ts: nowTs,
-        price: priceNum,
-        source: row.source.slice(0, 200),
-        txHash: tx.hash,
-      });
+      const feed = await oracle.feeds(marketKey);
+      if (feed.paused) {
+        anyPaused = true;
+        console.warn(
+          `⚠ ${row.symbol}: circuit breaker paused (push deviated >30%) — unpause after review, then push a smaller step`,
+        );
+      } else {
+        const onChain = await oracle.latestPrice(marketKey);
+        const priceNum = Number(ethers.formatEther(onChain));
+        console.log(`✓ ${row.symbol}: $${priceNum}/mg  tx=${tx.hash}`);
+        historySamples.push({
+          market: row.symbol,
+          ts: nowTs,
+          price: priceNum,
+          source: row.source.slice(0, 200),
+          txHash: tx.hash,
+        });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // MIN_PUSH_INTERVAL = 5m — if a prior run just landed, still sample charts.
+      if (/too soon/i.test(msg)) {
+        console.warn(`⏭ ${row.symbol}: push too soon (min 5m interval) — sampling on-chain mark for charts`);
+        try {
+          const onChain = await oracle.latestPrice(marketKey);
+          const priceNum = Number(ethers.formatEther(onChain));
+          if (priceNum > 0) {
+            historySamples.push({
+              market: row.symbol,
+              ts: nowTs,
+              price: priceNum,
+              source: `on-chain sample (push skipped: too soon) · ${row.source.slice(0, 120)}`,
+            });
+          }
+        } catch {
+          /* ignore */
+        }
+        continue;
+      }
+      throw err;
     }
   }
 

@@ -24,7 +24,7 @@ export type PriceHistoryFile = {
 };
 
 const NOTE =
-  "Oracle mark samples for PEPT Trade charts. Appended on each successful pushPrice. Sparse (e.g. 3h cadence) — OHLC stair-steps are expected.";
+  "Oracle mark samples for PEPT Trade charts. Appended on each successful pushPrice (~5m cron). Fine TFs (5m/15m) need dense samples; coarser TFs still stair-step when marks are quiet.";
 
 function historyPaths(): string[] {
   const contractsData = path.join(__dirname, "../../data/price-history.json");

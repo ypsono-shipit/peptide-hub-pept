@@ -8,8 +8,9 @@ name: Refresh GLP-1 peptide oracle prices
 
 on:
   schedule:
-    # Every 5 minutes UTC — densest GitHub Actions schedule allows (not 1m).
-    # Fills chart history for more candles; still inside oracle staleness windows.
+    # Best-effort only. GitHub routinely delays/skips high-frequency schedules
+    # (we observed ~18 runs/day instead of 288). Prefer external cron →
+    # POST /api/cron/refresh-oracle (workflow_dispatch) for true 5m cadence.
     - cron: "*/5 * * * *"
   workflow_dispatch:
     inputs:
@@ -91,32 +92,41 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # Keep chart history on main so Vercel deploys pick up new samples.
+      # Keep chart history on main so /trade + /oracle pick up new samples
+      # (OHLC prefers raw.githubusercontent.com/.../main/.../price-history.json).
       - name: Commit price history
         if: success() && github.ref == 'refs/heads/main'
         working-directory: .
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Race-safe: other deploys may land while scrape/push runs
-          git pull --rebase origin main || git pull --rebase --autostash origin main
-          git add \
+          # Snapshot may live under contracts/ and frontend/public/
+          git add -f \
             contracts/data/price-history.json \
+            contracts/data/glp1-last-scrape.json \
             frontend/public/data/price-history.json \
             frontend/public/data/glp1-last-scrape.json \
-            || true
+            2>/dev/null || true
+          # Race-safe against concurrent history commits
+          git pull --rebase --autostash origin main
+          git add -f \
+            contracts/data/price-history.json \
+            contracts/data/glp1-last-scrape.json \
+            frontend/public/data/price-history.json \
+            frontend/public/data/glp1-last-scrape.json \
+            2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No history/scrape changes to commit"
-          else
-            git commit -m "chore: append oracle price history + scrape snapshot [skip ci]"
-            # Retry push once after rebase if main moved
-            for i in 1 2 3; do
-              if git push origin HEAD:main; then
-                echo "History pushed"
-                exit 0
-              fi
-              echo "Push rejected, rebasing (attempt $i)…"
-              git pull --rebase origin main
-            done
-            exit 1
+            exit 0
           fi
+          git commit -m "chore: append oracle price history + scrape snapshot [skip ci]"
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "History pushed"
+              exit 0
+            fi
+            echo "Push rejected, rebasing (attempt $i)…"
+            git pull --rebase --autostash origin main
+          done
+          exit 1
