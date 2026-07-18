@@ -6,7 +6,7 @@ export const maxDuration = 30;
 /**
  * Reliable 5-minute oracle refresh trigger.
  *
- * GitHub Actions `schedule: "*/5 * * * *"` is best-effort and often fires only
+ * GitHub Actions schedule every 5 minutes is best-effort and often fires only
  * ~hourly under load (we saw ~18/288 expected runs/day). External crons that hit
  * this route call workflow_dispatch, which starts within seconds.
  *
