@@ -1,220 +1,27 @@
 {
-<<<<<<< Updated upstream
-  "updatedAt": "2026-07-18T21:10:56.808Z",
-=======
-  "updatedAt": "2026-07-18T21:11:39.204Z",
->>>>>>> Stashed changes
+  "updatedAt": "2026-07-18T21:15:58.689Z",
   "note": "Oracle mark samples for PEPT Trade charts. Appended on each successful pushPrice (~5m cron). Fine TFs (5m/15m) need dense samples; coarser TFs still stair-step when marks are quiet.",
   "samples": [
     {
       "market": "SEMA-PERP",
-      "ts": 1784406660,
-      "price": 5.8213,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$7.1811(n=35) · divergence=64.0%",
-      "txHash": "0x8d95c22df8df20c25bb4c4d28fdfe82bbda5b5f03925426f9b1ba0fcacc7ebc5"
+      "ts": 1784409351,
+      "price": 4.6413,
+      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$5.122(n=18) · divergence=17.0%",
+      "txHash": "0x675006f10144fdfecaa60ae7b8b1506206ebab0304d8cbedfb1aa59aceb77877"
     },
     {
       "market": "RETA-PERP",
-      "ts": 1784406660,
-      "price": 5.3325,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2961(n=69) · divergence=32.8%",
-      "txHash": "0x8a5cae3a247408561071550f26eb56b2e70a43fd3dbaa31e4a288d709c0dae24"
+      "ts": 1784409351,
+      "price": 5.128,
+      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.189(n=41) · divergence=30.5%",
+      "txHash": "0xe2c720e213de3ca5ff614c3b6c1135285295edf9e35af1b336a0a2a2458c36ee"
     },
     {
       "market": "GLP1-IDX-PERP",
-      "ts": 1784406660,
-      "price": 5.1738,
+      "ts": 1784409351,
+      "price": 4.3624,
       "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0x45f1dc39861470723404e5c90a80c9d8ed62667c6c324df9bfca4595fbb78fa3"
-    },
-    {
-      "market": "SEMA-PERP",
-      "ts": 1784406941,
-      "price": 5.7361,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$7.0931(n=33) · divergence=62.0%",
-      "txHash": "0x05e59185c3ef50bbc441af406def270e414c0fe43df08462523de5497691291a"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784406941,
-      "price": 5.3325,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2961(n=69) · divergence=32.8%",
-      "txHash": "0x9f73390109da4d393d86471405841ffb5d5f4b10a5a5f809c7773f39c01e1de6"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784406941,
-      "price": 5.1227,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0xc234ab19c72181b7b37b3908536eb7bb92a7d7de369c69966a87a1ce66f856e7"
-    },
-    {
-      "market": "SEMA-PERP",
-      "ts": 1784407252,
-      "price": 5.8213,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$7.1811(n=35) · divergence=64.0%",
-      "txHash": "0x21236ce116cbcc6bf3a15b09fd9c487b854b4129ae4f9998dc436608aee52963"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784407252,
-      "price": 5.3325,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2961(n=69) · divergence=32.8%",
-      "txHash": "0x6d9d021dcb329344defec40c89efd4b56007dde28222b7d1635c09d6cff3879c"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784407252,
-      "price": 5.1738,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0x0f5cc862d103931364bcaa6e439e1f6cc9d0cb7a61f50b87f2107e79e730f0a3"
-    },
-    {
-      "market": "SEMA-PERP",
-      "ts": 1784407544,
-      "price": 5.4465,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$6.7511(n=27) · divergence=54.2%",
-      "txHash": "0x5bb3d70f22dcbca0fa36aa5b2b1c14e684f29df2c756ef874da3910c3dd28977"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784407544,
-      "price": 5.2246,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2698(n=52) · divergence=32.2%",
-      "txHash": "0x05aaf392aa512ea1aa2bf892a012b3e3f34482e2437f08b00daf7f4e15153cd4"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784407544,
-      "price": 4.9126,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0x084f6453baf1c714febec21d95a355224a409535fb49bf9dfc5ca815ede53201"
-    },
-    {
-      "market": "SEMA-PERP",
-      "ts": 1784407855,
-      "price": 5.5805,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$6.9477(n=29) · divergence=58.7%",
-      "txHash": "0xa1386e276138c232708ad759398a4992d18eda38b6daeafb88f863cf356f9a63"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784407855,
-      "price": 5.2606,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2852(n=57) · divergence=32.6%",
-      "txHash": "0x6716af1ca3e0b7a36f7f19c18af22b96bd85da189b9a2a44ae1475decb4ab472"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784407855,
-      "price": 5.0089,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0x1f1a003d8d7345495468056226a068785b1bca818c8739c24c58e599b7f0ab81"
-    },
-    {
-      "market": "SEMA-PERP",
-      "ts": 1784408148,
-      "price": 5.8213,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$7.1811(n=35) · divergence=64.0%",
-      "txHash": "0x6536438319b78d10dcb999473a14ba50b5f1d35ae77c5cde7eacaa06123b3700"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784408148,
-      "price": 5.3325,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2961(n=69) · divergence=32.8%",
-      "txHash": "0x8a6b29a5e7e81327065dd66d8447f45a645e7f0d9d69fb6101372130c5cb6515"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784408148,
-      "price": 5.1738,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0xa5bbd01df3188bfee6a602f6f25ab56ba3b4de59cd5d724170471ef067a606c3"
-    },
-    {
-      "market": "SEMA-PERP",
-      "ts": 1784408469,
-      "price": 5.8213,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$7.1811(n=35) · divergence=64.0%",
-      "txHash": "0x54f4b5de581f5d5d11ab468c8e56acc7795cf4dcdf0a31b09e18250edbf61bab"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784408469,
-      "price": 5.3325,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2961(n=69) · divergence=32.8%",
-      "txHash": "0x0d791c4eb996728d230fbec8cd29b25559bd9e62b2a49e29d791ed183c661589"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784408469,
-      "price": 5.1738,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0xed8aff925a311b8562e013d68dec7e63a6efa4fbb95d1083755cee525d55a958"
-    },
-    {
-      "market": "SEMA-PERP",
-      "ts": 1784408743,
-      "price": 5.6584,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$7.0656(n=30) · divergence=61.4%",
-      "txHash": "0x05e44fc35c1522e09c2f3335a7bbec62e9d2ed93dbd1bfd00fd3b0eb725ed239"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784408743,
-      "price": 5.2504,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.1593(n=63) · divergence=29.9%",
-      "txHash": "0x85df81b2c5cc690ee93ed7d2dc24dca1424c1ec6583b7a81a269251756f2e4d7"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784408743,
-      "price": 5.0644,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0x24285a33de4f41f53eaec175e581faed152d55dfba12eaa4b0046af0649abb27"
-    },
-    {
-      "market": "SEMA-PERP",
-<<<<<<< Updated upstream
-      "ts": 1784409049,
-      "price": 5.8213,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$7.1811(n=35) · divergence=64.0%",
-      "txHash": "0x90531256e9ebdc99c7e3f0603f10b0f57840d6f365e3fb7e503072def55a3c3c"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784409049,
-      "price": 5.3325,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2961(n=69) · divergence=32.8%",
-      "txHash": "0x43723668552bfd6513aa2a829279e7a917c48a16d5f65739d4f6201550821d67"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784409049,
-      "price": 5.1738,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0xdc5992cf81c70099bd060fc3d26c7d18821950d0113a7126a473a3abd3624749"
-=======
-      "ts": 1784409090,
-      "price": 5.8213,
-      "source": "Dual source weighted · peptidescouter=$4.3791(n=27) · vendor_basket=$7.1811(n=35) · divergence=64.0%",
-      "txHash": "0x9e549bf64c94b865ee99155ebc6993842e017704a931f823abe5c098f1c4a807"
-    },
-    {
-      "market": "RETA-PERP",
-      "ts": 1784409090,
-      "price": 5.3325,
-      "source": "Dual source weighted · peptidescouter=$4.7412(n=92) · vendor_basket=$6.2961(n=69) · divergence=32.8%",
-      "txHash": "0xa4309b66988e198ed73ba1f50a8d46c6926572be51e94660c9acfd5a5ccf203b"
-    },
-    {
-      "market": "GLP1-IDX-PERP",
-      "ts": 1784409090,
-      "price": 5.1738,
-      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
-      "txHash": "0x234fd890a95db1cac84f9166eaa2eeb80dec232b4d050b5abaf68d1433af6f2b"
->>>>>>> Stashed changes
+      "txHash": "0x6ce4e7fa50ca72e4bcea8769c0fbd8ac2b43bbd447dd06bcde8f8f74deeab2c9"
     }
   ]
 }
