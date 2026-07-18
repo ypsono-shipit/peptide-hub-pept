@@ -2,20 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Internal admin gate for /admin dashboard APIs.
- * Accepts (in order): ORACLE_ADMIN_SECRET, ADMIN_SECRET, CRON_SECRET.
+ * Any of these env vars is accepted as a valid unlock secret:
+ *   ORACLE_ADMIN_SECRET | ADMIN_SECRET | CRON_SECRET
  *
  * Clients may send the secret via:
  *   X-Admin-Secret: <secret>
  *   Authorization: Bearer <secret>
  *   ?secret=<secret>
  */
-export function getAdminSecret(): string | null {
-  return (
-    process.env.ORACLE_ADMIN_SECRET?.trim() ||
-    process.env.ADMIN_SECRET?.trim() ||
-    process.env.CRON_SECRET?.trim() ||
-    null
-  );
+export function getAdminSecrets(): string[] {
+  const out: string[] = [];
+  for (const k of ["ORACLE_ADMIN_SECRET", "ADMIN_SECRET", "CRON_SECRET"] as const) {
+    const v = process.env[k]?.trim();
+    if (v && !out.includes(v)) out.push(v);
+  }
+  return out;
 }
 
 export function extractProvidedSecret(req: NextRequest): string | null {
@@ -33,8 +34,8 @@ export function extractProvidedSecret(req: NextRequest): string | null {
 export function assertInternalAdmin(
   req: NextRequest,
 ): { ok: true } | { ok: false; response: NextResponse } {
-  const expected = getAdminSecret();
-  if (!expected) {
+  const expected = getAdminSecrets();
+  if (expected.length === 0) {
     return {
       ok: false,
       response: NextResponse.json(
@@ -48,7 +49,7 @@ export function assertInternalAdmin(
     };
   }
   const provided = extractProvidedSecret(req);
-  if (!provided || provided !== expected) {
+  if (!provided || !expected.includes(provided)) {
     return {
       ok: false,
       response: NextResponse.json(
