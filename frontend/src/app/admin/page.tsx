@@ -6,7 +6,7 @@ import Image from "next/image";
 import { BrandWordmark } from "@/components/BrandWordmark";
 import { cn } from "@/lib/cn";
 
-const SECRET_KEY = "pept_admin_secret";
+const PASSWORD_KEY = "pept_admin_password";
 
 type VendorRow = {
   peptide: string;
@@ -77,7 +77,7 @@ function fmtAge(mins: number | null) {
 }
 
 export default function AdminPage() {
-  const [secret, setSecret] = useState("");
+  const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [data, setData] = useState<AdminPayload | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -90,9 +90,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     try {
-      const s = sessionStorage.getItem(SECRET_KEY);
+      const s = sessionStorage.getItem(PASSWORD_KEY);
       if (s) {
-        setSecret(s);
+        setPassword(s);
         setUnlocked(true);
       }
     } catch {
@@ -101,29 +101,27 @@ export default function AdminPage() {
   }, []);
 
   const load = useCallback(
-    async (s: string, silent = false) => {
-      if (!s) return;
+    async (pwd: string, silent = false) => {
+      if (!pwd) return;
       if (!silent) setLoading(true);
       try {
         const res = await fetch(`/api/admin/vendors?alertPct=${alertPct}`, {
           cache: "no-store",
-          headers: { "X-Admin-Secret": s },
+          headers: { "X-Admin-Secret": pwd },
         });
         if (res.status === 401) {
           setUnlocked(false);
-          setErr("Invalid admin secret.");
+          setErr("Invalid password.");
           setData(null);
           try {
-            sessionStorage.removeItem(SECRET_KEY);
+            sessionStorage.removeItem(PASSWORD_KEY);
           } catch {
             /* */
           }
           return;
         }
         if (res.status === 503) {
-          setErr(
-            "Admin APIs disabled — set ORACLE_ADMIN_SECRET, ADMIN_SECRET, or CRON_SECRET in Vercel env.",
-          );
+          setErr("Admin dashboard is not configured.");
           setData(null);
           return;
         }
@@ -133,7 +131,7 @@ export default function AdminPage() {
         setErr(null);
         setUnlocked(true);
         try {
-          sessionStorage.setItem(SECRET_KEY, s);
+          sessionStorage.setItem(PASSWORD_KEY, pwd);
         } catch {
           /* */
         }
@@ -147,11 +145,11 @@ export default function AdminPage() {
   );
 
   useEffect(() => {
-    if (!unlocked || !secret) return;
-    load(secret, false);
-    const id = setInterval(() => load(secret, true), 60_000);
+    if (!unlocked || !password) return;
+    load(password, false);
+    const id = setInterval(() => load(password, true), 60_000);
     return () => clearInterval(id);
-  }, [unlocked, secret, load]);
+  }, [unlocked, password, load]);
 
   const filtered = useMemo(() => {
     if (!data) return [];
@@ -176,27 +174,26 @@ export default function AdminPage() {
 
   function onUnlock(e: React.FormEvent) {
     e.preventDefault();
-    if (!secret.trim()) return;
-    load(secret.trim(), false);
+    if (!password.trim()) return;
+    load(password.trim(), false);
   }
 
   function logout() {
     setUnlocked(false);
     setData(null);
-    setSecret("");
+    setPassword("");
     try {
-      sessionStorage.removeItem(SECRET_KEY);
+      sessionStorage.removeItem(PASSWORD_KEY);
     } catch {
       /* */
     }
   }
 
   function downloadCsv() {
-    if (!secret) return;
+    if (!password) return;
     const url = `/api/admin/export-history?format=csv`;
-    // fetch with header then blob download (query secret also accepted)
     void (async () => {
-      const res = await fetch(url, { headers: { "X-Admin-Secret": secret } });
+      const res = await fetch(url, { headers: { "X-Admin-Secret": password } });
       if (!res.ok) {
         setErr(`Export failed: HTTP ${res.status}`);
         return;
@@ -234,7 +231,7 @@ export default function AdminPage() {
             <>
               <button
                 type="button"
-                onClick={() => load(secret, false)}
+                onClick={() => load(password, false)}
                 className="rounded-full border border-border-strong px-3 py-1 text-xs font-semibold text-ink hover:bg-panel"
               >
                 Refresh
@@ -270,20 +267,18 @@ export default function AdminPage() {
             className="mt-10 max-w-md rounded-2xl border border-border bg-panel p-6"
           >
             <label className="block text-xs font-semibold uppercase tracking-wide text-muted">
-              Admin secret
+              Admin password
             </label>
             <p className="mt-1 text-xs text-ink-soft">
-              Same value as <code className="text-ink">ORACLE_ADMIN_SECRET</code>,{" "}
-              <code className="text-ink">ADMIN_SECRET</code>, or{" "}
-              <code className="text-ink">CRON_SECRET</code> in Vercel.
+              Internal dashboard password (not the cron / oracle API secrets).
             </p>
             <input
               type="password"
-              value={secret}
-              onChange={(e) => setSecret(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               className="mt-3 w-full rounded-lg border border-border-strong bg-bg px-3 py-2 text-sm text-ink outline-none focus:border-green"
-              placeholder="••••••••"
+              placeholder="Password"
             />
             <button type="submit" className="btn-green mt-4 w-full py-2.5 text-sm">
               Unlock dashboard

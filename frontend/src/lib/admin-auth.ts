@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Internal admin gate for /admin dashboard APIs.
- * Any of these env vars is accepted as a valid unlock secret:
+ * Internal /admin gate.
+ *
+ * Preferred unlock: simple dashboard password from ADMIN_PASSWORD
+ * (defaults to "peptidegod" if unset — change via Vercel env anytime).
+ *
+ * Also accepts ops secrets if someone still sends them:
  *   ORACLE_ADMIN_SECRET | ADMIN_SECRET | CRON_SECRET
  *
- * Clients may send the secret via:
- *   X-Admin-Secret: <secret>
- *   Authorization: Bearer <secret>
- *   ?secret=<secret>
+ * Clients send the password via:
+ *   X-Admin-Secret: <password>
+ *   Authorization: Bearer <password>
+ *   ?secret=<password>
  */
+const DEFAULT_ADMIN_PASSWORD = "peptidegod";
+
 export function getAdminSecrets(): string[] {
   const out: string[] = [];
+  const password = process.env.ADMIN_PASSWORD?.trim() || DEFAULT_ADMIN_PASSWORD;
+  if (password) out.push(password);
+
   for (const k of ["ORACLE_ADMIN_SECRET", "ADMIN_SECRET", "CRON_SECRET"] as const) {
     const v = process.env[k]?.trim();
     if (v && !out.includes(v)) out.push(v);
@@ -41,8 +50,7 @@ export function assertInternalAdmin(
       response: NextResponse.json(
         {
           error: "admin_disabled",
-          message:
-            "Set ORACLE_ADMIN_SECRET, ADMIN_SECRET, or CRON_SECRET to enable /admin APIs.",
+          message: "No admin password configured.",
         },
         { status: 503 },
       ),
@@ -53,7 +61,7 @@ export function assertInternalAdmin(
     return {
       ok: false,
       response: NextResponse.json(
-        { error: "unauthorized", message: "Invalid admin secret." },
+        { error: "unauthorized", message: "Invalid password." },
         { status: 401 },
       ),
     };
