@@ -27,6 +27,8 @@ export type VendorBasketConfig = {
   minVendorSamples: number;
   maxSourceDivergenceBps: number;
   fetchDelayMs: number;
+  /** Max concurrent product-page fetches (keeps 5m cron under time budget). */
+  concurrency: number;
   products: Record<PeptideSlug, BasketProductConfig[]>;
 };
 
@@ -61,12 +63,15 @@ export type ScrapeBasketOptions = {
   fetchImpl?: typeof fetch;
   userAgent?: string;
   delayMs?: number;
+  /** Override concurrent page fetches (default from config). */
+  concurrency?: number;
   minSamples?: number;
   config?: VendorBasketConfig;
 };
 
 const MIN_PRICE_PER_MG = 0.05;
 const MAX_PRICE_PER_MG = 200;
+const DEFAULT_CONCURRENCY = 8;
 
 export function loadVendorBasketConfig(
   configPath = path.join(__dirname, "../../data/vendor-basket.json"),
@@ -76,6 +81,7 @@ export function loadVendorBasketConfig(
     minVendorSamples: raw.minVendorSamples ?? 3,
     maxSourceDivergenceBps: raw.maxSourceDivergenceBps ?? 2500,
     fetchDelayMs: raw.fetchDelayMs ?? 400,
+    concurrency: Math.max(1, Number(raw.concurrency ?? DEFAULT_CONCURRENCY)),
     products: raw.products,
   };
 }
@@ -89,13 +95,18 @@ export async function scrapeVendorBasket(
   const fetchImpl = opts.fetchImpl ?? fetch;
   const userAgent = opts.userAgent ?? ORACLE_USER_AGENT;
   const delayMs = opts.delayMs ?? config.fetchDelayMs;
+  const concurrency = Math.max(1, opts.concurrency ?? config.concurrency ?? DEFAULT_CONCURRENCY);
   const minSamples = opts.minSamples ?? config.minVendorSamples;
 
   const offers: VendorOffer[] = [];
   const errors: VendorBasketAggregate["errors"] = [];
 
-  for (let i = 0; i < products.length; i++) {
-    const product = products[i]!;
+  // Concurrent page fetches so ~100 PDPs finish inside the 5m GitHub Actions cadence.
+  await mapPool(products, concurrency, async (product, index) => {
+    // Stagger starts slightly to avoid thundering-herd blocks on shared CDNs.
+    if (delayMs > 0 && index > 0) {
+      await sleep(Math.min(delayMs, 80) * (index % concurrency));
+    }
     try {
       const pageOffers = await scrapeProductPage(product, { fetchImpl, userAgent });
       offers.push(...pageOffers.filter((o) => o.inStock && o.pricePerMg > 0));
@@ -106,10 +117,7 @@ export async function scrapeVendorBasket(
         error: err instanceof Error ? err.message : String(err),
       });
     }
-    if (i < products.length - 1 && delayMs > 0) {
-      await sleep(delayMs);
-    }
-  }
+  });
 
   const prices = offers.map((o) => o.pricePerMg);
   const filtered = iqrFilter(prices);
@@ -232,7 +240,10 @@ async function scrapeProductPage(
 
 /** WooCommerce variable products embed variations as HTML-escaped JSON. */
 export function parseWooVariations(html: string, product: BasketProductConfig): VendorOffer[] {
-  const m = html.match(/data-product_variations="([^"]+)"/);
+  // Themes quote the attribute with either " or '; cheerio/attr also works via form.
+  const m =
+    html.match(/data-product_variations="([^"]+)"/) ??
+    html.match(/data-product_variations='([^']+)'/);
   if (!m) return [];
 
   let data: unknown;
@@ -389,22 +400,39 @@ export function parseSimplePrice(html: string, product: BasketProductConfig): Ve
   const title = $("h1").first().text() || $("title").text();
   if (looksLikeKit(title) || looksLikeKit(product.url)) return [];
 
+  // Titles like "S-5" / "S-10" (common vendor codenames for SEMA sizes)
   const sizeMg =
-    product.sizeMg ?? extractSizeMg(title) ?? extractSizeMg(product.url) ?? extractSizeMg(html.slice(0, 2000));
+    product.sizeMg ??
+    extractSizeMg(title) ??
+    extractSizeMg(product.url) ??
+    extractCodenameSizeMg(title) ??
+    extractSizeMg(html.slice(0, 2000));
   if (sizeMg == null) return [];
 
-  // Prefer itemprop / woocommerce amount
+  // Prefer itemprop / sale (ins) price / first positive woocommerce amount
   let price: number | null = null;
   const itemprop = $('[itemprop="price"]').attr("content") ?? $('[itemprop="price"]').first().text();
   price = num(itemprop);
 
-  if (price == null) {
-    const amount = $(".woocommerce-Price-amount bdi").first().text() || $(".price .amount").first().text();
-    const m = amount.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+  if (price == null || price <= 0) {
+    const sale = $("p.price ins .woocommerce-Price-amount bdi").first().text()
+      || $("p.price ins .amount").first().text()
+      || $("ins .woocommerce-Price-amount bdi").first().text();
+    const m = sale.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
     if (m) price = Number(m[1]);
   }
 
-  if (price == null) {
+  if (price == null || price <= 0) {
+    // Skip $0 placeholders that some themes inject before the real amount
+    const amounts = $(".woocommerce-Price-amount bdi, .price .amount")
+      .map((_, el) => $(el).text().replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/)?.[1])
+      .get()
+      .map((s) => (s != null ? Number(s) : NaN))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    if (amounts.length) price = amounts[0]!;
+  }
+
+  if (price == null || price <= 0) {
     // JSON-ish "price":"40"
     const m = html.match(/"price"\s*:\s*"([0-9]+(?:\.[0-9]+)?)"/);
     if (m) price = Number(m[1]);
@@ -425,6 +453,15 @@ export function parseSimplePrice(html: string, product: BasketProductConfig): Ve
       method: "simple_price",
     },
   ];
+}
+
+/** Match codenames like "S-5", "S-10" used by some vendors for SEMA vial sizes. */
+function extractCodenameSizeMg(text: string): number | null {
+  if (!text) return null;
+  const m = text.match(/(?:^|[^\w])S-([0-9]+(?:\.[0-9]+)?)(?:[^\w]|$)/i);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return n > 0 && n <= 500 ? n : null;
 }
 
 export function extractSizeMg(text: string): number | null {
@@ -504,4 +541,20 @@ function dedupeOffers(offers: VendorOffer[]): VendorOffer[] {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+/** Run async work over items with a fixed concurrency pool. */
+async function mapPool<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+  let next = 0;
+  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (next < items.length) {
+      const i = next++;
+      await worker(items[i]!, i);
+    }
+  });
+  await Promise.all(runners);
 }

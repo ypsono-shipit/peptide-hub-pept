@@ -67,7 +67,13 @@ type MonitorPayload = {
     sampleCount: number;
     byMarket: Record<string, HistoryPt[]>;
   };
-  cadence: { cron: string; note: string };
+  cadence: {
+    cron: string;
+    note: string;
+    healthy?: boolean;
+    targetMinutes?: number;
+    staleAfterMinutes?: number;
+  };
 };
 
 function fmtUsd(n: number | null | undefined, d = 4) {
@@ -193,7 +199,14 @@ export default function OracleMonitorPage() {
           <Stat
             label="History samples"
             value={data ? data.history.sampleCount.toLocaleString() : "—"}
-            note={data?.cadence.cron ? `cron ${data.cadence.cron}` : ""}
+            note={
+              data?.cadence.healthy === false
+                ? "cadence delayed (want ≤10m)"
+                : data?.cadence.cron
+                  ? `target ${data.cadence.cron}`
+                  : ""
+            }
+            tone={data?.cadence.healthy === false ? "warn" : "neutral"}
           />
           <Stat
             label="On-chain oracle"
@@ -211,6 +224,19 @@ export default function OracleMonitorPage() {
           <p className="mt-4 rounded-xl border border-negative/40 bg-panel px-4 py-3 text-sm text-negative">
             {err}
           </p>
+        )}
+        {data?.cadence.healthy === false && (
+          <div className="mt-4 rounded-xl border border-amber-500/40 bg-panel px-4 py-3 text-sm text-ink-soft">
+            <div className="font-semibold text-ink">Refresh cadence is delayed</div>
+            <p className="mt-1 text-xs leading-relaxed">
+              {data.cadence.note}. GitHub Actions <code className="text-ink">schedule</code> is
+              best-effort (often ~hourly under load). For true 5‑minute scrapes + chart samples,
+              hit <code className="text-ink">POST /api/cron/refresh-oracle</code> every 5 minutes
+              from an external cron (e.g. cron-job.org) with{" "}
+              <code className="text-ink">CRON_SECRET</code> +{" "}
+              <code className="text-ink">ORACLE_DISPATCH_TOKEN</code>.
+            </p>
+          </div>
         )}
         {loading && !data && <p className="mt-8 text-sm text-muted">Loading monitor feed…</p>}
 
