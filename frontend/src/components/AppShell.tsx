@@ -6,11 +6,13 @@ import { Sidebar } from "@/components/Sidebar";
 /** Landing `/` is full-bleed; app routes keep the terminal shell. */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  // Marketing + public docs: full-bleed (no trade shell sidebar)
+  // Marketing + public docs + internal admin: full-bleed (no trade shell sidebar)
   const isMarketing =
     pathname === "/" ||
     pathname === "/home" ||
     pathname === "/waitlist" ||
+    pathname === "/admin" ||
+    pathname?.startsWith("/admin/") ||
     pathname === "/oracle" ||
     pathname?.startsWith("/oracle/") ||
     pathname === "/docs" ||

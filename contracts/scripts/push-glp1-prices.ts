@@ -150,6 +150,37 @@ function fromReferenceJson(reason: string): { rows: PriceRow[]; meta: Record<str
   return { rows, meta: { mode: "reference_json", reason } };
 }
 
+/** Previous scrape (for per-vendor % change alerts on /admin). */
+type PrevSnapshot = {
+  scrapedAt?: string;
+  peptides?: Record<
+    string,
+    {
+      basket?: { offers?: Array<{ vendor: string; url?: string; sizeMg?: number; pricePerMg: number }> };
+      scouter?: {
+        listings?: Array<{ vendor: string; sizeMg?: number | null; pricePerMg: number }>;
+      };
+    }
+  >;
+};
+
+function loadPreviousSnapshot(): PrevSnapshot | null {
+  const candidates = [
+    path.join(__dirname, "../../frontend/public/data/glp1-last-scrape.json"),
+    path.join(__dirname, "../data/glp1-last-scrape.json"),
+  ];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) {
+        return JSON.parse(fs.readFileSync(p, "utf8")) as PrevSnapshot;
+      }
+    } catch {
+      /* next */
+    }
+  }
+  return null;
+}
+
 function writeDualSnapshot(dual: Awaited<ReturnType<typeof resolveAllDualSources>>) {
   const weights = referenceData.glp1Index.weights;
   const indexPrice = roundPrice(
@@ -158,14 +189,33 @@ function writeDualSnapshot(dual: Awaited<ReturnType<typeof resolveAllDualSources
       dual.results.retatrutide.pricePerMg * weights.retatrutide,
   );
 
+  const previous = loadPreviousSnapshot();
+
+  // Preserve prior snapshot for admin change detection (even after this write).
+  if (previous?.scrapedAt) {
+    const prevPayload = JSON.stringify(previous, null, 2) + "\n";
+    for (const prevPath of [
+      path.join(__dirname, "../data/glp1-prev-scrape.json"),
+      path.join(__dirname, "../../frontend/public/data/glp1-prev-scrape.json"),
+    ]) {
+      try {
+        fs.mkdirSync(path.dirname(prevPath), { recursive: true });
+        fs.writeFileSync(prevPath, prevPayload);
+      } catch (e) {
+        console.warn(`Could not write prev scrape → ${prevPath}:`, e);
+      }
+    }
+  }
+
   const snapshot = {
     scrapedAt: new Date().toISOString(),
     method: "dual source: PeptideScouter + vendor basket",
     sourceErrors: dual.sourceErrors,
+    previousScrapedAt: previous?.scrapedAt ?? null,
     peptides: {
-      semaglutide: summarizeDual(dual, "semaglutide"),
-      tirzepatide: summarizeDual(dual, "tirzepatide"),
-      retatrutide: summarizeDual(dual, "retatrutide"),
+      semaglutide: summarizeDual(dual, "semaglutide", previous),
+      tirzepatide: summarizeDual(dual, "tirzepatide", previous),
+      retatrutide: summarizeDual(dual, "retatrutide", previous),
     },
     glp1Index: {
       symbol: referenceData.glp1Index.symbol,
@@ -177,7 +227,7 @@ function writeDualSnapshot(dual: Awaited<ReturnType<typeof resolveAllDualSources
   const payload = JSON.stringify(snapshot, null, 2) + "\n";
   const outPaths = [
     path.join(__dirname, "../data/glp1-last-scrape.json"),
-    // Frontend monitor dashboard (committed like price-history)
+    // Frontend monitor + /admin (committed like price-history)
     path.join(__dirname, "../../frontend/public/data/glp1-last-scrape.json"),
   ];
   for (const outPath of outPaths) {
@@ -187,11 +237,39 @@ function writeDualSnapshot(dual: Awaited<ReturnType<typeof resolveAllDualSources
   }
 }
 
+function offerKey(vendor: string, sizeMg: number | null | undefined, url?: string): string {
+  const v = vendor.trim().toLowerCase();
+  const s = sizeMg != null && Number.isFinite(sizeMg) ? String(sizeMg) : "?";
+  if (url) {
+    try {
+      const u = new URL(url);
+      return `${v}|${s}|${u.hostname}${u.pathname}`;
+    } catch {
+      /* fall through */
+    }
+  }
+  return `${v}|${s}`;
+}
+
 function summarizeDual(
   dual: Awaited<ReturnType<typeof resolveAllDualSources>>,
   slug: "semaglutide" | "tirzepatide" | "retatrutide",
+  previous: PrevSnapshot | null,
 ) {
   const r = dual.results[slug];
+  const scouter = dual.scouter[slug];
+  const basket = dual.basket[slug];
+  const prevPep = previous?.peptides?.[slug];
+
+  const prevBasketByKey = new Map<string, number>();
+  for (const o of prevPep?.basket?.offers ?? []) {
+    prevBasketByKey.set(offerKey(o.vendor, o.sizeMg, o.url), o.pricePerMg);
+  }
+  const prevScouterByKey = new Map<string, number>();
+  for (const l of prevPep?.scouter?.listings ?? []) {
+    prevScouterByKey.set(offerKey(l.vendor, l.sizeMg ?? null), l.pricePerMg);
+  }
+
   return {
     pricePerMg: r.pricePerMg,
     method: r.method,
@@ -200,20 +278,50 @@ function summarizeDual(
     divergenceBps: r.divergenceBps,
     divergenceWarning: r.divergenceWarning,
     sources: r.sources,
-    scouter: dual.scouter[slug]
+    scouter: scouter
       ? {
-          pricePerMg: dual.scouter[slug]!.pricePerMg,
-          sampleCount: dual.scouter[slug]!.sampleCount,
-          inStockCount: dual.scouter[slug]!.inStockCount,
+          pricePerMg: scouter.pricePerMg,
+          sampleCount: scouter.sampleCount,
+          inStockCount: scouter.inStockCount,
+          listings: scouter.listings.map((l) => {
+            const prev = prevScouterByKey.get(offerKey(l.vendor, l.sizeMg));
+            const changePct =
+              prev != null && prev > 0 ? ((l.pricePerMg - prev) / prev) * 100 : null;
+            return {
+              vendor: l.vendor,
+              sizeMg: l.sizeMg,
+              pricePerMg: l.pricePerMg,
+              listPricePerMg: l.listPricePerMg,
+              inStock: l.inStock,
+              previousPricePerMg: prev ?? null,
+              changePct: changePct != null ? Math.round(changePct * 100) / 100 : null,
+            };
+          }),
         }
       : null,
-    basket: dual.basket[slug]
+    basket: basket
       ? {
-          pricePerMg: dual.basket[slug]!.pricePerMg,
-          sampleCount: dual.basket[slug]!.sampleCount,
-          vendorCount: dual.basket[slug]!.vendorCount,
-          offerCount: dual.basket[slug]!.offerCount,
-          errors: dual.basket[slug]!.errors,
+          pricePerMg: basket.pricePerMg,
+          sampleCount: basket.sampleCount,
+          vendorCount: basket.vendorCount,
+          offerCount: basket.offerCount,
+          errors: basket.errors,
+          offers: basket.offers.map((o) => {
+            const prev = prevBasketByKey.get(offerKey(o.vendor, o.sizeMg, o.url));
+            const changePct =
+              prev != null && prev > 0 ? ((o.pricePerMg - prev) / prev) * 100 : null;
+            return {
+              vendor: o.vendor,
+              url: o.url,
+              sizeMg: o.sizeMg,
+              priceUsd: o.priceUsd,
+              pricePerMg: o.pricePerMg,
+              inStock: o.inStock,
+              method: o.method,
+              previousPricePerMg: prev ?? null,
+              changePct: changePct != null ? Math.round(changePct * 100) / 100 : null,
+            };
+          }),
         }
       : null,
   };
