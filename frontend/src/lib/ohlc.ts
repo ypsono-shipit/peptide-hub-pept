@@ -46,8 +46,19 @@ export function samplesToOhlc(
   opts?: { livePrice?: number; liveTs?: number; maxBars?: number },
 ): Candle[] {
   const interval = TF_SECONDS[tf];
-  // More bars on fine TFs so denser cron shows a full chart
-  const defaultMax = tf === "5m" || tf === "15m" ? 360 : tf === "1h" ? 240 : 150;
+  // Window length by TF — long enough to zoom out to multi-day / multi-week views
+  const defaultMax =
+    tf === "5m"
+      ? 864 // ~3 days of 5m bars
+      : tf === "15m"
+        ? 672 // ~7 days
+        : tf === "1h"
+          ? 720 // ~30 days
+          : tf === "4h"
+            ? 360 // ~60 days
+            : tf === "1D"
+              ? 400 // ~13 months
+              : 200; // 1W
   const maxBars = opts?.maxBars ?? defaultMax;
 
   let pts = samples

@@ -66,8 +66,7 @@ export async function GET(req: NextRequest) {
   const { samples, source } = await loadSamples();
   const candles = samplesToOhlc(samples, market, tf, {
     livePrice: Number.isFinite(livePrice) ? livePrice : undefined,
-    // Fine TFs get more bars so 5m cron fills a dense chart
-    maxBars: tf === "5m" || tf === "15m" ? 360 : tf === "1h" ? 240 : 150,
+    // Omit maxBars — lib defaults cover multi-day zoom-out (5m→~3d, 1D→~year)
   });
 
   return NextResponse.json(

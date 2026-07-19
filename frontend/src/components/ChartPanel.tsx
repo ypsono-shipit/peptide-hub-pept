@@ -44,10 +44,17 @@ export function ChartPanel({
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-  const [tf, setTf] = useState<Tf>("5m");
+  /** Fit full range only when symbol/tf changes — not on every poll (preserves zoom). */
+  const shouldFitRef = useRef(true);
+  const [tf, setTf] = useState<Tf>("1D");
   const [candles, setCandles] = useState<Candle[]>([]);
   const [sampleCount, setSampleCount] = useState(0);
   const [status, setStatus] = useState<"loading" | "ok" | "empty" | "error">("loading");
+
+  // Reset fit when market or timeframe changes so the full new range is visible once
+  useEffect(() => {
+    shouldFitRef.current = true;
+  }, [symbol, tf]);
 
   // Fetch OHLC from oracle JSON history; poll so 5m cron shows new candles without refresh
   useEffect(() => {
@@ -97,7 +104,26 @@ export function ChartPanel({
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight || 360,
       rightPriceScale: { borderColor: "#1f1f1f" },
-      timeScale: { borderColor: "#1f1f1f", timeVisible: true },
+      timeScale: {
+        borderColor: "#1f1f1f",
+        timeVisible: true,
+        secondsVisible: false,
+        // Allow zooming out far enough to see multi-day / multi-week ranges
+        minBarSpacing: 0.5,
+        rightOffset: 4,
+        shiftVisibleRangeOnNewBar: true,
+      },
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: true,
+      },
+      handleScale: {
+        axisPressedMouseMove: true,
+        mouseWheel: true,
+        pinch: true,
+      },
       crosshair: {
         vertLine: { color: "#404040" },
         horzLine: { color: "#404040" },
@@ -135,7 +161,7 @@ export function ChartPanel({
     };
   }, []);
 
-  // Push candle data when loaded
+  // Push candle data when loaded (preserve user zoom on silent polls)
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current) return;
     if (candles.length === 0) {
@@ -143,11 +169,18 @@ export function ChartPanel({
       if (price > 0) {
         const t = Math.floor(Date.now() / 1000) as UTCTimestamp;
         seriesRef.current.setData([{ time: t, open: price, high: price, low: price, close: price }]);
+        if (shouldFitRef.current) {
+          chartRef.current.timeScale().fitContent();
+          shouldFitRef.current = false;
+        }
       }
       return;
     }
     seriesRef.current.setData(toChartData(candles));
-    chartRef.current.timeScale().fitContent();
+    if (shouldFitRef.current) {
+      chartRef.current.timeScale().fitContent();
+      shouldFitRef.current = false;
+    }
   }, [candles, price]);
 
   const last = candles[candles.length - 1];
@@ -172,10 +205,11 @@ export function ChartPanel({
             {chg.toFixed(2)}%
           </span>
         </span>
-        <div className="ml-auto flex gap-0.5">
+        <div className="ml-auto flex flex-wrap items-center gap-0.5">
           {TIMEFRAMES.map((t) => (
             <button
               key={t}
+              type="button"
               onClick={() => setTf(t)}
               className={cn(
                 "rounded px-2 py-1 text-[11px] font-medium",
@@ -185,6 +219,18 @@ export function ChartPanel({
               {t}
             </button>
           ))}
+          <button
+            type="button"
+            title="Fit all loaded history"
+            onClick={() => {
+              shouldFitRef.current = true;
+              chartRef.current?.timeScale().fitContent();
+              shouldFitRef.current = false;
+            }}
+            className="ml-1 rounded px-2 py-1 text-[11px] font-medium text-muted hover:text-ink-soft"
+          >
+            All
+          </button>
         </div>
       </div>
       <div ref={containerRef} className="min-h-[280px] w-full flex-1" />
@@ -194,7 +240,7 @@ export function ChartPanel({
         {status === "empty" && "No history yet; live oracle mark only (cron will fill this)"}
         {status === "ok" && (
           <>
-            Oracle history · {sampleCount} samples · {tf} OHLC · ~5m cadence
+            Oracle history · {sampleCount} samples · {tf} OHLC · scroll/pinch zoom · 1D/1W for days–weeks
             {unit === "$/mg" ? " · $/mg" : ""} · live mark overlays last close
           </>
         )}
