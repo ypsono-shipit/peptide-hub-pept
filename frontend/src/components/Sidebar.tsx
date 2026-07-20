@@ -42,7 +42,7 @@ export function Sidebar() {
         <Logo size={36} className="ring-1 ring-border" />
         <div className="hidden min-w-0 lg:block">
           <BrandWordmark className="block truncate" />
-          <div className="truncate text-[10px] text-muted">Spot · Perps · Vials</div>
+          <div className="truncate text-[10px] text-muted">Spot · Earn · Perps</div>
         </div>
       </Link>
 
