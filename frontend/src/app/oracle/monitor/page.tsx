@@ -163,8 +163,8 @@ export default function OracleMonitorPage() {
           <Link href="/docs/oracle" className="hover:text-ink">
             Docs
           </Link>
-          <Link href="/trade" className="hover:text-ink">
-            Trade
+          <Link href="/spot" className="hover:text-ink">
+            Spot
           </Link>
           <button
             type="button"

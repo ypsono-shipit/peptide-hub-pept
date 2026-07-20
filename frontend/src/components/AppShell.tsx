@@ -11,6 +11,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname === "/" ||
     pathname === "/home" ||
     pathname === "/waitlist" ||
+    pathname === "/launchpad" ||
+    pathname?.startsWith("/launchpad/") ||
     pathname === "/admin" ||
     pathname?.startsWith("/admin/") ||
     pathname === "/oracle" ||

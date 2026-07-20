@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // Old trade terminal → perps; spot is the new primary market surface
+      { source: "/trade", destination: "/perps", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;

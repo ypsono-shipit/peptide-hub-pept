@@ -5,12 +5,16 @@ import { usePathname } from "next/navigation";
 import {
   LayoutGrid,
   LineChart,
+  ArrowLeftRight,
   Droplets,
   Store,
   Wallet,
   Coins,
   Settings,
   HelpCircle,
+  Rocket,
+  Package,
+  CandlestickChart,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/Logo";
@@ -18,7 +22,10 @@ import { BrandWordmark } from "@/components/BrandWordmark";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutGrid },
-  { href: "/trade", label: "Trade", icon: LineChart },
+  { href: "/spot", label: "Spot", icon: ArrowLeftRight },
+  { href: "/perps", label: "Perps", icon: CandlestickChart },
+  { href: "/redeem", label: "Redeem", icon: Package },
+  { href: "/launchpad", label: "Launchpad", icon: Rocket },
   { href: "/portfolio", label: "Positions", icon: Wallet },
   { href: "/liquidity", label: "Liquidity", icon: Droplets },
   { href: "/marketplace", label: "Marketplace", icon: Store },
@@ -26,9 +33,7 @@ const NAV = [
   { href: "/oracle/monitor", label: "Oracle", icon: LineChart },
 ];
 
-const BOTTOM = [
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+const BOTTOM = [{ href: "/settings", label: "Settings", icon: Settings }];
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -39,13 +44,14 @@ export function Sidebar() {
         <Logo size={36} className="ring-1 ring-border" />
         <div className="hidden min-w-0 lg:block">
           <BrandWordmark className="block truncate" />
-          <div className="truncate text-[10px] text-muted">Peptide Perpetuals</div>
+          <div className="truncate text-[10px] text-muted">Spot · Perps · Vials</div>
         </div>
       </Link>
 
-      <nav className="flex flex-1 flex-col gap-0.5 px-2">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
         {NAV.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+          const active =
+            pathname === href || (href !== "/dashboard" && pathname?.startsWith(href));
           return (
             <Link
               key={href}

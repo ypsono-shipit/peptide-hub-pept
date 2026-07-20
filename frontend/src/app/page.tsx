@@ -159,7 +159,7 @@ export default function LandingPage() {
                   Peptide exposure.
                 </p>
               </div>
-              <Link href="/trade" className="shrink-0 text-xs font-medium text-ink underline-offset-4 hover:underline">
+              <Link href="/spot" className="shrink-0 text-xs font-medium text-ink underline-offset-4 hover:underline">
                 Open trade →
               </Link>
             </div>

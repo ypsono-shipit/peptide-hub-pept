@@ -19,8 +19,8 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-lg font-semibold text-ink">Overview</h1>
           <p className="text-sm text-muted">
-            Peptide perpetuals on Robinhood Chain Testnet. Oracle-marked. USDC margin. $PEPT is the
-            platform token (OHM-style), not a perp.
+            Spot SEMA + peptide perps on Robinhood Chain. Oracle-marked research pricing. $PEPT is the
+            platform token, not a perp.
           </p>
         </div>
 
@@ -32,12 +32,14 @@ export default function DashboardPage() {
                 <MarketRow key={m.symbol} market={m} />
               ))}
             </div>
-            <Link
-              href="/trade"
-              className="mt-3 inline-block text-xs font-medium text-ink hover:underline"
-            >
-              Open trade terminal →
-            </Link>
+            <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium">
+              <Link href="/spot" className="text-ink hover:underline">
+                Spot desk →
+              </Link>
+              <Link href="/perps" className="text-muted hover:text-ink hover:underline">
+                Perps →
+              </Link>
+            </div>
           </Panel>
           <AccountCard />
         </div>
@@ -54,7 +56,7 @@ function MarketRow({ market }: { market: (typeof MOCK_MARKETS)[number] }) {
 
   return (
     <Link
-      href="/trade"
+      href={market.symbol.includes("PERP") ? "/perps" : "/spot"}
       className="flex items-center gap-3 py-2.5 transition-colors hover:bg-panel-hover/50"
     >
       <div className="min-w-0 flex-1">

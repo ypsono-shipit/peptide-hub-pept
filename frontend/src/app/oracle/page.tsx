@@ -33,7 +33,7 @@ export default function OracleProductPage() {
             API
           </Link>
           <Link
-            href="/trade"
+            href="/spot"
             className="rounded-full bg-green px-4 py-1.5 text-xs font-semibold text-black hover:bg-green-dim"
           >
             Launch Terminal

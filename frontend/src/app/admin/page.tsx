@@ -224,8 +224,11 @@ export default function AdminPage() {
           <Link href="/oracle/monitor" className="hover:text-ink">
             Oracle monitor
           </Link>
-          <Link href="/trade" className="hover:text-ink">
-            Trade
+          <Link href="/spot" className="hover:text-ink">
+            Spot
+          </Link>
+          <Link href="/perps" className="hover:text-ink">
+            Perps
           </Link>
           {unlocked && (
             <>

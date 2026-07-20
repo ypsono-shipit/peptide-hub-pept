@@ -45,7 +45,7 @@ export default function PortfolioPage() {
                   <p className="text-xs text-muted">Isolated-margin peptide perps</p>
                 </div>
                 <Link
-                  href="/trade"
+                  href="/perps"
                   className="text-xs font-medium text-ink underline-offset-4 hover:underline"
                 >
                   Trade →
