@@ -211,6 +211,12 @@ export default function SpotPage() {
               Earn LP →
             </Link>
             <Link
+              href="/risk"
+              className="rounded-lg px-2.5 py-1 text-xs font-medium text-muted hover:bg-panel hover:text-ink"
+            >
+              SEMA risk →
+            </Link>
+            <Link
               href="/redeem"
               className="rounded-lg px-2.5 py-1 text-xs font-medium text-muted hover:bg-panel hover:text-ink"
             >
