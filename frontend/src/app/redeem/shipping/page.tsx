@@ -101,11 +101,6 @@ function RedeemShippingInner() {
   }, [searchParams]);
 
   const kitsN = Math.floor(Number(kits) || 0);
-  const seMaRequired = useMemo(
-    () => transfer?.seMa ?? kitsToSema(kitsN),
-    [transfer, kitsN],
-  );
-  const vials = kitsN * VIALS_PER_KIT;
   const hasTransfer = Boolean(transfer?.txHash);
 
   const submit = async (e: React.FormEvent) => {

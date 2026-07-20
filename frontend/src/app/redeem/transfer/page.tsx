@@ -228,5 +228,3 @@ export default function RedeemTransferPage() {
     </div>
   );
 }
-
-export { SESSION_KEY as REDEEM_TRANSFER_SESSION_KEY };
