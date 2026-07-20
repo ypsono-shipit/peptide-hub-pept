@@ -76,11 +76,13 @@ export function samplesToOhlc(
 
   if (pts.length === 0) return [];
 
-  // Prefer recent window so 5m charts aren't dominated by weeks of flat history
   const end = Math.floor(pts[pts.length - 1]!.ts / interval) * interval;
-  const idealStart = end - (maxBars - 1) * interval;
   const dataStart = Math.floor(pts[0]!.ts / interval) * interval;
-  const start = Math.max(dataStart, idealStart);
+  // Use full sample span when short (so fine TFs aren't collapsed to 1–2 bars)
+  const spanBars = Math.max(1, Math.floor((end - dataStart) / interval) + 1);
+  const idealStart = end - (maxBars - 1) * interval;
+  // If history is shorter than maxBars, start at first sample (not mid-window)
+  const start = spanBars <= maxBars ? dataStart : Math.max(dataStart, idealStart);
 
   const buckets = new Map<number, number[]>();
   for (const p of pts) {
@@ -100,7 +102,11 @@ export function samplesToOhlc(
 
   const candles: Candle[] = [];
 
-  for (let t = start; t <= end; t += interval) {
+  // Always emit bars for every interval in [start, end] (forward-fill gaps)
+  // Cap iterations to maxBars to avoid pathological huge ranges
+  let t = start;
+  let guard = 0;
+  while (t <= end && guard < maxBars + 2) {
     const prices = buckets.get(t);
     if (prices && prices.length > 0) {
       const open = prevClose;
@@ -118,6 +124,8 @@ export function samplesToOhlc(
         close: prevClose,
       });
     }
+    t += interval;
+    guard += 1;
   }
 
   return candles.length > maxBars ? candles.slice(candles.length - maxBars) : candles;

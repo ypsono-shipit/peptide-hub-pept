@@ -32,6 +32,26 @@ function toChartData(candles: Candle[]): CandlestickData[] {
   }));
 }
 
+/** Keep bars readable when history is short (don't stretch 1–2 candles full width). */
+function applyDefaultView(chart: IChartApi, n: number) {
+  const ts = chart.timeScale();
+  if (n <= 0) return;
+  if (n === 1) {
+    ts.setVisibleLogicalRange({ from: -4, to: 12 });
+    return;
+  }
+  if (n < 8) {
+    ts.setVisibleLogicalRange({ from: -2, to: Math.max(n + 6, 12) });
+    return;
+  }
+  if (n < 40) {
+    // Show all bars with a little padding so zoom-out still has room
+    ts.setVisibleLogicalRange({ from: -1, to: n + 3 });
+    return;
+  }
+  ts.fitContent();
+}
+
 export function ChartPanel({
   symbol,
   price,
@@ -44,19 +64,18 @@ export function ChartPanel({
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-  /** Fit full range only when symbol/tf changes — not on every poll (preserves zoom). */
+  /** Fit / set range only when symbol/tf changes — not on every poll. */
   const shouldFitRef = useRef(true);
-  const [tf, setTf] = useState<Tf>("1D");
+  // Fine TF by default — daily only has 1 bar until multi-day history exists
+  const [tf, setTf] = useState<Tf>("15m");
   const [candles, setCandles] = useState<Candle[]>([]);
   const [sampleCount, setSampleCount] = useState(0);
   const [status, setStatus] = useState<"loading" | "ok" | "empty" | "error">("loading");
 
-  // Reset fit when market or timeframe changes so the full new range is visible once
   useEffect(() => {
     shouldFitRef.current = true;
   }, [symbol, tf]);
 
-  // Fetch OHLC from oracle JSON history; poll so 5m cron shows new candles without refresh
   useEffect(() => {
     let cancelled = false;
     const load = (silent = false) => {
@@ -87,7 +106,6 @@ export function ChartPanel({
     };
   }, [symbol, tf, price]);
 
-  // Create chart once
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -103,26 +121,34 @@ export function ChartPanel({
       },
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight || 360,
-      rightPriceScale: { borderColor: "#1f1f1f" },
+      rightPriceScale: {
+        borderColor: "#1f1f1f",
+        scaleMargins: { top: 0.12, bottom: 0.12 },
+      },
       timeScale: {
         borderColor: "#1f1f1f",
         timeVisible: true,
         secondsVisible: false,
-        // Allow zooming out far enough to see multi-day / multi-week ranges
-        minBarSpacing: 0.5,
-        rightOffset: 4,
+        // Tiny min spacing → wheel zoom can pull way out past “1 bar fills the screen”
+        minBarSpacing: 0.05,
+        maxBarSpacing: 48,
+        rightOffset: 6,
+        fixLeftEdge: false,
+        fixRightEdge: false,
+        lockVisibleTimeRangeOnResize: true,
         shiftVisibleRangeOnNewBar: true,
       },
       handleScroll: {
         mouseWheel: true,
         pressedMouseMove: true,
         horzTouchDrag: true,
-        vertTouchDrag: true,
+        vertTouchDrag: false,
       },
       handleScale: {
-        axisPressedMouseMove: true,
+        axisPressedMouseMove: { time: true, price: true },
         mouseWheel: true,
         pinch: true,
+        axisDoubleClickReset: true,
       },
       crosshair: {
         vertLine: { color: "#404040" },
@@ -130,7 +156,6 @@ export function ChartPanel({
       },
     });
 
-    // Robinhood neon up / gray down candles
     const series = chart.addCandlestickSeries({
       upColor: "#CCFF00",
       downColor: "#525252",
@@ -144,6 +169,13 @@ export function ChartPanel({
     chartRef.current = chart;
     seriesRef.current = series;
 
+    // Capture wheel on chart container so page doesn't steal zoom
+    const el = containerRef.current;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+
     const ro = new ResizeObserver(() => {
       if (!containerRef.current || !chartRef.current) return;
       chartRef.current.applyOptions({
@@ -154,6 +186,7 @@ export function ChartPanel({
     ro.observe(containerRef.current);
 
     return () => {
+      el.removeEventListener("wheel", onWheel);
       ro.disconnect();
       chart.remove();
       chartRef.current = null;
@@ -161,16 +194,16 @@ export function ChartPanel({
     };
   }, []);
 
-  // Push candle data when loaded (preserve user zoom on silent polls)
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current) return;
     if (candles.length === 0) {
-      // single mark candle so chart isn't blank
       if (price > 0) {
         const t = Math.floor(Date.now() / 1000) as UTCTimestamp;
-        seriesRef.current.setData([{ time: t, open: price, high: price, low: price, close: price }]);
+        seriesRef.current.setData([
+          { time: t, open: price, high: price, low: price, close: price },
+        ]);
         if (shouldFitRef.current) {
-          chartRef.current.timeScale().fitContent();
+          applyDefaultView(chartRef.current, 1);
           shouldFitRef.current = false;
         }
       }
@@ -178,7 +211,7 @@ export function ChartPanel({
     }
     seriesRef.current.setData(toChartData(candles));
     if (shouldFitRef.current) {
-      chartRef.current.timeScale().fitContent();
+      applyDefaultView(chartRef.current, candles.length);
       shouldFitRef.current = false;
     }
   }, [candles, price]);
@@ -221,27 +254,65 @@ export function ChartPanel({
           ))}
           <button
             type="button"
-            title="Fit all loaded history"
+            title="Show all loaded candles"
             onClick={() => {
-              shouldFitRef.current = true;
-              chartRef.current?.timeScale().fitContent();
-              shouldFitRef.current = false;
+              if (!chartRef.current) return;
+              applyDefaultView(chartRef.current, Math.max(candles.length, 1));
             }}
             className="ml-1 rounded px-2 py-1 text-[11px] font-medium text-muted hover:text-ink-soft"
           >
-            All
+            Fit
+          </button>
+          <button
+            type="button"
+            title="Zoom out"
+            onClick={() => {
+              const ts = chartRef.current?.timeScale();
+              if (!ts) return;
+              const r = ts.getVisibleLogicalRange();
+              if (!r) {
+                applyDefaultView(chartRef.current!, Math.max(candles.length, 1));
+                return;
+              }
+              const span = r.to - r.from;
+              const pad = Math.max(span * 0.35, 4);
+              ts.setVisibleLogicalRange({ from: r.from - pad, to: r.to + pad });
+            }}
+            className="rounded px-2 py-1 text-[11px] font-medium text-muted hover:text-ink-soft"
+          >
+            −
+          </button>
+          <button
+            type="button"
+            title="Zoom in"
+            onClick={() => {
+              const ts = chartRef.current?.timeScale();
+              if (!ts) return;
+              const r = ts.getVisibleLogicalRange();
+              if (!r) return;
+              const span = r.to - r.from;
+              const shrink = Math.max(span * 0.2, 1);
+              if (span - 2 * shrink < 3) return;
+              ts.setVisibleLogicalRange({ from: r.from + shrink, to: r.to - shrink });
+            }}
+            className="rounded px-2 py-1 text-[11px] font-medium text-muted hover:text-ink-soft"
+          >
+            +
           </button>
         </div>
       </div>
-      <div ref={containerRef} className="min-h-[280px] w-full flex-1" />
+      <div ref={containerRef} className="min-h-[280px] w-full flex-1 touch-none" />
       <div className="border-t border-border px-3 py-1 text-[10px] text-faint">
         {status === "loading" && "Loading oracle history…"}
         {status === "error" && "Failed to load history; showing live mark only"}
         {status === "empty" && "No history yet; live oracle mark only (cron will fill this)"}
         {status === "ok" && (
           <>
-            Oracle history · {sampleCount} samples · {tf} OHLC · scroll/pinch zoom · 1D/1W for days–weeks
-            {unit === "$/mg" ? " · $/mg" : ""} · live mark overlays last close
+            {sampleCount} samples · {candles.length} {tf} bars · scroll / pinch / − + to zoom
+            {candles.length < 5
+              ? " · short history — prefer 5m/15m until multi-day samples accumulate"
+              : ""}
+            {unit === "$/mg" ? " · $/mg" : ""}
           </>
         )}
       </div>
