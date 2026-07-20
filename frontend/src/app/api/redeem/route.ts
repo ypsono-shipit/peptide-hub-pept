@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       phone?: string;
       notes?: string;
       researchConfirm?: boolean;
+      transferTxHash?: string;
     };
 
     const result = await submitRedeemOrder({
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
       phone: body.phone,
       notes: body.notes,
       researchConfirm: Boolean(body.researchConfirm),
+      transferTxHash: body.transferTxHash,
     });
 
     if (!result.ok) {

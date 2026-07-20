@@ -20,6 +20,8 @@ export type RedeemOrderInput = {
   phone?: string;
   notes?: string;
   researchConfirm: boolean;
+  /** On-chain SEMA transfer to treasury before shipping form */
+  transferTxHash?: string;
 };
 
 export type RedeemResult =
@@ -101,6 +103,15 @@ export async function submitRedeemOrder(input: RedeemOrderInput): Promise<Redeem
     };
   }
 
+  const transferTx = (input.transferTxHash || "").trim();
+  if (!transferTx || !/^0x[a-fA-F0-9]{64}$/.test(transferTx)) {
+    return {
+      ok: false,
+      error: "SEMA transfer transaction required before shipping.",
+      status: 400,
+    };
+  }
+
   const seMaRequired = kitsToSema(kits);
   const orderId = `RDM-${Date.now().toString(36).toUpperCase()}-${wallet.slice(2, 8).toUpperCase()}`;
   const createdAt = new Date().toISOString();
@@ -125,6 +136,7 @@ export async function submitRedeemOrder(input: RedeemOrderInput): Promise<Redeem
     phone: (input.phone || "").trim() || null,
     notes: (input.notes || "").trim() || null,
     status: "pending_fulfillment",
+    transfer_tx: transferTx,
     created_at: createdAt,
   };
 

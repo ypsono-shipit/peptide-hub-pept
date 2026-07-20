@@ -1,33 +1,54 @@
 import { keccak256, toBytes } from "viem";
 
 /**
- * Spot market config — SEMA / USDG (or testnet USDC) Uniswap-style pair.
- * Addresses filled after deploy:SEMA + pool seed; UI works in demo mode until live.
+ * Spot market — SEMA / USDG on Robinhood mainnet Uniswap V2.
+ *
+ * RH mainnet has Global Dollar (USDG), not Circle USDC. Pair is SEMA/USDG.
+ *
+ * Uniswap V2 (mainnet 4663):
+ *   Factory  0xaA5f8c18EF9be81ffED30c223F9CD0D012a2AdB9
+ *   Router02 0x8bc3ce37f87d5F3Ca1DcD4D86c0EcbC6039e3B17
+ *   WETH     0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73
+ *   USDG     0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168
+ *
+ * After `npx hardhat run scripts/deploy-sema-spot.ts --network robinhoodMainnet`,
+ * paste SemaToken + pair into SPOT_MAINNET and set live: true.
  */
 export const SEMA_ORACLE_KEY = keccak256(toBytes("SEMA-PERP"));
+
+export const UNI_V2_FACTORY =
+  "0xaA5f8c18EF9be81ffED30c223F9CD0D012a2AdB9" as const;
+export const UNI_V2_ROUTER =
+  "0x8bc3ce37f87d5F3Ca1DcD4D86c0EcbC6039e3B17" as const;
+export const MAINNET_USDG =
+  "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168" as const;
+export const MAINNET_WETH =
+  "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73" as const;
 
 export type SpotPairConfig = {
   baseSymbol: string;
   baseName: string;
   quoteSymbol: string;
-  /** ERC-20 SEMA token — zero until deployed */
   baseToken: `0x${string}`;
-  /** USDG mainnet / USDC testnet collateral */
   quoteToken: `0x${string}`;
-  /** Uniswap V2 pair (or router) — zero until pool exists */
   pair: `0x${string}`;
   router: `0x${string}`;
+  factory: `0x${string}`;
   baseDecimals: number;
   quoteDecimals: number;
-  /** mg peptide equivalent per 1 whole SEMA token (redemption ratio) */
   mgPerToken: number;
   oracleKey: `0x${string}`;
+  /** Where redeemed SEMA is sent before shipping form */
+  redeemTreasury: `0x${string}`;
   live: boolean;
 };
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
-/** Testnet placeholders — wire after SemaToken + pool deploy */
+/** Deployer from mainnet.json — used as redeem treasury until overridden */
+export const DEFAULT_DEPLOYER =
+  "0x4f442C8bA22952bC4271Ff9ECBa7B37CA188C1fB" as const;
+
 export const SPOT_TESTNET: SpotPairConfig = {
   baseSymbol: "SEMA",
   baseName: "Semaglutide research token",
@@ -36,26 +57,33 @@ export const SPOT_TESTNET: SpotPairConfig = {
   quoteToken: "0xAc80194dc1aE8eF52df73e7e1864fB3C62290fe0",
   pair: ZERO,
   router: ZERO,
+  factory: ZERO,
   baseDecimals: 18,
   quoteDecimals: 6,
   mgPerToken: 1,
   oracleKey: SEMA_ORACLE_KEY,
+  redeemTreasury: DEFAULT_DEPLOYER,
   live: false,
 };
 
-/** Mainnet — USDG pair when pool is seeded */
+/**
+ * Mainnet SEMA/USDG. Update baseToken + pair after deploy-sema-spot.
+ * live stays false until addresses are non-zero.
+ */
 export const SPOT_MAINNET: SpotPairConfig = {
   baseSymbol: "SEMA",
   baseName: "Semaglutide research token",
   quoteSymbol: "USDG",
   baseToken: ZERO,
-  quoteToken: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  quoteToken: MAINNET_USDG,
   pair: ZERO,
-  router: ZERO,
+  router: UNI_V2_ROUTER,
+  factory: UNI_V2_FACTORY,
   baseDecimals: 18,
   quoteDecimals: 6,
   mgPerToken: 1,
   oracleKey: SEMA_ORACLE_KEY,
+  redeemTreasury: DEFAULT_DEPLOYER,
   live: false,
 };
 
@@ -64,5 +92,10 @@ export function divergenceBps(poolPrice: number, oraclePrice: number): number | 
   return Math.round((Math.abs(poolPrice - oraclePrice) / oraclePrice) * 10_000);
 }
 
-/** Soft warning when pool drifts from research oracle (>15%). */
 export const DIVERGENCE_WARN_BPS = 1500;
+
+/** Soft monthly kit cap per wallet (ops can raise later). */
+export const MONTHLY_KIT_CAP = 5;
+
+/** LP points: rough points per 1 USDG of LP principal (UI estimate). */
+export const LP_POINTS_PER_USDG = 10;

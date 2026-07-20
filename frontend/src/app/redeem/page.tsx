@@ -92,18 +92,19 @@ export default function RedeemPage() {
             <div className="font-semibold text-ink">How it works now</div>
             <ol className="mt-2 list-decimal space-y-1.5 pl-4">
               <li>
-                Hold at least <strong className="text-ink">{SEMA_PER_KIT} SEMA</strong> (spot
-                / future pool). On-chain burn ships later; today we verify balance off-chain.
+                Hold at least <strong className="text-ink">{SEMA_PER_KIT} SEMA</strong> from
+                spot (Uniswap).
               </li>
               <li>
-                Open the shipping form · choose whole kits · enter ship-to + contact email.
+                <strong className="text-ink">Sign a transfer</strong> of kit SEMA to the PEPT
+                treasury wallet (deployer).
               </li>
               <li>
-                Order is written to our <strong className="text-ink">Google Sheet</strong>{" "}
-                (ops queue). You get a <strong className="text-ink">confirmation email</strong>.
+                After the tx confirms → shipping form (address + email).
               </li>
               <li>
-                We fulfill manually (partner kit batch). You&apos;ll hear when it ships.
+                Order hits our <strong className="text-ink">Google Sheet</strong> + confirmation
+                email; we fulfill the Research Only kit manually.
               </li>
             </ol>
             <p className="mt-3 text-muted">
@@ -126,17 +127,17 @@ export default function RedeemPage() {
             </div>
             <p className="mt-2 text-xs leading-relaxed text-ink-soft">
               Minimum <span className="font-mono text-ink">{SEMA_PER_KIT} SEMA</span> →{" "}
-              <span className="font-mono text-ink">1 kit ({VIALS_PER_KIT} vials)</span>. Next
-              step collects shipping details and emails confirmation.
+              <span className="font-mono text-ink">1 kit ({VIALS_PER_KIT} vials)</span>. First
+              you transfer tokens on-chain, then shipping details.
             </p>
             <Link
-              href="/redeem/shipping"
+              href="/redeem/transfer"
               className="btn-green mt-4 flex w-full items-center justify-center py-2.5 text-sm"
             >
-              Continue to shipping →
+              Start · Transfer SEMA →
             </Link>
             <p className="mt-3 text-center text-[10px] text-muted">
-              No payment on this form — kit fulfillment is ops-reviewed
+              Step 1: wallet tx · Step 2: shipping · Ops ships kit
             </p>
           </div>
         </div>

@@ -8,6 +8,8 @@
     "node": "hardhat node",
     "deploy:testnet": "hardhat run scripts/deploy.ts --network robinhoodTestnet",
     "deploy:mainnet": "hardhat run scripts/deploy-mainnet.ts --network robinhoodMainnet",
+    "deploy:sema-spot": "hardhat run scripts/deploy-sema-spot.ts --network robinhoodMainnet",
+    "seed:sema": "hardhat run scripts/seed-sema-liquidity.ts --network robinhoodMainnet",
     "scrape:glp1": "ts-node scripts/scrape-glp1-prices.ts",
     "scrape:glp1:scouter": "SKIP_BASKET=1 ts-node scripts/scrape-glp1-prices.ts",
     "scrape:glp1:basket": "SKIP_SCOUTER=1 ts-node scripts/scrape-glp1-prices.ts",

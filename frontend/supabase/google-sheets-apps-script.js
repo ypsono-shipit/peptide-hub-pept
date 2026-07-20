@@ -52,6 +52,7 @@ function redeemSheet_() {
       "phone",
       "notes",
       "status",
+      "transfer_tx",
       "created_at",
     ]);
   }
@@ -156,6 +157,7 @@ function handleRedeem_(body) {
     body.phone || "",
     body.notes || "",
     body.status || "pending_fulfillment",
+    body.transfer_tx || "",
     body.created_at || new Date().toISOString(),
   ]);
 
@@ -169,6 +171,7 @@ function handleRedeem_(body) {
       "Kits: " + kits + " ( = " + vials + " vials )",
       "SEMA required: " + sema + " tokens (10 SEMA per kit)",
       "Wallet: " + wallet,
+      "Transfer tx: " + (body.transfer_tx || "n/a"),
       "",
       "Ship to:",
       body.full_name || "",

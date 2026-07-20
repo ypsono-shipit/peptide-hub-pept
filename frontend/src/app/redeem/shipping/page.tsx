@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAccount, useConnect } from "wagmi";
 import { AlertTriangle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
@@ -11,18 +12,43 @@ import { SEMA_ORACLE_KEY } from "@/lib/spot";
 import { MOCK_MARKETS } from "@/lib/markets";
 import {
   kitsToSema,
-  MAX_KITS,
   MIN_KITS,
   SEMA_PER_KIT,
   VIALS_PER_KIT,
 } from "@/lib/redeem/constants";
 
+const SESSION_KEY = "pept_redeem_transfer";
+
+type TransferSession = {
+  txHash: string;
+  wallet: string;
+  kits: number;
+  seMa: number;
+  treasury: string;
+  token: string;
+  at: number;
+};
+
 export default function RedeemShippingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 text-center text-sm text-muted">Loading shipping…</div>
+      }
+    >
+      <RedeemShippingInner />
+    </Suspense>
+  );
+}
+
+function RedeemShippingInner() {
+  const searchParams = useSearchParams();
   const seMarket = MOCK_MARKETS.find((m) => m.symbol === "SEMA-PERP")!;
   const { price: oraclePrice, isLive } = useOraclePrice(SEMA_ORACLE_KEY, seMarket.price);
   const { address, isConnected } = useAccount();
   const { connectors, connect } = useConnect();
 
+  const [transfer, setTransfer] = useState<TransferSession | null>(null);
   const [kits, setKits] = useState(String(MIN_KITS));
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
@@ -42,15 +68,62 @@ export default function RedeemShippingPage() {
     null,
   );
 
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as TransferSession;
+        // Session valid for 2h
+        if (parsed?.txHash && Date.now() - (parsed.at || 0) < 2 * 60 * 60 * 1000) {
+          setTransfer(parsed);
+          setKits(String(parsed.kits || MIN_KITS));
+          return;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    const tx = searchParams.get("tx");
+    const k = searchParams.get("kits");
+    const w = searchParams.get("wallet");
+    if (tx && k && w) {
+      setTransfer({
+        txHash: tx,
+        wallet: w,
+        kits: Math.max(MIN_KITS, Number(k) || MIN_KITS),
+        seMa: kitsToSema(Math.max(MIN_KITS, Number(k) || MIN_KITS)),
+        treasury: "",
+        token: "",
+        at: Date.now(),
+      });
+      setKits(String(k));
+    }
+  }, [searchParams]);
+
   const kitsN = Math.floor(Number(kits) || 0);
-  const seMaRequired = useMemo(() => kitsToSema(kitsN), [kitsN]);
+  const seMaRequired = useMemo(
+    () => transfer?.seMa ?? kitsToSema(kitsN),
+    [transfer, kitsN],
+  );
   const vials = kitsN * VIALS_PER_KIT;
+  const hasTransfer = Boolean(transfer?.txHash);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!hasTransfer) {
+      setError("Complete SEMA transfer first.");
+      return;
+    }
     if (!isConnected || !address) {
       setError("Connect your wallet first.");
+      return;
+    }
+    if (
+      transfer?.wallet &&
+      address.toLowerCase() !== transfer.wallet.toLowerCase()
+    ) {
+      setError("Connect the same wallet that sent SEMA.");
       return;
     }
     if (!accept) {
@@ -65,7 +138,7 @@ export default function RedeemShippingPage() {
         body: JSON.stringify({
           email,
           wallet: address,
-          kits: kitsN,
+          kits: transfer?.kits ?? kitsN,
           fullName,
           institution: institution || undefined,
           address1,
@@ -77,6 +150,7 @@ export default function RedeemShippingPage() {
           phone: phone || undefined,
           notes: notes || undefined,
           researchConfirm: accept,
+          transferTxHash: transfer?.txHash,
         }),
       });
       const data = (await res.json()) as {
@@ -128,12 +202,28 @@ export default function RedeemShippingPage() {
           </Link>
 
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
-            Shipping &amp; kit order
+            Step 2 · Shipping
           </h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Whole kits only · {SEMA_PER_KIT} SEMA = {VIALS_PER_KIT} vials (Research Only pack size).
-            Confirmation email after submit; we fulfill from the ops sheet.
+            Whole kits only · {SEMA_PER_KIT} SEMA = {VIALS_PER_KIT} vials. Confirmation email
+            after submit; we fulfill from the ops sheet.
           </p>
+
+          {!hasTransfer && !done && (
+            <div className="mt-6 rounded-2xl border border-amber-500/40 bg-panel p-5 text-sm text-ink-soft">
+              <p className="font-semibold text-ink">SEMA transfer required first</p>
+              <p className="mt-2 text-xs leading-relaxed">
+                Sign the on-chain transfer of kit SEMA to the PEPT treasury, then return here
+                for shipping details.
+              </p>
+              <Link
+                href="/redeem/transfer"
+                className="btn-green mt-4 inline-flex px-4 py-2 text-sm"
+              >
+                Go to transfer →
+              </Link>
+            </div>
+          )}
 
           {done ? (
             <div className="mt-8 rounded-2xl border border-green/35 bg-green/5 p-6 text-center">
@@ -161,8 +251,16 @@ export default function RedeemShippingPage() {
                 </Link>
               </div>
             </div>
-          ) : (
+          ) : hasTransfer ? (
             <form onSubmit={submit} className="mt-6 space-y-4 rounded-2xl border border-border bg-panel p-5">
+              <div className="rounded-lg border border-green/30 bg-green/5 px-3 py-2 text-xs">
+                <div className="text-muted">SEMA transfer tx</div>
+                <div className="mt-0.5 truncate font-mono text-ink">{transfer!.txHash}</div>
+                <div className="mt-1 text-muted">
+                  {transfer!.kits} kit(s) · {transfer!.seMa} SEMA sent
+                </div>
+              </div>
+
               <div className="rounded-lg border border-border bg-bg px-3 py-2 text-xs">
                 <div className="text-muted">Wallet (ship / SEMA holder)</div>
                 {isConnected && address ? (
@@ -181,22 +279,13 @@ export default function RedeemShippingPage() {
                 )}
               </div>
 
-              <Field label={`Kits (${SEMA_PER_KIT} SEMA each)`} required>
-                <input
-                  type="number"
-                  min={MIN_KITS}
-                  max={MAX_KITS}
-                  step={1}
-                  value={kits}
-                  onChange={(e) => setKits(e.target.value)}
-                  className={inputCls}
-                />
-                <p className="mt-1 text-[10px] text-muted">
-                  = {Number.isFinite(vials) && kitsN > 0 ? vials : "—"} vials ·{" "}
-                  <span className="font-mono text-ink-soft">{seMaRequired || "—"} SEMA</span>{" "}
-                  required (min {SEMA_PER_KIT})
-                </p>
-              </Field>
+              <div className="text-[11px] text-muted">
+                Kits locked from transfer:{" "}
+                <span className="font-mono text-ink">
+                  {transfer!.kits} kit(s) · {transfer!.seMa} SEMA · {transfer!.kits * VIALS_PER_KIT}{" "}
+                  vials
+                </span>
+              </div>
 
               <Field label="Email (confirmation)" required>
                 <input
@@ -344,7 +433,7 @@ export default function RedeemShippingPage() {
                 {busy ? "Submitting…" : "Submit redemption order"}
               </button>
             </form>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

@@ -1,9 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useAccount, useConnect } from "wagmi";
-import { ArrowDownUp, ExternalLink, FlaskConical, Info } from "lucide-react";
+import {
+  useAccount,
+  useConnect,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { parseUnits, formatUnits, maxUint256 } from "viem";
+import { ArrowDownUp, ExternalLink, FlaskConical, Info, Coins } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { AccountCard } from "@/components/AccountCard";
 import { ChartPanel } from "@/components/ChartPanel";
@@ -15,50 +22,171 @@ import {
   SPOT_TESTNET,
   DIVERGENCE_WARN_BPS,
   divergenceBps,
+  LP_POINTS_PER_USDG,
+  MONTHLY_KIT_CAP,
 } from "@/lib/spot";
 import { MOCK_MARKETS } from "@/lib/markets";
+import { ERC20_ABI, UNI_V2_PAIR_ABI, UNI_V2_ROUTER_ABI } from "@/lib/uniswap-v2";
+import { SEMA_PER_KIT } from "@/lib/redeem/constants";
+
+const ZERO = "0x0000000000000000000000000000000000000000";
 
 export default function SpotPage() {
   const network = useNetworkConfig();
-  const pair = network.testnet ? SPOT_TESTNET : SPOT_MAINNET;
+  const pairCfg = network.testnet ? SPOT_TESTNET : SPOT_MAINNET;
   const seMarket = MOCK_MARKETS.find((m) => m.symbol === "SEMA-PERP")!;
-  const { price: oraclePrice, isLive } = useOraclePrice(pair.oracleKey, seMarket.price);
+  const { price: oraclePrice, isLive } = useOraclePrice(pairCfg.oracleKey, seMarket.price);
   const { address, isConnected } = useAccount();
   const { connectors, connect } = useConnect();
 
+  const live =
+    pairCfg.live &&
+    pairCfg.baseToken !== ZERO &&
+    pairCfg.pair !== ZERO &&
+    pairCfg.router !== ZERO;
+
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [amountIn, setAmountIn] = useState("");
-  // Demo pool mark: tracks oracle until Uniswap pair is live (± small spread for UI)
+  const [slippageBps, setSlippageBps] = useState(100); // 1%
+
+  const { data: reserves } = useReadContract({
+    address: pairCfg.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "getReserves",
+    query: { enabled: live, refetchInterval: 15_000 },
+  });
+  const { data: token0 } = useReadContract({
+    address: pairCfg.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "token0",
+    query: { enabled: live },
+  });
+
   const poolPrice = useMemo(() => {
-    if (pair.live) return oraclePrice; // wire reserves later
-    return oraclePrice > 0 ? oraclePrice * 1.012 : 0; // illustrative premium
-  }, [oraclePrice, pair.live]);
+    if (!live || !reserves || !token0) {
+      return oraclePrice > 0 ? oraclePrice * 1.012 : 0;
+    }
+    const [r0, r1] = reserves as readonly [bigint, bigint, number];
+    const baseIs0 = (token0 as string).toLowerCase() === pairCfg.baseToken.toLowerCase();
+    const reserveBase = baseIs0 ? r0 : r1;
+    const reserveQuote = baseIs0 ? r1 : r0;
+    if (reserveBase === 0n) return 0;
+    // quote per base, adjust decimals: base 18, quote 6
+    const q = Number(formatUnits(reserveQuote, pairCfg.quoteDecimals));
+    const b = Number(formatUnits(reserveBase, pairCfg.baseDecimals));
+    return b > 0 ? q / b : 0;
+  }, [live, reserves, token0, pairCfg, oraclePrice]);
 
   const divBps = divergenceBps(poolPrice, oraclePrice);
   const divWarn = divBps != null && divBps >= DIVERGENCE_WARN_BPS;
 
-  const inNum = Number(amountIn);
-  const amountOut =
-    inNum > 0 && poolPrice > 0
-      ? side === "buy"
-        ? inNum / poolPrice // quote → SEMA
-        : inNum * poolPrice // SEMA → quote
-      : 0;
+  const inToken = side === "buy" ? pairCfg.quoteToken : pairCfg.baseToken;
+  const outToken = side === "buy" ? pairCfg.baseToken : pairCfg.quoteToken;
+  const inDecimals = side === "buy" ? pairCfg.quoteDecimals : pairCfg.baseDecimals;
+  const outDecimals = side === "buy" ? pairCfg.baseDecimals : pairCfg.quoteDecimals;
+  const inLabel = side === "buy" ? pairCfg.quoteSymbol : pairCfg.baseSymbol;
+  const outLabel = side === "buy" ? pairCfg.baseSymbol : pairCfg.quoteSymbol;
 
-  const inLabel = side === "buy" ? pair.quoteSymbol : pair.baseSymbol;
-  const outLabel = side === "buy" ? pair.baseSymbol : pair.quoteSymbol;
+  const amountInWei =
+    amountIn && Number(amountIn) > 0 ? parseUnits(amountIn, inDecimals) : 0n;
+
+  const { data: amountsOut } = useReadContract({
+    address: pairCfg.router,
+    abi: UNI_V2_ROUTER_ABI,
+    functionName: "getAmountsOut",
+    args: [amountInWei, [inToken, outToken]],
+    query: {
+      enabled: live && amountInWei > 0n && isConnected,
+      refetchInterval: 10_000,
+    },
+  });
+
+  const amountOutWei =
+    amountsOut && Array.isArray(amountsOut) && amountsOut.length >= 2
+      ? (amountsOut[1] as bigint)
+      : 0n;
+  const amountOutHuman =
+    amountOutWei > 0n ? Number(formatUnits(amountOutWei, outDecimals)) : 0;
+
+  const { data: allowance } = useReadContract({
+    address: inToken,
+    abi: ERC20_ABI,
+    functionName: "allowance",
+    args: address ? [address, pairCfg.router] : undefined,
+    query: { enabled: live && !!address && amountInWei > 0n },
+  });
+
+  const needsApprove =
+    live && amountInWei > 0n && (allowance === undefined || (allowance as bigint) < amountInWei);
+
+  const { writeContract, data: txHash, isPending, reset } = useWriteContract();
+  const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    if (isSuccess) {
+      setAmountIn("");
+      reset();
+    }
+  }, [isSuccess, reset]);
+
+  const { data: lpBal } = useReadContract({
+    address: pairCfg.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: live && !!address },
+  });
+  const { data: lpSupply } = useReadContract({
+    address: pairCfg.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "totalSupply",
+    query: { enabled: live },
+  });
+
+  const lpPoints = useMemo(() => {
+    if (!live || !lpBal || !lpSupply || !reserves || (lpSupply as bigint) === 0n) return 0;
+    const [r0, r1] = reserves as readonly [bigint, bigint, number];
+    const baseIs0 =
+      token0 && (token0 as string).toLowerCase() === pairCfg.baseToken.toLowerCase();
+    const reserveQuote = baseIs0 ? r1 : r0;
+    const share = Number(lpBal as bigint) / Number(lpSupply as bigint);
+    const quoteOwned = share * Number(formatUnits(reserveQuote, pairCfg.quoteDecimals));
+    // Count both sides roughly as 2x quote for TVL share
+    return Math.floor(quoteOwned * 2 * LP_POINTS_PER_USDG);
+  }, [live, lpBal, lpSupply, reserves, token0, pairCfg]);
+
+  function onApprove() {
+    writeContract({
+      address: inToken,
+      abi: ERC20_ABI,
+      functionName: "approve",
+      args: [pairCfg.router, maxUint256],
+    });
+  }
+
+  function onSwap() {
+    if (!address || amountInWei === 0n || amountOutWei === 0n) return;
+    const minOut = (amountOutWei * BigInt(10_000 - slippageBps)) / 10_000n;
+    const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
+    writeContract({
+      address: pairCfg.router,
+      abi: UNI_V2_ROUTER_ABI,
+      functionName: "swapExactTokensForTokens",
+      args: [amountInWei, minOut, [inToken, outToken], address, deadline],
+    });
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <TopBar
         market={{
-          symbol: `${pair.baseSymbol}/${pair.quoteSymbol}`,
-          name: pair.baseName,
+          symbol: `${pairCfg.baseSymbol}/${pairCfg.quoteSymbol}`,
+          name: pairCfg.baseName,
           price: oraclePrice,
           change24h: 0,
           volume24h: 0,
           unit: "$/mg",
-          oracleKey: pair.oracleKey,
+          oracleKey: pairCfg.oracleKey,
         }}
         price={oraclePrice}
         isLive={isLive}
@@ -66,10 +194,9 @@ export default function SpotPage() {
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 lg:flex-row lg:overflow-hidden">
         <div className="flex min-w-0 flex-1 flex-col gap-3 lg:overflow-y-auto">
-          {/* Mode tabs */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-lg bg-green/15 px-2.5 py-1 text-xs font-semibold text-green">
-              Spot
+              Spot · Uniswap V2
             </span>
             <Link
               href="/perps"
@@ -81,7 +208,7 @@ export default function SpotPage() {
               href="/redeem"
               className="rounded-lg px-2.5 py-1 text-xs font-medium text-muted hover:bg-panel hover:text-ink"
             >
-              Redeem vials →
+              Redeem kits →
             </Link>
             <Link
               href="/launchpad"
@@ -96,21 +223,17 @@ export default function SpotPage() {
               label="Official research price"
               value={oraclePrice}
               unit="$/mg"
-              note={
-                isLive
-                  ? "PeptideOracle · dual-source SEMA-PERP"
-                  : "Oracle offline · reference mark"
-              }
+              note={isLive ? "PeptideOracle · SEMA-PERP" : "Oracle offline · reference"}
               tone="oracle"
             />
             <PriceCard
-              label="Pool price (spot)"
+              label="Pool price"
               value={poolPrice}
-              unit={`$ / ${pair.baseSymbol}`}
+              unit={`${pairCfg.quoteSymbol} / ${pairCfg.baseSymbol}`}
               note={
-                pair.live
-                  ? `Uniswap V2 ${pair.baseSymbol}/${pair.quoteSymbol}`
-                  : "Demo mark until pool is seeded"
+                live
+                  ? `Uniswap V2 ${pairCfg.baseSymbol}/${pairCfg.quoteSymbol}`
+                  : "Deploy SEMA + seed pool to go live"
               }
               tone="pool"
             />
@@ -118,11 +241,7 @@ export default function SpotPage() {
               label="Oracle ↔ pool"
               value={divBps != null ? divBps / 100 : null}
               unit="%"
-              note={
-                divWarn
-                  ? "Divergence elevated — size carefully"
-                  : "Within soft band"
-              }
+              note={divWarn ? "Divergence elevated" : "Within soft band"}
               tone={divWarn ? "warn" : "neutral"}
               isPercent
             />
@@ -132,62 +251,71 @@ export default function SpotPage() {
             <div className="flex gap-2 rounded-xl border border-amber-500/40 bg-panel px-4 py-3 text-xs text-ink-soft">
               <Info size={16} className="mt-0.5 shrink-0 text-amber-400" />
               <p>
-                Spot pool is{" "}
-                <span className="font-semibold text-ink">
-                  {(divBps! / 100).toFixed(1)}%
-                </span>{" "}
-                away from the official research oracle. The oracle is the blended
-                lab/vendor $/mg mark — use it for context, not as a hard settlement
-                price on the AMM.
+                Pool is{" "}
+                <span className="font-semibold text-ink">{(divBps! / 100).toFixed(1)}%</span>{" "}
+                from the research oracle. Oracle is blended lab/vendor $/mg — not AMM settlement.
               </p>
             </div>
           )}
 
           <div className="grid min-h-[320px] gap-3 lg:grid-cols-[1fr_200px]">
             <ChartPanel symbol="SEMA-PERP" price={oraclePrice} unit="$/mg" />
-            <div className="rounded-xl border border-border bg-panel p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-ink">
-                <FlaskConical size={16} className="text-green" />
-                Research utility
+            <div className="space-y-3">
+              <div className="rounded-xl border border-border bg-panel p-4">
+                <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+                  <FlaskConical size={16} className="text-green" />
+                  Kit redemption
+                </div>
+                <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">
+                  <strong className="text-ink">1 SEMA ≈ 1 vial</strong>. Research Only kits =
+                  10 vials → need <strong className="text-ink">≥{SEMA_PER_KIT} SEMA</strong>.
+                  Transfer SEMA to treasury, then shipping form. Cap{" "}
+                  <strong className="text-ink">{MONTHLY_KIT_CAP} kits/month</strong> per wallet.
+                </p>
+                <Link
+                  href="/redeem"
+                  className="btn-green mt-4 inline-flex w-full justify-center py-2 text-xs"
+                >
+                  Redeem flow
+                </Link>
               </div>
-              <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">
-                <strong className="text-ink">1 {pair.baseSymbol} ≈ 1 vial unit</strong>.
-                Research Only ships in <strong className="text-ink">kits of 10</strong>, so
-                redeem needs <strong className="text-ink">≥10 SEMA</strong> per kit.
-              </p>
-              <Link
-                href="/redeem"
-                className="btn-green mt-4 inline-flex w-full justify-center py-2 text-xs"
-              >
-                Redeem kit flow
-              </Link>
-              <p className="mt-3 text-[10px] leading-relaxed text-muted">
-                Research use only. Not for human consumption. Shipping form → sheet +
-                confirmation email; we fulfill manually.
-              </p>
+              <div className="rounded-xl border border-border bg-panel p-4">
+                <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+                  <Coins size={16} className="text-green" />
+                  LP points
+                </div>
+                <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-ink">
+                  {lpPoints.toLocaleString()}
+                </p>
+                <p className="mt-1 text-[10px] text-muted">
+                  Est. from your LP share · {LP_POINTS_PER_USDG} pts per $ LP TVL. Incentives
+                  expand post-launch.
+                </p>
+              </div>
             </div>
           </div>
 
           <div className="rounded-xl border border-border bg-panel p-4 text-xs text-ink-soft">
-            <div className="font-semibold text-ink">Roadmap</div>
+            <div className="font-semibold text-ink">Mainnet notes</div>
             <ul className="mt-2 list-disc space-y-1 pl-4">
               <li>
-                Deploy {pair.baseSymbol} ERC-20 + Uniswap V2 pool vs{" "}
-                {pair.quoteSymbol}
+                Stable on Robinhood mainnet is <strong className="text-ink">USDG</strong>{" "}
+                (Global Dollar) — no Circle USDC deployment found; pair is SEMA/USDG.
               </li>
-              <li>Seed liquidity · wire router swap on this page</li>
-              <li>LP points + limited monthly redemptions</li>
               <li>
-                Fully-backed vial launches on{" "}
-                <Link href="/launchpad" className="text-green-soft hover:underline">
-                  /launchpad
-                </Link>
+                Uniswap V2 Router{" "}
+                <code className="text-[10px] text-ink">{pairCfg.router.slice(0, 10)}…</code>
+              </li>
+              <li>
+                Deploy:{" "}
+                <code className="text-[10px]">
+                  npx hardhat run scripts/deploy-sema-spot.ts --network robinhoodMainnet
+                </code>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Swap ticket */}
         <div className="flex w-full shrink-0 flex-col gap-3 lg:w-[340px] lg:overflow-y-auto">
           <AccountCard />
 
@@ -195,7 +323,7 @@ export default function SpotPage() {
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-ink">Swap</h2>
               <span className="text-[10px] uppercase tracking-wide text-muted">
-                {pair.baseSymbol}/{pair.quoteSymbol}
+                {pairCfg.baseSymbol}/{pairCfg.quoteSymbol}
               </span>
             </div>
 
@@ -214,7 +342,7 @@ export default function SpotPage() {
                       : "text-muted hover:text-ink",
                   )}
                 >
-                  {s === "buy" ? `Buy ${pair.baseSymbol}` : `Sell ${pair.baseSymbol}`}
+                  {s === "buy" ? `Buy ${pairCfg.baseSymbol}` : `Sell ${pairCfg.baseSymbol}`}
                 </button>
               ))}
             </div>
@@ -249,27 +377,34 @@ export default function SpotPage() {
             </label>
             <div className="mt-1 flex items-center gap-2 rounded-lg border border-border bg-bg px-3 py-2">
               <div className="min-w-0 flex-1 font-mono text-sm tabular-nums text-ink">
-                {amountOut > 0 ? amountOut.toFixed(6) : "—"}
+                {amountOutHuman > 0 ? amountOutHuman.toFixed(6) : "—"}
               </div>
               <span className="shrink-0 text-xs font-semibold text-ink">{outLabel}</span>
             </div>
 
             <div className="mt-3 space-y-1 text-[11px] text-muted">
               <div className="flex justify-between">
-                <span>Est. rate</span>
+                <span>Pool rate</span>
                 <span className="font-mono text-ink-soft">
-                  1 {pair.baseSymbol} ≈ {poolPrice.toFixed(4)} {pair.quoteSymbol}
+                  1 {pairCfg.baseSymbol} ≈ {poolPrice > 0 ? poolPrice.toFixed(4) : "—"}{" "}
+                  {pairCfg.quoteSymbol}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Oracle reference</span>
-                <span className="font-mono text-ink-soft">
-                  ${oraclePrice.toFixed(4)}/mg
-                </span>
+                <span>Oracle</span>
+                <span className="font-mono text-ink-soft">${oraclePrice.toFixed(4)}/mg</span>
               </div>
-              <div className="flex justify-between">
-                <span>Slippage (default)</span>
-                <span className="font-mono text-ink-soft">1.0%</span>
+              <div className="flex justify-between items-center">
+                <span>Slippage</span>
+                <select
+                  value={slippageBps}
+                  onChange={(e) => setSlippageBps(Number(e.target.value))}
+                  className="rounded border border-border bg-bg px-1 py-0.5 text-ink"
+                >
+                  <option value={50}>0.5%</option>
+                  <option value={100}>1%</option>
+                  <option value={200}>2%</option>
+                </select>
               </div>
             </div>
 
@@ -284,38 +419,42 @@ export default function SpotPage() {
               >
                 Connect wallet
               </button>
-            ) : pair.live ? (
-              <button type="button" className="btn-green mt-4 w-full py-2.5 text-sm" disabled>
-                Swap (wiring router…)
-              </button>
-            ) : (
+            ) : !live ? (
               <div className="mt-4 rounded-lg border border-border-strong bg-bg px-3 py-3 text-center">
                 <div className="text-xs font-semibold text-ink">Pool not live yet</div>
                 <p className="mt-1 text-[11px] leading-relaxed text-muted">
-                  SEMA token + {pair.quoteSymbol} Uniswap V2 pool deploy next. UI and
-                  oracle path are ready; swaps enable when{" "}
-                  <code className="text-ink-soft">pair.live</code> is set.
+                  Deploy SEMA + seed Uniswap V2 liquidity, then set{" "}
+                  <code className="text-ink-soft">SPOT_MAINNET.live = true</code>.
                 </p>
-                {address && (
-                  <p className="mt-2 truncate font-mono text-[10px] text-faint">
-                    {address}
-                  </p>
-                )}
               </div>
+            ) : needsApprove ? (
+              <button
+                type="button"
+                className="btn-green mt-4 w-full py-2.5 text-sm"
+                disabled={isPending || confirming}
+                onClick={onApprove}
+              >
+                {isPending || confirming ? "Confirm in wallet…" : `Approve ${inLabel}`}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn-green mt-4 w-full py-2.5 text-sm"
+                disabled={isPending || confirming || amountInWei === 0n || amountOutWei === 0n}
+                onClick={onSwap}
+              >
+                {isPending || confirming ? "Swapping…" : `Swap ${inLabel} → ${outLabel}`}
+              </button>
             )}
-          </div>
 
-          <div className="rounded-xl border border-border bg-panel p-3 text-[10px] leading-relaxed text-muted">
-            Research use only. Not medical advice. Spot price is an AMM mark; official
-            research pricing comes from PeptideOracle (PeptideScouter + vendor basket).
-            {network.explorer && (
+            {txHash && (
               <a
-                href={network.explorer}
+                href={`${network.explorer}/tx/${txHash}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-1 inline-flex items-center gap-1 text-green-soft hover:underline"
+                className="mt-2 flex items-center justify-center gap-1 text-[10px] text-green-soft hover:underline"
               >
-                Explorer <ExternalLink size={10} />
+                View tx <ExternalLink size={10} />
               </a>
             )}
           </div>
