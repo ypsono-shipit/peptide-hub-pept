@@ -1,12 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAccount, useConnect } from "wagmi";
 import { BrandWordmark } from "@/components/BrandWordmark";
 
 export default function WaitlistPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-bg px-5 py-20 text-center text-sm text-muted">
+          Loading waitlist…
+        </div>
+      }
+    >
+      <WaitlistInner />
+    </Suspense>
+  );
+}
+
+function WaitlistInner() {
+  const searchParams = useSearchParams();
+  const from = (searchParams.get("from") || "").toLowerCase();
+  const source = useMemo(() => {
+    if (from === "launchpad") return "launchpad";
+    if (from === "landing" || from === "home") return "landing";
+    return "waitlist";
+  }, [from]);
+  const fromLaunchpad = source === "launchpad";
+
   const { address, isConnected } = useAccount();
   const { connectors, connect } = useConnect();
 
@@ -52,6 +76,7 @@ export default function WaitlistPage() {
           email,
           wallet: wallet || undefined,
           xHandle: xHandle || undefined,
+          source,
         }),
       });
       const data = (await res.json()) as {
@@ -103,21 +128,31 @@ export default function WaitlistPage() {
           <BrandWordmark />
         </Link>
         <span className="rounded-full border border-border bg-panel px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">
-          Waitlist
+          {fromLaunchpad ? "Launchpad · Waitlist" : "Waitlist"}
         </span>
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-lg flex-col px-5 pb-20 pt-6 sm:px-6 sm:pt-10">
         <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">
-          Early access
+          {fromLaunchpad ? "Launchpad · Early access" : "Early access"}
         </p>
         <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">
-          Join the line for peptide{" "}
-          <em className="font-serif font-normal italic text-green-soft">perps</em>
+          {fromLaunchpad ? (
+            <>
+              Get alerts for fully-backed{" "}
+              <em className="font-serif font-normal italic text-green-soft">vial launches</em>
+            </>
+          ) : (
+            <>
+              Join the line for peptide{" "}
+              <em className="font-serif font-normal italic text-green-soft">perps</em>
+            </>
+          )}
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft sm:text-base">
-          Oracle-marked markets, USDG margin, and research-kit NFTs on Robinhood Chain. Leave your
-          details — we&apos;ll open access in waves.
+          {fromLaunchpad
+            ? "Same PEPT waitlist as the main product — launchpad, spot SEMA, perps, and research kits. One list, one Supabase (or Sheets) backend."
+            : "Oracle-marked markets, USDG margin, and research-kit NFTs on Robinhood Chain. Leave your details — we'll open access in waves."}
         </p>
 
         <div className="mt-8 rounded-2xl border border-border bg-panel px-5 py-4">

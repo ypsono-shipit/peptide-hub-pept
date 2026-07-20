@@ -6,9 +6,14 @@ create table if not exists public.waitlist (
   email text not null,
   wallet text,
   x_handle text,
+  -- e.g. landing | launchpad | waitlist (optional analytics)
+  source text,
   created_at timestamptz not null default now(),
   constraint waitlist_email_unique unique (email)
 );
+
+-- Safe for existing projects that already created the table without source
+alter table public.waitlist add column if not exists source text;
 
 create index if not exists waitlist_created_at_idx on public.waitlist (created_at desc);
 

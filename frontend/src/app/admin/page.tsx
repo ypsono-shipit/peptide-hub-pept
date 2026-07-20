@@ -618,8 +618,8 @@ export default function AdminPage() {
                       <code className="text-ink">frontend/public/data/glp1-last-scrape.json</code>
                     </li>
                     <li className="text-muted">
-                      Not in Supabase — waitlist uses Google Sheets only. History is git + GitHub
-                      Actions commits.
+                      Price history is git JSON (not Supabase). Waitlist uses Supabase when
+                      configured, else Google Sheets.
                     </li>
                   </ul>
                   <div className="mt-5 flex flex-wrap gap-3">

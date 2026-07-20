@@ -7,14 +7,11 @@ import { BrandWordmark } from "@/components/BrandWordmark";
 import { Rocket, Sparkles, Shield, Layers } from "lucide-react";
 
 export default function LaunchpadPage() {
-  const [email, setEmail] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState<number | null>(null);
 
   const refreshCount = useCallback(async () => {
     try {
+      // Same queue as /waitlist → /api/waitlist → Supabase (or Sheets fallback)
       const res = await fetch("/api/waitlist", { cache: "no-store" });
       const data = (await res.json()) as { count?: number };
       if (typeof data.count === "number") setCount(data.count);
@@ -25,31 +22,9 @@ export default function LaunchpadPage() {
 
   useEffect(() => {
     refreshCount();
+    const t = setInterval(refreshCount, 30_000);
+    return () => clearInterval(t);
   }, [refreshCount]);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setBusy(true);
-    try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, xHandle: undefined, wallet: undefined }),
-      });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok || !data.ok) {
-        setError(data.error || "Could not join. Try again.");
-        return;
-      }
-      setDone(true);
-      await refreshCount();
-    } catch {
-      setError("Network error. Try again.");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-bg text-ink">
@@ -75,10 +50,10 @@ export default function LaunchpadPage() {
             Redeem
           </Link>
           <Link
-            href="/spot"
+            href="/waitlist?from=launchpad"
             className="rounded-full bg-green px-3 py-1 text-xs font-semibold text-black hover:bg-green-dim"
           >
-            Trade SEMA
+            Join waitlist
           </Link>
         </nav>
       </header>
@@ -115,7 +90,7 @@ export default function LaunchpadPage() {
             phase="Phase 2 · Soon"
             title="Launchpad RWA vials"
             body="Curated fully-backed launches: raise inventory capital, mint 1:1 research units, transparent reserves, and batch redemption. TIRZ, RETA, and more."
-            cta={{ href: "#waitlist", label: "Join waitlist" }}
+            cta={{ href: "/waitlist?from=launchpad", label: "Join waitlist" }}
           />
         </div>
 
@@ -145,41 +120,42 @@ export default function LaunchpadPage() {
           ))}
         </section>
 
-        <section id="waitlist" className="mt-16 scroll-mt-20 rounded-2xl border border-border bg-panel p-6 sm:p-8">
+        <section
+          id="waitlist"
+          className="mt-16 scroll-mt-20 rounded-2xl border border-border bg-panel p-6 sm:p-8"
+        >
           <h2 className="text-xl font-semibold text-ink">Get launch alerts</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            Early access to fully-backed vial launches and fundraising windows.
+            Uses the <strong className="text-ink">same waitlist</strong> as{" "}
+            <Link href="/waitlist" className="text-green-soft hover:underline">
+              /waitlist
+            </Link>
+            {" "}
+            (Supabase table <code className="text-ink">waitlist</code>, with Sheets fallback).
             {count != null && (
-              <span className="text-muted"> · {count.toLocaleString()} on the list</span>
+              <span className="text-muted">
+                {" "}
+                · {count.toLocaleString()} already in line
+              </span>
             )}
           </p>
 
-          {done ? (
-            <p className="mt-6 text-sm text-green-soft">
-              You&apos;re on the list. We&apos;ll ping you when launchpad opens.
-            </p>
-          ) : (
-            <form onSubmit={submit} className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@lab.email"
-                className="min-w-0 flex-1 rounded-lg border border-border-strong bg-bg px-4 py-2.5 text-sm text-ink outline-none focus:border-green"
-              />
-              <button
-                type="submit"
-                disabled={busy}
-                className="btn-green shrink-0 px-6 py-2.5 text-sm disabled:opacity-50"
-              >
-                {busy ? "Joining…" : "Join waitlist"}
-              </button>
-            </form>
-          )}
-          {error && <p className="mt-2 text-xs text-negative">{error}</p>}
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link
+              href="/waitlist?from=launchpad"
+              className="btn-green inline-flex justify-center px-6 py-2.5 text-sm"
+            >
+              Join the PEPT waitlist
+            </Link>
+            <Link
+              href="/waitlist"
+              className="inline-flex justify-center rounded-lg border border-border-strong px-4 py-2.5 text-sm font-semibold text-ink hover:bg-bg"
+            >
+              Open waitlist page
+            </Link>
+          </div>
           <p className="mt-4 text-[11px] text-muted">
-            Same waitlist as the main PEPT list. Research use only · not investment advice.
+            Research use only · not investment advice. One list powers product + launchpad.
           </p>
         </section>
 

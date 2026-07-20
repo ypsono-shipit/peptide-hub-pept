@@ -9,6 +9,8 @@ export type WaitlistEntry = {
   email: string;
   wallet: string | null;
   xHandle: string | null;
+  /** Origin surface: waitlist | launchpad | landing | etc. */
+  source: string | null;
 };
 
 export type WaitlistResult =
@@ -111,6 +113,7 @@ async function joinViaSheets(entry: WaitlistEntry): Promise<WaitlistResult | nul
       email: entry.email,
       wallet: entry.wallet,
       x_handle: entry.xHandle,
+      source: entry.source,
       created_at: new Date().toISOString(),
     });
     const text = await res.text();
@@ -189,37 +192,51 @@ export async function joinWaitlist(input: {
   email: string;
   wallet?: string;
   xHandle?: string;
+  source?: string;
 }): Promise<WaitlistResult> {
   const email = normalizeEmail(input.email);
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, error: "Enter a valid email address.", status: 400 };
   }
 
+  const sourceRaw = (input.source || "").trim().toLowerCase().slice(0, 64);
   const entry: WaitlistEntry = {
     email,
     wallet: normalizeWallet(input.wallet),
     xHandle: normalizeX(input.xHandle),
+    source: sourceRaw || null,
   };
 
-  // Prefer Supabase when configured
+  // Prefer Supabase when configured (same table for /waitlist + /launchpad)
   const sb = supabaseConfig();
   if (sb) {
-    const res = await fetch(`${sb.url}/rest/v1/waitlist`, {
-      method: "POST",
-      headers: {
-        apikey: sb.key,
-        Authorization: `Bearer ${sb.key}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-      },
-      body: JSON.stringify({
+    const postRow = async (includeSource: boolean) => {
+      const row: Record<string, string | null> = {
         email: entry.email,
         wallet: entry.wallet,
         x_handle: entry.xHandle,
-      }),
-    });
+      };
+      if (includeSource && entry.source) row.source = entry.source;
+      return fetch(`${sb.url}/rest/v1/waitlist`, {
+        method: "POST",
+        headers: {
+          apikey: sb.key,
+          Authorization: `Bearer ${sb.key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify(row),
+      });
+    };
 
-    const text = await res.text();
+    let res = await postRow(true);
+    let text = await res.text();
+    // Retry without source if column not migrated yet
+    if (!res.ok && /source|PGRST|column/i.test(text) && entry.source) {
+      res = await postRow(false);
+      text = await res.text();
+    }
+
     let json: { code?: string; message?: string; id?: string } | unknown[] | null = null;
     try {
       json = text ? JSON.parse(text) : null;

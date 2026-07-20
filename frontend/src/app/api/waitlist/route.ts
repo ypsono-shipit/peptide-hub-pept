@@ -27,12 +27,14 @@ export async function POST(req: NextRequest) {
       wallet?: string;
       xHandle?: string;
       x_handle?: string;
+      source?: string;
     };
 
     const result = await joinWaitlist({
       email: body.email || "",
       wallet: body.wallet,
       xHandle: body.xHandle || body.x_handle,
+      source: body.source,
     });
 
     if (!result.ok) {
