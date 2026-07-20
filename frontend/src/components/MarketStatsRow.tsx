@@ -8,7 +8,7 @@ export function MarketStatsRow({
   openInterestLabel?: string;
 }) {
   const cells = [
-    { label: "Open Interest", value: openInterestLabel ?? "; ", note: "from PLP / engine" },
+    { label: "Open Interest", value: openInterestLabel ?? "—", note: "from perps engine" },
     { label: "24H Volume", value: "Demo", note: "not on-chain yet" },
     { label: "Liquidation (24H)", value: "Demo", note: "not on-chain yet" },
     { label: "Long / Short (24H)", value: "; ", note: "not tracked" },

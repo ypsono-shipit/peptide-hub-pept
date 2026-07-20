@@ -6,10 +6,8 @@ import {
   LayoutGrid,
   LineChart,
   ArrowLeftRight,
-  Droplets,
   Store,
   Wallet,
-  Coins,
   Settings,
   HelpCircle,
   Rocket,
@@ -29,9 +27,7 @@ const NAV = [
   { href: "/redeem", label: "Redeem", icon: Package },
   { href: "/launchpad", label: "Launchpad", icon: Rocket },
   { href: "/portfolio", label: "Positions", icon: Wallet },
-  { href: "/liquidity", label: "Liquidity", icon: Droplets },
   { href: "/marketplace", label: "Marketplace", icon: Store },
-  { href: "/stake", label: "Stake", icon: Coins },
   { href: "/oracle/monitor", label: "Oracle", icon: LineChart },
 ];
 

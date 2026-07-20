@@ -17,11 +17,6 @@ export function AccountCard() {
     args: address ? [address] : undefined,
     query: { enabled: !!address && network.contractsLive },
   });
-  const aum = useReadContract({
-    ...plpPool,
-    functionName: "totalAssets",
-    query: { enabled: network.contractsLive },
-  });
   const oi = useReadContract({
     ...plpPool,
     functionName: "openInterestUsd",
@@ -56,25 +51,18 @@ export function AccountCard() {
         {isConnected ? "" : " · connect wallet"}
         {!network.contractsLive && isConnected ? " · mainnet deploy pending" : ""}
       </div>
-      <div className="mt-2 space-y-1 border-t border-border pt-2 text-[11px] text-muted">
-        <div className="flex justify-between">
-          <span>PLP AUM</span>
-          <span className="font-mono text-ink-soft">
-            {aum.data !== undefined
-              ? Number(formatUnits(aum.data as bigint, COLLATERAL_DECIMALS)).toLocaleString()
-              : "; "}{" "}
-            {network.collateralSymbol}
-          </span>
+      {network.contractsLive && (
+        <div className="mt-2 space-y-1 border-t border-border pt-2 text-[11px] text-muted">
+          <div className="flex justify-between">
+            <span>Open interest</span>
+            <span className="font-mono text-ink-soft">
+              {oi.data !== undefined
+                ? `$${Number(formatUnits(oi.data as bigint, 18)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+                : "—"}
+            </span>
+          </div>
         </div>
-        <div className="flex justify-between">
-          <span>Open interest</span>
-          <span className="font-mono text-ink-soft">
-            {oi.data !== undefined
-              ? `$${Number(formatUnits(oi.data as bigint, 18)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-              : "; "}
-          </span>
-        </div>
-      </div>
+      )}
       {isConnected && network.canMintCollateral && network.contractsLive && (
         <button
           disabled={isPending}

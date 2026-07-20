@@ -7,7 +7,6 @@ import { TopBar } from "@/components/TopBar";
 import { PositionsTable } from "@/components/PositionsTable";
 import { AccountCard } from "@/components/AccountCard";
 import { MyVouchers } from "@/components/marketplace/MyVouchers";
-import { PlpHoldingsCard } from "@/components/PlpHoldingsCard";
 import { usePositions } from "@/lib/usePositions";
 import { useAppContracts } from "@/lib/useAppContracts";
 import { Panel } from "@/components/ui/Panel";
@@ -32,7 +31,7 @@ export default function PortfolioPage() {
         <div>
           <h1 className="text-lg font-semibold text-ink">Portfolio</h1>
           <p className="text-sm text-muted">
-            Perps positions, PLP liquidity, and kit voucher NFTs on Robinhood testnet
+            Perps positions and kit voucher NFTs on Robinhood Chain
           </p>
         </div>
 
@@ -69,24 +68,6 @@ export default function PortfolioPage() {
                   />
                 )}
               </Panel>
-            </section>
-
-            <section className="space-y-3">
-              <div className="flex items-end justify-between gap-3">
-                <div>
-                  <h2 className="text-sm font-semibold text-ink">Liquidity (PLP)</h2>
-                  <p className="text-xs text-muted">
-                    Vault shares, redeemable value, and attributed yield
-                  </p>
-                </div>
-                <Link
-                  href="/liquidity"
-                  className="text-xs font-medium text-ink underline-offset-4 hover:underline"
-                >
-                  Vault →
-                </Link>
-              </div>
-              <PlpHoldingsCard />
             </section>
 
             <section className="space-y-3">

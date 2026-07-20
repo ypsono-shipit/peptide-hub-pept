@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
     return [
       // Old trade terminal → perps; spot is the new primary market surface
       { source: "/trade", destination: "/perps", permanent: false },
+      // PLP vault + PEPT stake hidden for now → spot LP earn
+      { source: "/liquidity", destination: "/earn", permanent: false },
+      { source: "/stake", destination: "/earn", permanent: false },
     ];
   },
 };
