@@ -9,7 +9,7 @@ import { BrandWordmark } from "@/components/BrandWordmark";
 export const metadata: Metadata = {
   title: "PEPT Trade | Peptide Perpetuals on Robinhood Chain",
   description:
-    "Oracle-marked peptide perps, USDC margin, PLP liquidity, and Pept Trade x Research Only kits. Launch the terminal on Robinhood Chain Testnet.",
+    "Oracle-marked peptide perps, USDG margin, and Pept Trade x Research Only kits on Robinhood Chain.",
 };
 
 const FEATURES = [

@@ -10,7 +10,20 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 export const metadata: Metadata = {
   title: "PEPT Trade | Peptide Perpetuals",
   description:
-    "Trade peptide-themed perps on Robinhood Chain. Oracle-marked markets, USDC margin, PLP liquidity, Pept Trade x Research Only marketplace.",
+    "Trade peptide perps on Robinhood Chain. Oracle-marked markets, USDG margin, Pept Trade x Research Only marketplace.",
+  openGraph: {
+    title: "PEPT Trade | Peptide Perpetuals",
+    description:
+      "Trade peptide perps on Robinhood Chain. Oracle-marked markets, USDG margin, Pept Trade x Research Only marketplace.",
+    siteName: "PEPT Trade",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PEPT Trade | Peptide Perpetuals",
+    description:
+      "Trade peptide perps on Robinhood Chain. Oracle-marked markets, USDG margin, Pept Trade x Research Only marketplace.",
+  },
   icons: {
     icon: [
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
