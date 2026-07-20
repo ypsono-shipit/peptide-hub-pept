@@ -39,16 +39,16 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-[72px] shrink-0 flex-col border-r border-border bg-bg py-4 lg:w-52">
-      <Link href="/dashboard" className="mb-6 flex items-center gap-2.5 px-3 lg:px-4">
-        <Logo size={36} className="ring-1 ring-border" />
-        <div className="hidden min-w-0 lg:block">
+    <aside className="relative z-20 flex w-[72px] shrink-0 flex-col overflow-hidden border-r border-border bg-bg py-4 lg:w-52">
+      <Link href="/dashboard" className="mb-6 flex min-w-0 items-center gap-2.5 px-3 lg:px-4">
+        <Logo size={36} className="shrink-0 ring-1 ring-border" />
+        <div className="hidden min-w-0 flex-1 lg:block">
           <BrandWordmark className="block truncate" />
           <div className="truncate text-[10px] text-muted">Spot · Earn · Perps</div>
         </div>
       </Link>
 
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-x-hidden overflow-y-auto px-2">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active =
             pathname === href || (href !== "/dashboard" && pathname?.startsWith(href));
@@ -58,14 +58,15 @@ export function Sidebar() {
               href={href}
               title={label}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                // Inset ring only — outer shadow-green was bleeding over main content
+                "flex min-w-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
                 active
-                  ? "bg-panel-hover font-medium text-ink shadow-green"
+                  ? "bg-panel-hover font-medium text-ink ring-1 ring-inset ring-green/80"
                   : "text-muted hover:bg-panel hover:text-ink-soft",
               )}
             >
               <Icon size={18} className={cn("shrink-0", active && "text-green")} />
-              <span className="hidden lg:inline">{label}</span>
+              <span className="hidden min-w-0 truncate lg:inline">{label}</span>
             </Link>
           );
         })}

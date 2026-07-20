@@ -28,7 +28,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-bg">
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">{children}</div>
+      {/* Isolate main pane so sidebar rings/shadows never paint over page titles */}
+      <div className="relative z-0 flex min-w-0 flex-1 flex-col overflow-hidden bg-bg">
+        {children}
+      </div>
     </div>
   );
 }
