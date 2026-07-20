@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAccount, useConnect } from "wagmi";
@@ -161,8 +161,8 @@ function RedeemShippingInner() {
       }
       setDone({
         orderId: data.orderId,
-        kits: data.kits ?? kitsN,
-        seMa: data.seMaRequired ?? seMaRequired,
+        kits: data.kits ?? transfer?.kits ?? kitsN,
+        seMa: data.seMaRequired ?? transfer?.seMa ?? kitsToSema(kitsN),
       });
     } catch {
       setError("Network error. Try again.");
