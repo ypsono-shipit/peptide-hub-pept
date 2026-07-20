@@ -181,14 +181,14 @@ function WaitlistInner() {
             <p className="mt-4 text-xs text-muted">
               Follow{" "}
               <a
-                href="https://t.me/blackswanhl"
+                href="https://x.com/pept_trade"
                 target="_blank"
                 rel="noreferrer"
                 className="text-ink underline underline-offset-2"
               >
-                @blackswanhl
+                @pept_trade
               </a>{" "}
-              for updates.
+              on X for updates.
             </p>
           </div>
         ) : (
