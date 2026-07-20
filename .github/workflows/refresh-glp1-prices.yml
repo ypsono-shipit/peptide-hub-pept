@@ -92,8 +92,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # Keep chart history on main so /trade + /oracle pick up new samples
-      # (OHLC prefers raw.githubusercontent.com/.../main/.../price-history.json).
+      # Keep chart history on main so /trade + /oracle pick up new samples.
+      # NEVER commit merge-conflict markers — that 500s /api/oracle/monitor
+      # (git pull --rebase --autostash previously wrote <<<<<<< Updated upstream).
       - name: Commit price history
         if: success() && github.ref == 'refs/heads/main'
         working-directory: .
@@ -101,32 +102,126 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Snapshot may live under contracts/ and frontend/public/
-          git add -f \
-            contracts/data/price-history.json \
-            contracts/data/glp1-last-scrape.json \
-            frontend/public/data/price-history.json \
-            frontend/public/data/glp1-last-scrape.json \
-            2>/dev/null || true
-          # Race-safe against concurrent history commits
-          git pull --rebase --autostash origin main
-          git add -f \
-            contracts/data/price-history.json \
-            contracts/data/glp1-last-scrape.json \
-            frontend/public/data/price-history.json \
-            frontend/public/data/glp1-last-scrape.json \
-            2>/dev/null || true
+
+          DATA_FILES=(
+            contracts/data/price-history.json
+            contracts/data/glp1-last-scrape.json
+            frontend/public/data/price-history.json
+            frontend/public/data/glp1-last-scrape.json
+          )
+
+          merge_histories() {
+            node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const paths = [
+            "contracts/data/price-history.json",
+            "frontend/public/data/price-history.json",
+          ];
+          const NOTE =
+            "Oracle mark samples for PEPT Trade charts. Appended on each successful pushPrice (~5m cron). Fine TFs (5m/15m) need dense samples; coarser TFs still stair-step when marks are quiet.";
+          function load(p) {
+            try {
+              if (!fs.existsSync(p)) return [];
+              const t = fs.readFileSync(p, "utf8");
+              if (t.includes("<<<<<<<") || t.includes(">>>>>>>")) {
+                console.warn("skip conflicted", p);
+                const re =
+                  /\{\s*"market"\s*:\s*"([^"]+)"\s*,\s*"ts"\s*:\s*(\d+)\s*,\s*"price"\s*:\s*([0-9.eE+-]+)[^}]*\}/g;
+                const out = [];
+                let m;
+                while ((m = re.exec(t))) {
+                  out.push({ market: m[1], ts: Number(m[2]), price: Number(m[3]) });
+                }
+                return out;
+              }
+              const j = JSON.parse(t);
+              return Array.isArray(j.samples) ? j.samples : [];
+            } catch (e) {
+              console.warn("load fail", p, e.message);
+              return [];
+            }
+          }
+          const map = new Map();
+          for (const p of paths) {
+            for (const s of load(p)) {
+              if (!s?.market || !s.ts || !Number.isFinite(s.price)) continue;
+              const k = `${s.market}|${s.ts}|${Number(s.price).toFixed(6)}`;
+              const prev = map.get(k);
+              if (!prev || (s.txHash && !prev.txHash)) map.set(k, s);
+            }
+          }
+          let samples = [...map.values()].sort(
+            (a, b) => a.ts - b.ts || a.market.localeCompare(b.market),
+          );
+          if (samples.length > 20000) samples = samples.slice(samples.length - 20000);
+          if (samples.length === 0) {
+            console.error("merge_histories: no samples — refusing to write empty");
+            process.exit(2);
+          }
+          const body =
+            JSON.stringify(
+              { updatedAt: new Date().toISOString(), note: NOTE, samples },
+              null,
+              2,
+            ) + "\n";
+          for (const p of paths) {
+            fs.mkdirSync(path.dirname(p), { recursive: true });
+            fs.writeFileSync(p, body);
+            console.log("wrote", p, "n=", samples.length);
+          }
+          NODE
+          }
+
+          assert_clean_json() {
+            for f in "${DATA_FILES[@]}"; do
+              [ -f "$f" ] || continue
+              if grep -qE '^(<<<<<<<|=======|>>>>>>>)' "$f"; then
+                echo "ERROR: conflict markers in $f"
+                return 1
+              fi
+            done
+            node -e "const j=require('./frontend/public/data/price-history.json'); if(!Array.isArray(j.samples)||!j.samples.length) process.exit(1)"
+          }
+
+          merge_histories
+          assert_clean_json
+          git add -f "${DATA_FILES[@]}" 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No history/scrape changes to commit"
             exit 0
           fi
           git commit -m "chore: append oracle price history + scrape snapshot [skip ci]"
-          for i in 1 2 3; do
-            if git push origin HEAD:main; then
-              echo "History pushed"
-              exit 0
+
+          # Commit first, then rebase (no --autostash — that left <<<<<<< markers)
+          for i in 1 2 3 4; do
+            git fetch origin main
+            if git rebase origin/main; then
+              assert_clean_json || {
+                merge_histories
+                assert_clean_json
+                git add -f "${DATA_FILES[@]}"
+                git commit --amend --no-edit
+              }
+              if git push origin HEAD:main; then
+                echo "History pushed"
+                exit 0
+              fi
+              echo "Push rejected (attempt $i)…"
+            else
+              echo "Rebase conflict (attempt $i) — densest sample merge"
+              git checkout --ours -- contracts/data/price-history.json frontend/public/data/price-history.json 2>/dev/null || true
+              git checkout --theirs -- contracts/data/glp1-last-scrape.json frontend/public/data/glp1-last-scrape.json 2>/dev/null || true
+              # Keep this run's scrape if present
+              merge_histories
+              git add -f "${DATA_FILES[@]}" 2>/dev/null || true
+              GIT_EDITOR=true git rebase --continue || {
+                git rebase --abort || true
+                merge_histories
+                assert_clean_json
+                git add -f "${DATA_FILES[@]}"
+                git commit -m "chore: append oracle price history + scrape snapshot [skip ci]" || true
+              }
             fi
-            echo "Push rejected, rebasing (attempt $i)…"
-            git pull --rebase --autostash origin main
           done
           exit 1
