@@ -46,20 +46,21 @@ export function samplesToOhlc(
   opts?: { livePrice?: number; liveTs?: number; maxBars?: number },
 ): Candle[] {
   const interval = TF_SECONDS[tf];
-  // Window length by TF — long enough to zoom out to multi-day / multi-week views
+  // Soft defaults; after we know the sample span we expand so zoom-out keeps full oracle history
   const defaultMax =
     tf === "5m"
-      ? 864 // ~3 days of 5m bars
+      ? 12_096 // ~42 days of 5m
       : tf === "15m"
-        ? 672 // ~7 days
+        ? 4_032 // ~42 days
         : tf === "1h"
-          ? 720 // ~30 days
+          ? 2_160 // ~90 days
           : tf === "4h"
-            ? 360 // ~60 days
+            ? 1_080 // ~180 days
             : tf === "1D"
-              ? 400 // ~13 months
-              : 200; // 1W
-  const maxBars = opts?.maxBars ?? defaultMax;
+              ? 730 // ~2 years
+              : 260; // 1W ~5 years
+  /** Hard safety cap for forward-fill loops (lightweight-charts handles ~15k fine). */
+  const HARD_CAP = 15_000;
 
   let pts = samples
     .filter((s) => s.market === market && Number.isFinite(s.price) && s.price > 0 && s.ts > 0)
@@ -80,6 +81,11 @@ export function samplesToOhlc(
   const dataStart = Math.floor(pts[0]!.ts / interval) * interval;
   // Use full sample span when short (so fine TFs aren't collapsed to 1–2 bars)
   const spanBars = Math.max(1, Math.floor((end - dataStart) / interval) + 1);
+  // Never clip restored oracle history on zoom-out: emit every bar in the sample span
+  const maxBars = Math.min(
+    HARD_CAP,
+    opts?.maxBars ?? Math.max(defaultMax, spanBars),
+  );
   const idealStart = end - (maxBars - 1) * interval;
   // If history is shorter than maxBars, start at first sample (not mid-window)
   const start = spanBars <= maxBars ? dataStart : Math.max(dataStart, idealStart);

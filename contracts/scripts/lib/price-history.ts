@@ -105,8 +105,8 @@ export function appendPriceSamples(samples: PriceSample[]): string[] {
       }
       next.push(s);
     }
-    // keep last ~5000 samples total
-    const trimmed = next.length > 5000 ? next.slice(next.length - 5000) : next;
+    // keep last ~20000 samples total (~few months of dense 5m multi-market)
+    const trimmed = next.length > 20_000 ? next.slice(next.length - 20_000) : next;
 
     // Never write a file that drops >50% of a large history (race / corrupt base).
     if (base.samples.length > 100 && trimmed.length < base.samples.length * 0.5) {

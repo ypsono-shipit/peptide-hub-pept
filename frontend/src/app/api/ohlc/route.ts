@@ -12,6 +12,31 @@ const REMOTE_HISTORY_URLS = [
   "https://raw.githubusercontent.com/ypsono-shipit/peptide-hub-pept/main/frontend/public/data/price-history.json",
 ].filter(Boolean) as string[];
 
+function sampleKey(s: PriceSample): string {
+  return `${s.market}|${s.ts}|${Number(s.price).toFixed(6)}`;
+}
+
+function mergeSamples(...lists: (PriceSample[] | null | undefined)[]): PriceSample[] {
+  const map = new Map<string, PriceSample>();
+  for (const list of lists) {
+    if (!list) continue;
+    for (const s of list) {
+      if (!s?.market || !s.ts || !Number.isFinite(s.price) || s.price <= 0) continue;
+      const k = sampleKey(s);
+      const prev = map.get(k);
+      // Prefer entry with txHash / longer source
+      if (
+        !prev ||
+        (!!s.txHash && !prev.txHash) ||
+        ((s.source?.length ?? 0) > (prev.source?.length ?? 0) && !prev.txHash)
+      ) {
+        map.set(k, s);
+      }
+    }
+  }
+  return [...map.values()].sort((a, b) => a.ts - b.ts || a.market.localeCompare(b.market));
+}
+
 async function loadSamplesFromRemote(): Promise<PriceSample[] | null> {
   for (const url of REMOTE_HISTORY_URLS) {
     try {
@@ -21,12 +46,12 @@ async function loadSamplesFromRemote(): Promise<PriceSample[] | null> {
         headers: { Accept: "application/json" },
       });
       if (!res.ok) continue;
-      const json = (await res.json()) as { samples?: PriceSample[]; updatedAt?: string };
+      const json = (await res.json()) as { samples?: PriceSample[] };
       if (Array.isArray(json.samples) && json.samples.length > 0) {
         return json.samples;
       }
     } catch {
-      // try next / fall through to disk
+      /* next */
     }
   }
   return null;
@@ -40,20 +65,30 @@ async function loadSamplesFromDisk(): Promise<PriceSample[]> {
   for (const p of candidates) {
     try {
       const raw = await readFile(p, "utf8");
+      if (raw.includes("<<<<<<<")) continue;
       const json = JSON.parse(raw) as { samples?: PriceSample[] };
-      if (Array.isArray(json.samples)) return json.samples;
+      if (Array.isArray(json.samples) && json.samples.length > 0) return json.samples;
     } catch {
-      // try next
+      /* next */
     }
   }
   return [];
 }
 
+/**
+ * Merge remote (cron-updated) + disk (deployed snapshot).
+ * Never prefer a thin remote over a rich disk (or vice versa).
+ */
 async function loadSamples(): Promise<{ samples: PriceSample[]; source: string }> {
-  const remote = await loadSamplesFromRemote();
-  if (remote) return { samples: remote, source: "oracle-json-history-remote" };
-  const disk = await loadSamplesFromDisk();
-  return { samples: disk, source: "oracle-json-history-disk" };
+  const [remote, disk] = await Promise.all([loadSamplesFromRemote(), loadSamplesFromDisk()]);
+  const samples = mergeSamples(disk, remote);
+  const source =
+    remote && disk.length
+      ? `merged remote(${remote.length})+disk(${disk.length})→${samples.length}`
+      : remote
+        ? `remote(${remote.length})`
+        : `disk(${disk.length})`;
+  return { samples, source };
 }
 
 export async function GET(req: NextRequest) {
@@ -66,7 +101,6 @@ export async function GET(req: NextRequest) {
   const { samples, source } = await loadSamples();
   const candles = samplesToOhlc(samples, market, tf, {
     livePrice: Number.isFinite(livePrice) ? livePrice : undefined,
-    // Omit maxBars — lib defaults cover multi-day zoom-out (5m→~3d, 1D→~year)
   });
 
   return NextResponse.json(
@@ -80,7 +114,7 @@ export async function GET(req: NextRequest) {
     },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
       },
     },
   );
