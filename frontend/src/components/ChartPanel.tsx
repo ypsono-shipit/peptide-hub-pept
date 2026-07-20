@@ -131,7 +131,7 @@ export function ChartPanel({
         secondsVisible: false,
         // Tiny min spacing → wheel zoom can pull way out past “1 bar fills the screen”
         minBarSpacing: 0.05,
-        maxBarSpacing: 48,
+        barSpacing: 8,
         rightOffset: 6,
         fixLeftEdge: false,
         fixRightEdge: false,
