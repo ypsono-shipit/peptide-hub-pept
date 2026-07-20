@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { useEffect } from "react";
+import Link from "next/link";
+import { useAccount, useReadContract } from "wagmi";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { PEPTIDES } from "@/lib/marketplaceData";
 import { productIdBytes } from "@/components/marketplace/BuyWithUsdc";
@@ -25,7 +25,7 @@ type MyVouchersProps = {
 /** List recent voucher token IDs owned by the connected wallet (scan minted range). */
 export function MyVouchers({
   title = "My kit vouchers",
-  description = "NFT receipts for on-chain purchases · redeem later for the physical kit",
+  description = "NFT receipts · Redeem → on-chain mark → shipping form → confirmation email",
   compact = true,
 }: MyVouchersProps = {}) {
   const { address, isConnected } = useAccount();
@@ -134,16 +134,6 @@ function VoucherRow({
     functionName: "vouchers",
     args: [BigInt(tokenId)],
   } as Parameters<typeof useReadContract>[0]);
-  const { writeContract, data: txHash, isPending, reset } = useWriteContract();
-  const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
-
-  useEffect(() => {
-    if (isSuccess) {
-      data.refetch();
-      reset();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuccess]);
 
   const isOwner =
     typeof ownerOf.data === "string" && ownerOf.data.toLowerCase() === owner.toLowerCase();
@@ -187,31 +177,19 @@ function VoucherRow({
           <div className="mt-0.5 text-[10px] text-ink-soft">{peptide.kitLabel}</div>
         )}
       </div>
-      <button
-        type="button"
-        disabled={redeemed || isPending || confirming}
-        onClick={() =>
-          writeContract({
-            address: voucher.address,
-            abi: voucher.abi as never,
-            functionName: "redeem",
-            args: [BigInt(tokenId)],
-          })
-        }
-        className={cn(
-          "shrink-0 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold",
-          redeemed
-            ? "bg-panel text-muted"
-            : "bg-primary text-on-primary hover:bg-accent disabled:opacity-50",
-        )}
-        title={
-          redeemed
-            ? "Already redeemed"
-            : "Mark as redeemed (demo; physical fulfillment not yet live)"
-        }
-      >
-        {redeemed ? "Redeemed" : isPending || confirming ? "…" : "Redeem"}
-      </button>
+      {redeemed ? (
+        <span className="shrink-0 rounded-lg bg-panel px-2.5 py-1.5 text-[10px] font-semibold text-muted">
+          Redeemed
+        </span>
+      ) : (
+        <Link
+          href={`/redeem/nft?tokenId=${tokenId}`}
+          className="shrink-0 rounded-lg bg-primary px-2.5 py-1.5 text-[10px] font-semibold text-on-primary hover:bg-accent"
+          title="On-chain redeem → shipping form → confirmation email"
+        >
+          Redeem
+        </Link>
+      )}
     </div>
   );
 }

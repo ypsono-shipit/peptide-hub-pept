@@ -168,10 +168,15 @@ function handleRedeem_(body) {
       "Thanks for requesting a PEPT research kit redemption.",
       "",
       "Order ID: " + orderId,
-      "Kits: " + kits + " ( = " + vials + " vials )",
-      "SEMA required: " + sema + " tokens (10 SEMA per kit)",
+      "Kind: " + (body.redeem_kind || "sema"),
+      body.redeem_kind === "nft"
+        ? "PEPT-KIT NFT #" + (body.nft_token_id || "") + " · " + (body.product_name || "")
+        : "Kits: " + kits + " ( = " + vials + " vials )",
+      body.redeem_kind === "nft"
+        ? "Kit label: " + (body.kit_label || "n/a")
+        : "SEMA required: " + sema + " tokens (10 SEMA per kit)",
       "Wallet: " + wallet,
-      "Transfer tx: " + (body.transfer_tx || "n/a"),
+      "On-chain tx: " + (body.transfer_tx || "n/a"),
       "",
       "Ship to:",
       body.full_name || "",

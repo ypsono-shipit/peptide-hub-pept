@@ -21,12 +21,17 @@ export async function POST(req: NextRequest) {
       notes?: string;
       researchConfirm?: boolean;
       transferTxHash?: string;
+      kind?: "sema" | "nft";
+      tokenId?: number;
+      productId?: string;
+      productName?: string;
+      kitLabel?: string;
     };
 
     const result = await submitRedeemOrder({
       email: body.email || "",
       wallet: body.wallet || "",
-      kits: Number(body.kits),
+      kits: body.kits != null ? Number(body.kits) : undefined,
       fullName: body.fullName || "",
       institution: body.institution,
       address1: body.address1 || "",
@@ -39,6 +44,11 @@ export async function POST(req: NextRequest) {
       notes: body.notes,
       researchConfirm: Boolean(body.researchConfirm),
       transferTxHash: body.transferTxHash,
+      kind: body.kind,
+      tokenId: body.tokenId != null ? Number(body.tokenId) : undefined,
+      productId: body.productId,
+      productName: body.productName,
+      kitLabel: body.kitLabel,
     });
 
     if (!result.ok) {
@@ -50,8 +60,11 @@ export async function POST(req: NextRequest) {
       orderId: result.orderId,
       kits: result.kits,
       seMaRequired: result.seMaRequired,
+      kind: result.kind,
       message:
-        "Redemption request received. Check your email for confirmation. We will fulfill manually after verifying SEMA holdings.",
+        result.kind === "nft"
+          ? "NFT kit redemption received. Check your email for confirmation. We will fulfill after verifying the on-chain redeem."
+          : "Redemption request received. Check your email for confirmation. We will fulfill manually after verifying SEMA holdings.",
     });
   } catch (e) {
     console.error("[redeem] post", e);

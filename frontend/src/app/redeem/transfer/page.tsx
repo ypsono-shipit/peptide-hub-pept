@@ -26,9 +26,9 @@ import {
   VIALS_PER_KIT,
 } from "@/lib/redeem/constants";
 import { ERC20_ABI } from "@/lib/uniswap-v2";
+import { saveRedeemSession } from "@/lib/redeem/session";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
-const SESSION_KEY = "pept_redeem_transfer";
 
 export default function RedeemTransferPage() {
   const router = useRouter();
@@ -63,17 +63,17 @@ export default function RedeemTransferPage() {
 
   useEffect(() => {
     if (!isSuccess || !txHash || !address) return;
-    const payload = {
-      txHash,
-      wallet: address,
-      kits: kitsN,
-      seMa,
-      treasury: pair.redeemTreasury,
-      token: pair.baseToken,
-      at: Date.now(),
-    };
     try {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+      saveRedeemSession({
+        kind: "sema",
+        txHash,
+        wallet: address,
+        kits: kitsN,
+        seMa,
+        treasury: pair.redeemTreasury,
+        token: pair.baseToken,
+        at: Date.now(),
+      });
     } catch {
       /* ignore */
     }

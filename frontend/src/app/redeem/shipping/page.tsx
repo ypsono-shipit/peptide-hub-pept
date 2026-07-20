@@ -10,24 +10,12 @@ import { cn } from "@/lib/cn";
 import { useOraclePrice } from "@/lib/useOraclePrice";
 import { SEMA_ORACLE_KEY } from "@/lib/spot";
 import { MOCK_MARKETS } from "@/lib/markets";
+import { kitsToSema, MIN_KITS, SEMA_PER_KIT, VIALS_PER_KIT } from "@/lib/redeem/constants";
 import {
-  kitsToSema,
-  MIN_KITS,
-  SEMA_PER_KIT,
-  VIALS_PER_KIT,
-} from "@/lib/redeem/constants";
-
-const SESSION_KEY = "pept_redeem_transfer";
-
-type TransferSession = {
-  txHash: string;
-  wallet: string;
-  kits: number;
-  seMa: number;
-  treasury: string;
-  token: string;
-  at: number;
-};
+  clearRedeemSession,
+  loadRedeemSession,
+  type RedeemSession,
+} from "@/lib/redeem/session";
 
 export default function RedeemShippingPage() {
   return (
@@ -48,8 +36,7 @@ function RedeemShippingInner() {
   const { address, isConnected } = useAccount();
   const { connectors, connect } = useConnect();
 
-  const [transfer, setTransfer] = useState<TransferSession | null>(null);
-  const [kits, setKits] = useState(String(MIN_KITS));
+  const [session, setSession] = useState<RedeemSession | null>(null);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [institution, setInstitution] = useState("");
@@ -64,61 +51,63 @@ function RedeemShippingInner() {
   const [accept, setAccept] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ orderId: string; kits: number; seMa: number } | null>(
-    null,
-  );
+  const [done, setDone] = useState<{
+    orderId: string;
+    summary: string;
+  } | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(SESSION_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as TransferSession;
-        // Session valid for 2h
-        if (parsed?.txHash && Date.now() - (parsed.at || 0) < 2 * 60 * 60 * 1000) {
-          setTransfer(parsed);
-          setKits(String(parsed.kits || MIN_KITS));
-          return;
-        }
-      }
-    } catch {
-      /* ignore */
+    const loaded = loadRedeemSession();
+    if (loaded) {
+      setSession(loaded);
+      return;
     }
+    // Query-string fallback after redirect
     const tx = searchParams.get("tx");
-    const k = searchParams.get("kits");
     const w = searchParams.get("wallet");
-    if (tx && k && w) {
-      setTransfer({
+    const type = searchParams.get("type");
+    if (tx && w && type === "nft") {
+      const tokenId = Number(searchParams.get("tokenId"));
+      setSession({
+        kind: "nft",
         txHash: tx,
         wallet: w,
-        kits: Math.max(MIN_KITS, Number(k) || MIN_KITS),
-        seMa: kitsToSema(Math.max(MIN_KITS, Number(k) || MIN_KITS)),
+        tokenId: Number.isFinite(tokenId) ? tokenId : 0,
+        at: Date.now(),
+      });
+      return;
+    }
+    if (tx && w) {
+      const k = Math.max(MIN_KITS, Number(searchParams.get("kits")) || MIN_KITS);
+      setSession({
+        kind: "sema",
+        txHash: tx,
+        wallet: w,
+        kits: k,
+        seMa: kitsToSema(k),
         treasury: "",
         token: "",
         at: Date.now(),
       });
-      setKits(String(k));
     }
   }, [searchParams]);
 
-  const kitsN = Math.floor(Number(kits) || 0);
-  const hasTransfer = Boolean(transfer?.txHash);
+  const hasProof = Boolean(session?.txHash);
+  const isNft = session?.kind === "nft";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!hasTransfer) {
-      setError("Complete SEMA transfer first.");
+    if (!session?.txHash) {
+      setError(isNft ? "Complete NFT redeem on-chain first." : "Complete SEMA transfer first.");
       return;
     }
     if (!isConnected || !address) {
       setError("Connect your wallet first.");
       return;
     }
-    if (
-      transfer?.wallet &&
-      address.toLowerCase() !== transfer.wallet.toLowerCase()
-    ) {
-      setError("Connect the same wallet that sent SEMA.");
+    if (address.toLowerCase() !== session.wallet.toLowerCase()) {
+      setError("Connect the same wallet that signed the redeem tx.");
       return;
     }
     if (!accept) {
@@ -127,26 +116,52 @@ function RedeemShippingInner() {
     }
     setBusy(true);
     try {
+      const body =
+        session.kind === "nft"
+          ? {
+              kind: "nft" as const,
+              email,
+              wallet: address,
+              tokenId: session.tokenId,
+              productId: session.productId,
+              productName: session.productName,
+              kitLabel: session.kitLabel,
+              fullName,
+              institution: institution || undefined,
+              address1,
+              address2: address2 || undefined,
+              city,
+              stateRegion: stateRegion || undefined,
+              postalCode,
+              country,
+              phone: phone || undefined,
+              notes: notes || undefined,
+              researchConfirm: accept,
+              transferTxHash: session.txHash,
+            }
+          : {
+              kind: "sema" as const,
+              email,
+              wallet: address,
+              kits: session.kits,
+              fullName,
+              institution: institution || undefined,
+              address1,
+              address2: address2 || undefined,
+              city,
+              stateRegion: stateRegion || undefined,
+              postalCode,
+              country,
+              phone: phone || undefined,
+              notes: notes || undefined,
+              researchConfirm: accept,
+              transferTxHash: session.txHash,
+            };
+
       const res = await fetch("/api/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          wallet: address,
-          kits: transfer?.kits ?? kitsN,
-          fullName,
-          institution: institution || undefined,
-          address1,
-          address2: address2 || undefined,
-          city,
-          stateRegion: stateRegion || undefined,
-          postalCode,
-          country,
-          phone: phone || undefined,
-          notes: notes || undefined,
-          researchConfirm: accept,
-          transferTxHash: transfer?.txHash,
-        }),
+        body: JSON.stringify(body),
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -154,16 +169,18 @@ function RedeemShippingInner() {
         orderId?: string;
         kits?: number;
         seMaRequired?: number;
+        kind?: string;
       };
       if (!res.ok || !data.ok || !data.orderId) {
         setError(data.error || "Could not submit order.");
         return;
       }
-      setDone({
-        orderId: data.orderId,
-        kits: data.kits ?? transfer?.kits ?? kitsN,
-        seMa: data.seMaRequired ?? transfer?.seMa ?? kitsToSema(kitsN),
-      });
+      const summary =
+        session.kind === "nft"
+          ? `PEPT-KIT #${session.tokenId}${session.productName ? ` · ${session.productName}` : ""}`
+          : `${session.kits} kit(s) · ${session.seMa} SEMA · ${session.kits * VIALS_PER_KIT} vials`;
+      setDone({ orderId: data.orderId, summary });
+      clearRedeemSession();
     } catch {
       setError("Network error. Try again.");
     } finally {
@@ -190,33 +207,46 @@ function RedeemShippingInner() {
       <div className="flex-1 overflow-y-auto p-3 sm:p-6">
         <div className="mx-auto max-w-xl">
           <Link
-            href="/redeem"
+            href={isNft ? "/portfolio" : "/redeem"}
             className="inline-flex items-center gap-1 text-xs text-muted hover:text-ink"
           >
-            <ArrowLeft size={12} /> Redeem overview
+            <ArrowLeft size={12} /> {isNft ? "Portfolio" : "Redeem overview"}
           </Link>
 
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
             Step 2 · Shipping
           </h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Whole kits only · {SEMA_PER_KIT} SEMA = {VIALS_PER_KIT} vials. Confirmation email
-            after submit; we fulfill from the ops sheet.
+            {isNft
+              ? "Ship-to for your PEPT-KIT voucher. Confirmation email after submit; we fulfill from the ops sheet."
+              : `Whole kits only · ${SEMA_PER_KIT} SEMA = ${VIALS_PER_KIT} vials. Confirmation email after submit.`}
           </p>
 
-          {!hasTransfer && !done && (
+          {!hasProof && !done && (
             <div className="mt-6 rounded-2xl border border-amber-500/40 bg-panel p-5 text-sm text-ink-soft">
-              <p className="font-semibold text-ink">SEMA transfer required first</p>
-              <p className="mt-2 text-xs leading-relaxed">
-                Sign the on-chain transfer of kit SEMA to the PEPT treasury, then return here
-                for shipping details.
+              <p className="font-semibold text-ink">
+                {searchParams.get("type") === "nft"
+                  ? "NFT on-chain redeem required first"
+                  : "SEMA transfer required first"}
               </p>
-              <Link
-                href="/redeem/transfer"
-                className="btn-green mt-4 inline-flex px-4 py-2 text-sm"
-              >
-                Go to transfer →
-              </Link>
+              <p className="mt-2 text-xs leading-relaxed">
+                Complete the on-chain step, then return here for shipping details and email
+                confirmation.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link
+                  href="/redeem/transfer"
+                  className="btn-green inline-flex px-4 py-2 text-sm"
+                >
+                  SEMA transfer →
+                </Link>
+                <Link
+                  href="/portfolio"
+                  className="rounded-lg border border-border-strong px-4 py-2 text-sm font-semibold text-ink hover:bg-panel"
+                >
+                  My NFT kits →
+                </Link>
+              </div>
             </div>
           )}
 
@@ -227,37 +257,43 @@ function RedeemShippingInner() {
               <p className="mt-2 text-sm text-ink-soft">
                 Order <span className="font-mono text-ink">{done.orderId}</span>
                 <br />
-                {done.kits} kit{done.kits === 1 ? "" : "s"} · {done.seMa} SEMA required ·{" "}
-                {done.kits * VIALS_PER_KIT} vials
+                {done.summary}
               </p>
               <p className="mt-3 text-xs leading-relaxed text-muted">
-                Check your inbox for a confirmation email. PEPT will verify holdings and process
-                fulfillment manually — not instant.
+                Check your inbox for a confirmation email. PEPT processes fulfillment manually —
+                not instant.
               </p>
               <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
-                <Link href="/spot" className="btn-green px-4 py-2 text-sm">
-                  Back to spot
+                <Link href="/portfolio" className="btn-green px-4 py-2 text-sm">
+                  Portfolio
                 </Link>
                 <Link
-                  href="/redeem"
+                  href="/marketplace"
                   className="rounded-lg border border-border-strong px-4 py-2 text-sm font-semibold text-ink hover:bg-panel"
                 >
-                  Redeem home
+                  Marketplace
                 </Link>
               </div>
             </div>
-          ) : hasTransfer ? (
-            <form onSubmit={submit} className="mt-6 space-y-4 rounded-2xl border border-border bg-panel p-5">
+          ) : hasProof && session ? (
+            <form
+              onSubmit={submit}
+              className="mt-6 space-y-4 rounded-2xl border border-border bg-panel p-5"
+            >
               <div className="rounded-lg border border-green/30 bg-green/5 px-3 py-2 text-xs">
-                <div className="text-muted">SEMA transfer tx</div>
-                <div className="mt-0.5 truncate font-mono text-ink">{transfer!.txHash}</div>
+                <div className="text-muted">
+                  {session.kind === "nft" ? "NFT redeem tx" : "SEMA transfer tx"}
+                </div>
+                <div className="mt-0.5 truncate font-mono text-ink">{session.txHash}</div>
                 <div className="mt-1 text-muted">
-                  {transfer!.kits} kit(s) · {transfer!.seMa} SEMA sent
+                  {session.kind === "nft"
+                    ? `PEPT-KIT #${session.tokenId}${session.productName ? ` · ${session.productName}` : ""}`
+                    : `${session.kits} kit(s) · ${session.seMa} SEMA sent`}
                 </div>
               </div>
 
               <div className="rounded-lg border border-border bg-bg px-3 py-2 text-xs">
-                <div className="text-muted">Wallet (ship / SEMA holder)</div>
+                <div className="text-muted">Wallet</div>
                 {isConnected && address ? (
                   <div className="mt-0.5 truncate font-mono text-sm text-ink">{address}</div>
                 ) : (
@@ -272,14 +308,6 @@ function RedeemShippingInner() {
                     Connect wallet
                   </button>
                 )}
-              </div>
-
-              <div className="text-[11px] text-muted">
-                Kits locked from transfer:{" "}
-                <span className="font-mono text-ink">
-                  {transfer!.kits} kit(s) · {transfer!.seMa} SEMA · {transfer!.kits * VIALS_PER_KIT}{" "}
-                  vials
-                </span>
               </div>
 
               <Field label="Email (confirmation)" required>
@@ -393,8 +421,8 @@ function RedeemShippingInner() {
 
               <div className="flex gap-2 rounded-lg border border-amber-500/30 bg-bg px-3 py-2 text-[11px] text-ink-soft">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-400" />
-                Research use only. Not for human consumption. Manual fulfillment after we verify
-                SEMA. On-chain burn may be required later.
+                Research use only. Not for human consumption. Manual fulfillment after ops
+                review.
               </div>
 
               <label className="flex items-start gap-2 text-[11px] text-ink-soft">
@@ -405,8 +433,7 @@ function RedeemShippingInner() {
                   className="mt-0.5"
                 />
                 <span>
-                  I confirm lawful research-only use, understand kits are {VIALS_PER_KIT} vials /
-                  {SEMA_PER_KIT} SEMA each, and accept that fulfillment is not guaranteed
+                  I confirm lawful research-only use and accept that fulfillment is not guaranteed
                   immediately.
                 </span>
               </label>
