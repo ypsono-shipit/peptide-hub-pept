@@ -1,4 +1,4 @@
-/** Minimal Uniswap V2 ABIs for RH mainnet spot. */
+/** Minimal Uniswap V2 ABIs for RH mainnet spot + earn. */
 
 export const ERC20_ABI = [
   {
@@ -91,6 +91,24 @@ export const UNI_V2_ROUTER_ABI = [
       { name: "liquidity", type: "uint256" },
     ],
   },
+  {
+    type: "function",
+    name: "removeLiquidity",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "tokenA", type: "address" },
+      { name: "tokenB", type: "address" },
+      { name: "liquidity", type: "uint256" },
+      { name: "amountAMin", type: "uint256" },
+      { name: "amountBMin", type: "uint256" },
+      { name: "to", type: "address" },
+      { name: "deadline", type: "uint256" },
+    ],
+    outputs: [
+      { name: "amountA", type: "uint256" },
+      { name: "amountB", type: "uint256" },
+    ],
+  },
 ] as const;
 
 export const UNI_V2_PAIR_ABI = [
@@ -132,5 +150,109 @@ export const UNI_V2_PAIR_ABI = [
     stateMutability: "view",
     inputs: [],
     outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "approve",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "allowance",
+    stateMutability: "view",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+    ],
+    outputs: [{ type: "uint256" }],
+  },
+] as const;
+
+export const GAUGE_ABI = [
+  {
+    type: "function",
+    name: "deposit",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "withdraw",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "claimPoints",
+    stateMutability: "nonpayable",
+    inputs: [],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "pendingPoints",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "users",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [
+      { name: "amount", type: "uint256" },
+      { name: "rewardDebt", type: "uint256" },
+      { name: "points", type: "uint256" },
+    ],
+  },
+  {
+    type: "function",
+    name: "totalStaked",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "weeklyEmission",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "startTime",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "currentEpoch",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "epochEndsAt",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "lpToken",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "address" }],
   },
 ] as const;

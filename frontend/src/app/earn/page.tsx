@@ -1,0 +1,678 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  useAccount,
+  useConnect,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { parseUnits, formatUnits, maxUint256 } from "viem";
+import {
+  ArrowDownUp,
+  Coins,
+  Droplets,
+  ExternalLink,
+  Flame,
+  Info,
+  Timer,
+} from "lucide-react";
+import { TopBar } from "@/components/TopBar";
+import { AccountCard } from "@/components/AccountCard";
+import { cn } from "@/lib/cn";
+import { useNetworkConfig } from "@/lib/useAppContracts";
+import { SPOT_MAINNET, SPOT_TESTNET } from "@/lib/spot";
+import { ERC20_ABI, GAUGE_ABI, UNI_V2_PAIR_ABI, UNI_V2_ROUTER_ABI } from "@/lib/uniswap-v2";
+import {
+  WEEKLY_EMISSION,
+  estimateEpochPoints,
+  formatDuration,
+  pointsPerSecond,
+  provisionalEpoch,
+  epochFromStart,
+  IDLE_LP_POINTS_NOTE,
+} from "@/lib/points";
+
+const ZERO = "0x0000000000000000000000000000000000000000";
+
+export default function EarnPage() {
+  const network = useNetworkConfig();
+  const pair = network.testnet ? SPOT_TESTNET : SPOT_MAINNET;
+  const { address, isConnected } = useAccount();
+  const { connectors, connect } = useConnect();
+
+  const live = pair.live && pair.baseToken !== ZERO && pair.pair !== ZERO;
+  const gaugeLive = live && pair.gauge !== ZERO;
+
+  const [tab, setTab] = useState<"add" | "remove" | "stake">("add");
+  const [semaAmt, setSemaAmt] = useState("");
+  const [usdgAmt, setUsdgAmt] = useState("");
+  const [lpAmt, setLpAmt] = useState("");
+  const [stakeAmt, setStakeAmt] = useState("");
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const { data: startTime } = useReadContract({
+    address: pair.gauge,
+    abi: GAUGE_ABI,
+    functionName: "startTime",
+    query: { enabled: gaugeLive },
+  });
+
+  const epoch = useMemo(() => {
+    if (gaugeLive && startTime != null) {
+      return epochFromStart(Number(startTime), now);
+    }
+    return provisionalEpoch(now);
+  }, [gaugeLive, startTime, now]);
+
+  const { data: reserves } = useReadContract({
+    address: pair.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "getReserves",
+    query: { enabled: live, refetchInterval: 15_000 },
+  });
+  const { data: token0 } = useReadContract({
+    address: pair.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "token0",
+    query: { enabled: live },
+  });
+  const { data: lpSupply } = useReadContract({
+    address: pair.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "totalSupply",
+    query: { enabled: live },
+  });
+  const { data: walletLp } = useReadContract({
+    address: pair.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: live && !!address },
+  });
+  const { data: semaBal } = useReadContract({
+    address: pair.baseToken,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: live && !!address },
+  });
+  const { data: usdgBal } = useReadContract({
+    address: pair.quoteToken,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: live && !!address },
+  });
+
+  const { data: gaugeUser } = useReadContract({
+    address: pair.gauge,
+    abi: GAUGE_ABI,
+    functionName: "users",
+    args: address ? [address] : undefined,
+    query: { enabled: gaugeLive && !!address, refetchInterval: 12_000 },
+  });
+  const { data: pendingPts } = useReadContract({
+    address: pair.gauge,
+    abi: GAUGE_ABI,
+    functionName: "pendingPoints",
+    args: address ? [address] : undefined,
+    query: { enabled: gaugeLive && !!address, refetchInterval: 12_000 },
+  });
+  const { data: totalStaked } = useReadContract({
+    address: pair.gauge,
+    abi: GAUGE_ABI,
+    functionName: "totalStaked",
+    query: { enabled: gaugeLive, refetchInterval: 15_000 },
+  });
+  const { data: weeklyOnChain } = useReadContract({
+    address: pair.gauge,
+    abi: GAUGE_ABI,
+    functionName: "weeklyEmission",
+    query: { enabled: gaugeLive },
+  });
+
+  const stakedLp = gaugeUser ? (gaugeUser as readonly [bigint, bigint, bigint])[0] : 0n;
+  const lifetimePts = gaugeUser ? (gaugeUser as readonly [bigint, bigint, bigint])[2] : 0n;
+  const pending = (pendingPts as bigint | undefined) ?? 0n;
+
+  const stakeShare =
+    totalStaked && (totalStaked as bigint) > 0n
+      ? Number(stakedLp) / Number(totalStaked as bigint)
+      : 0;
+
+  const weeklyPtsEst = estimateEpochPoints(stakeShare, 1);
+  const pps = pointsPerSecond(stakeShare);
+
+  const tvlUsdg = useMemo(() => {
+    if (!reserves || !token0) return null;
+    const [r0, r1] = reserves as readonly [bigint, bigint, number];
+    const baseIs0 = (token0 as string).toLowerCase() === pair.baseToken.toLowerCase();
+    const reserveQuote = baseIs0 ? r1 : r0;
+    // Approximate TVL as 2× quote side
+    return Number(formatUnits(reserveQuote, pair.quoteDecimals)) * 2;
+  }, [reserves, token0, pair]);
+
+  const { data: allowSema } = useReadContract({
+    address: pair.baseToken,
+    abi: ERC20_ABI,
+    functionName: "allowance",
+    args: address ? [address, pair.router] : undefined,
+    query: { enabled: live && !!address },
+  });
+  const { data: allowUsdg } = useReadContract({
+    address: pair.quoteToken,
+    abi: ERC20_ABI,
+    functionName: "allowance",
+    args: address ? [address, pair.router] : undefined,
+    query: { enabled: live && !!address },
+  });
+  const { data: allowLpRouter } = useReadContract({
+    address: pair.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "allowance",
+    args: address ? [address, pair.router] : undefined,
+    query: { enabled: live && !!address },
+  });
+  const { data: allowLpGauge } = useReadContract({
+    address: pair.pair,
+    abi: UNI_V2_PAIR_ABI,
+    functionName: "allowance",
+    args: address && gaugeLive ? [address, pair.gauge] : undefined,
+    query: { enabled: gaugeLive && !!address },
+  });
+
+  const { writeContract, data: txHash, isPending, reset } = useWriteContract();
+  const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    if (isSuccess) reset();
+  }, [isSuccess, reset]);
+
+  function deadline() {
+    return BigInt(Math.floor(Date.now() / 1000) + 1200);
+  }
+
+  function onAddLiquidity() {
+    if (!address || !live) return;
+    const a = parseUnits(semaAmt || "0", pair.baseDecimals);
+    const b = parseUnits(usdgAmt || "0", pair.quoteDecimals);
+    if (a === 0n || b === 0n) return;
+    if ((allowSema as bigint | undefined) !== undefined && (allowSema as bigint) < a) {
+      writeContract({
+        address: pair.baseToken,
+        abi: ERC20_ABI,
+        functionName: "approve",
+        args: [pair.router, maxUint256],
+      });
+      return;
+    }
+    if ((allowUsdg as bigint | undefined) !== undefined && (allowUsdg as bigint) < b) {
+      writeContract({
+        address: pair.quoteToken,
+        abi: ERC20_ABI,
+        functionName: "approve",
+        args: [pair.router, maxUint256],
+      });
+      return;
+    }
+    writeContract({
+      address: pair.router,
+      abi: UNI_V2_ROUTER_ABI,
+      functionName: "addLiquidity",
+      args: [pair.baseToken, pair.quoteToken, a, b, 0n, 0n, address, deadline()],
+    });
+  }
+
+  function onRemoveLiquidity() {
+    if (!address || !live) return;
+    const liq = parseUnits(lpAmt || "0", 18);
+    if (liq === 0n) return;
+    if ((allowLpRouter as bigint | undefined) !== undefined && (allowLpRouter as bigint) < liq) {
+      writeContract({
+        address: pair.pair,
+        abi: UNI_V2_PAIR_ABI,
+        functionName: "approve",
+        args: [pair.router, maxUint256],
+      });
+      return;
+    }
+    writeContract({
+      address: pair.router,
+      abi: UNI_V2_ROUTER_ABI,
+      functionName: "removeLiquidity",
+      args: [pair.baseToken, pair.quoteToken, liq, 0n, 0n, address, deadline()],
+    });
+  }
+
+  function onStake() {
+    if (!address || !gaugeLive) return;
+    const amt = parseUnits(stakeAmt || "0", 18);
+    if (amt === 0n) return;
+    if ((allowLpGauge as bigint | undefined) !== undefined && (allowLpGauge as bigint) < amt) {
+      writeContract({
+        address: pair.pair,
+        abi: UNI_V2_PAIR_ABI,
+        functionName: "approve",
+        args: [pair.gauge, maxUint256],
+      });
+      return;
+    }
+    writeContract({
+      address: pair.gauge,
+      abi: GAUGE_ABI,
+      functionName: "deposit",
+      args: [amt],
+    });
+  }
+
+  function onUnstake() {
+    if (!address || !gaugeLive || stakedLp === 0n) return;
+    const amt = parseUnits(stakeAmt || "0", 18);
+    const use = amt > 0n && amt <= stakedLp ? amt : stakedLp;
+    writeContract({
+      address: pair.gauge,
+      abi: GAUGE_ABI,
+      functionName: "withdraw",
+      args: [use],
+    });
+  }
+
+  function onClaim() {
+    if (!gaugeLive) return;
+    writeContract({
+      address: pair.gauge,
+      abi: GAUGE_ABI,
+      functionName: "claimPoints",
+      args: [],
+    });
+  }
+
+  const weeklyDisplay =
+    weeklyOnChain != null
+      ? Number(formatUnits(weeklyOnChain as bigint, 18))
+      : WEEKLY_EMISSION;
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <TopBar />
+
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 lg:flex-row">
+        <div className="min-w-0 flex-1 space-y-4">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
+              Liquidity · Points
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+              Earn on{" "}
+              <em className="font-serif font-normal italic text-green-soft">
+                SEMA/{pair.quoteSymbol}
+              </em>
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-ink-soft">
+              Provide Uniswap V2 liquidity, stake LP in the PEPT gauge, and earn{" "}
+              <strong className="text-ink">weekly points</strong> toward the upcoming{" "}
+              <strong className="text-ink">$PEPT</strong> token. 1 epoch = 7 days · fixed emission
+              per epoch.
+            </p>
+          </div>
+
+          {/* Epoch strip */}
+          <div className="grid gap-3 sm:grid-cols-4">
+            <Stat
+              icon={Timer}
+              label="Epoch"
+              value={`#${epoch.epoch}`}
+              note={`${formatDuration(epoch.secondsLeft)} left`}
+            />
+            <Stat
+              icon={Flame}
+              label="Weekly emission"
+              value={weeklyDisplay.toLocaleString()}
+              note="points / epoch"
+            />
+            <Stat
+              icon={Droplets}
+              label="Pool TVL (est.)"
+              value={tvlUsdg != null ? `$${tvlUsdg.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—"}
+              note={live ? "2× quote side" : "Pool not live"}
+            />
+            <Stat
+              icon={Coins}
+              label="Your share"
+              value={stakeShare > 0 ? `${(stakeShare * 100).toFixed(2)}%` : "0%"}
+              note="of staked LP"
+            />
+          </div>
+
+          <div className="h-2 overflow-hidden rounded-full bg-panel-hover">
+            <div
+              className="h-full rounded-full bg-green transition-all"
+              style={{ width: `${Math.round(epoch.progress * 100)}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-muted">
+            Epoch progress · points stream continuously; full emission lands if you stay staked
+            all week.
+          </p>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-panel p-5">
+              <h2 className="text-sm font-semibold text-ink">Your points</h2>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-[10px] uppercase text-muted">Lifetime + claimed</div>
+                  <div className="font-mono text-2xl font-semibold tabular-nums text-ink">
+                    {gaugeLive
+                      ? Number(formatUnits(pending, 18)).toLocaleString(undefined, {
+                          maximumFractionDigits: 1,
+                        })
+                      : "—"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase text-muted">Harvested</div>
+                  <div className="font-mono text-2xl font-semibold tabular-nums text-green">
+                    {gaugeLive
+                      ? Number(formatUnits(lifetimePts, 18)).toLocaleString(undefined, {
+                          maximumFractionDigits: 1,
+                        })
+                      : "—"}
+                  </div>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-ink-soft">
+                Est. this epoch if share holds:{" "}
+                <span className="font-mono text-ink">{weeklyPtsEst.toFixed(1)}</span> pts ·{" "}
+                <span className="font-mono text-ink">{pps.toFixed(4)}</span> pts/s
+              </p>
+              <button
+                type="button"
+                disabled={!gaugeLive || !isConnected || isPending || confirming}
+                onClick={onClaim}
+                className="btn-green mt-4 w-full py-2 text-sm disabled:opacity-50"
+              >
+                Harvest points score
+              </button>
+              <p className="mt-2 text-[10px] text-muted">{IDLE_LP_POINTS_NOTE}</p>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-panel p-5">
+              <h2 className="text-sm font-semibold text-ink">How points work</h2>
+              <ul className="mt-3 list-disc space-y-1.5 pl-4 text-xs text-ink-soft">
+                <li>
+                  <strong className="text-ink">{weeklyDisplay.toLocaleString()} points</strong>{" "}
+                  emitted every 7-day epoch to all staked LPs.
+                </li>
+                <li>Your share of staked LP determines your stream rate.</li>
+                <li>
+                  Points are an <strong className="text-ink">airdrop ledger</strong> for $PEPT —
+                  not a transferable token yet.
+                </li>
+                <li>Unstaking stops accrual; claimed score stays on your address.</li>
+                <li>
+                  Trading fees from the Uniswap pool are separate yield (in SEMA +{" "}
+                  {pair.quoteSymbol}).
+                </li>
+              </ul>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                <Link href="/spot" className="text-green-soft hover:underline">
+                  Spot swap →
+                </Link>
+                <Link href="/redeem" className="text-muted hover:text-ink hover:underline">
+                  Redeem kits →
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {!live && (
+            <div className="flex gap-2 rounded-xl border border-amber-500/40 bg-panel px-4 py-3 text-xs text-ink-soft">
+              <Info size={16} className="mt-0.5 shrink-0 text-amber-400" />
+              <p>
+                Pool not live yet. After SEMA + Uniswap liquidity deploy, this page enables add /
+                remove / stake. Points gauge deploys after the pair exists.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Right panel */}
+        <div className="flex w-full shrink-0 flex-col gap-3 lg:w-[360px]">
+          <AccountCard />
+
+          <div className="rounded-xl border border-border bg-panel p-4">
+            <div className="flex gap-1 rounded-lg bg-bg p-0.5">
+              {(
+                [
+                  ["add", "Add LP"],
+                  ["remove", "Remove"],
+                  ["stake", "Stake"],
+                ] as const
+              ).map(([k, label]) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setTab(k)}
+                  className={cn(
+                    "flex-1 rounded-md py-1.5 text-xs font-semibold",
+                    tab === k ? "bg-green text-black" : "text-muted hover:text-ink",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {!isConnected ? (
+              <button
+                type="button"
+                className="btn-green mt-4 w-full py-2.5 text-sm"
+                onClick={() => {
+                  const c = connectors[0];
+                  if (c) connect({ connector: c });
+                }}
+              >
+                Connect wallet
+              </button>
+            ) : tab === "add" ? (
+              <div className="mt-4 space-y-3">
+                <Field
+                  label={`SEMA`}
+                  bal={
+                    semaBal != null
+                      ? Number(formatUnits(semaBal as bigint, pair.baseDecimals)).toFixed(4)
+                      : "—"
+                  }
+                >
+                  <input
+                    value={semaAmt}
+                    onChange={(e) => setSemaAmt(e.target.value)}
+                    placeholder="0.0"
+                    className={inputCls}
+                    type="number"
+                    min={0}
+                  />
+                </Field>
+                <div className="flex justify-center text-muted">
+                  <ArrowDownUp size={14} />
+                </div>
+                <Field
+                  label={pair.quoteSymbol}
+                  bal={
+                    usdgBal != null
+                      ? Number(formatUnits(usdgBal as bigint, pair.quoteDecimals)).toFixed(4)
+                      : "—"
+                  }
+                >
+                  <input
+                    value={usdgAmt}
+                    onChange={(e) => setUsdgAmt(e.target.value)}
+                    placeholder="0.0"
+                    className={inputCls}
+                    type="number"
+                    min={0}
+                  />
+                </Field>
+                <button
+                  type="button"
+                  disabled={!live || isPending || confirming}
+                  onClick={onAddLiquidity}
+                  className="btn-green w-full py-2.5 text-sm disabled:opacity-50"
+                >
+                  {isPending || confirming ? "Confirm…" : "Approve / Add liquidity"}
+                </button>
+              </div>
+            ) : tab === "remove" ? (
+              <div className="mt-4 space-y-3">
+                <Field
+                  label="LP tokens"
+                  bal={
+                    walletLp != null
+                      ? Number(formatUnits(walletLp as bigint, 18)).toFixed(6)
+                      : "—"
+                  }
+                >
+                  <input
+                    value={lpAmt}
+                    onChange={(e) => setLpAmt(e.target.value)}
+                    placeholder="0.0"
+                    className={inputCls}
+                    type="number"
+                    min={0}
+                  />
+                </Field>
+                <button
+                  type="button"
+                  disabled={!live || isPending || confirming}
+                  onClick={onRemoveLiquidity}
+                  className="btn-green w-full py-2.5 text-sm disabled:opacity-50"
+                >
+                  {isPending || confirming ? "Confirm…" : "Approve / Remove liquidity"}
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 space-y-3">
+                <div className="rounded-lg border border-border bg-bg px-3 py-2 text-xs">
+                  <div className="text-muted">Wallet LP</div>
+                  <div className="font-mono text-ink">
+                    {walletLp != null
+                      ? Number(formatUnits(walletLp as bigint, 18)).toFixed(6)
+                      : "—"}
+                  </div>
+                  <div className="mt-1 text-muted">Staked in gauge</div>
+                  <div className="font-mono text-green">
+                    {Number(formatUnits(stakedLp, 18)).toFixed(6)}
+                  </div>
+                </div>
+                <Field label="Amount (LP)">
+                  <input
+                    value={stakeAmt}
+                    onChange={(e) => setStakeAmt(e.target.value)}
+                    placeholder="0.0"
+                    className={inputCls}
+                    type="number"
+                    min={0}
+                  />
+                </Field>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    disabled={!gaugeLive || isPending || confirming}
+                    onClick={onStake}
+                    className="btn-green py-2 text-xs disabled:opacity-50"
+                  >
+                    Stake LP
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!gaugeLive || isPending || confirming || stakedLp === 0n}
+                    onClick={onUnstake}
+                    className="rounded-lg border border-border-strong py-2 text-xs font-semibold text-ink hover:bg-bg disabled:opacity-50"
+                  >
+                    Unstake
+                  </button>
+                </div>
+                {!gaugeLive && (
+                  <p className="text-[10px] text-muted">
+                    Gauge deploys after the SEMA/{pair.quoteSymbol} pair is live.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {txHash && (
+              <a
+                href={`${network.explorer}/tx/${txHash}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 flex items-center justify-center gap-1 text-[10px] text-green-soft hover:underline"
+              >
+                View tx <ExternalLink size={10} />
+              </a>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-border bg-panel p-3 text-[10px] leading-relaxed text-muted">
+            Trading fees accrue to LP holders from the pool. Points are separate and only for
+            gauge-staked LP. Research use only · not investment advice.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+const inputCls =
+  "input w-full rounded-lg border border-border-strong bg-bg px-3 py-2 font-mono text-sm text-ink outline-none focus:border-green";
+
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  note,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  value: string;
+  note: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-panel p-4">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted">
+        <Icon size={12} className="text-green" />
+        {label}
+      </div>
+      <div className="mt-1 font-mono text-lg font-semibold tabular-nums text-ink">{value}</div>
+      <div className="text-[10px] text-ink-soft">{note}</div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  bal,
+  children,
+}: {
+  label: string;
+  bal?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <div className="mb-1 flex justify-between text-[10px] font-semibold uppercase tracking-wide text-muted">
+        <span>{label}</span>
+        {bal != null && <span className="font-mono normal-case text-faint">bal {bal}</span>}
+      </div>
+      {children}
+    </label>
+  );
+}

@@ -205,6 +205,12 @@ export default function SpotPage() {
               Perps →
             </Link>
             <Link
+              href="/earn"
+              className="rounded-lg px-2.5 py-1 text-xs font-medium text-muted hover:bg-panel hover:text-ink"
+            >
+              Earn LP →
+            </Link>
+            <Link
               href="/redeem"
               className="rounded-lg px-2.5 py-1 text-xs font-medium text-muted hover:bg-panel hover:text-ink"
             >

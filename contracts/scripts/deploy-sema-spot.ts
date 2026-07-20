@@ -200,7 +200,22 @@ async function main() {
     );
   }
 
-  console.log("\nDone. Next: wire frontend + redeem treasury", redeemTreasury);
+  // ── LP points gauge (only when pair exists) ──────────────────────
+  let gaugeAddr = ethers.ZeroAddress;
+  if (pairAddr !== ethers.ZeroAddress) {
+    const weekly = ethers.parseEther(String(process.env.WEEKLY_POINTS || "100000"));
+    const Gauge = await ethers.getContractFactory("PeptLpGauge");
+    const gauge = await Gauge.deploy(pairAddr, deployer.address, weekly);
+    await gauge.waitForDeployment();
+    gaugeAddr = await gauge.getAddress();
+    console.log("PeptLpGauge:", gaugeAddr, "weeklyEmission", ethers.formatEther(weekly));
+    (out as { contracts: Record<string, string> }).contracts.PeptLpGauge = gaugeAddr;
+    writeFileSync(path, JSON.stringify(out, null, 2) + "\n");
+  }
+
+  console.log("\nDone. Redeem treasury:", redeemTreasury);
+  console.log("Gauge:", gaugeAddr);
+  console.log("Wire frontend SPOT_MAINNET: baseToken, pair, gauge, live:true");
 }
 
 main().catch((e) => {

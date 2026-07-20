@@ -40,6 +40,8 @@ export type SpotPairConfig = {
   oracleKey: `0x${string}`;
   /** Where redeemed SEMA is sent before shipping form */
   redeemTreasury: `0x${string}`;
+  /** PeptLpGauge — stake LP for weekly PEPT points (zero until deployed) */
+  gauge: `0x${string}`;
   live: boolean;
 };
 
@@ -63,11 +65,12 @@ export const SPOT_TESTNET: SpotPairConfig = {
   mgPerToken: 1,
   oracleKey: SEMA_ORACLE_KEY,
   redeemTreasury: DEFAULT_DEPLOYER,
+  gauge: ZERO,
   live: false,
 };
 
 /**
- * Mainnet SEMA/USDG. Update baseToken + pair after deploy-sema-spot.
+ * Mainnet SEMA/USDG. Update baseToken + pair + gauge after deploy.
  * live stays false until addresses are non-zero.
  */
 export const SPOT_MAINNET: SpotPairConfig = {
@@ -84,6 +87,7 @@ export const SPOT_MAINNET: SpotPairConfig = {
   mgPerToken: 1,
   oracleKey: SEMA_ORACLE_KEY,
   redeemTreasury: DEFAULT_DEPLOYER,
+  gauge: ZERO,
   live: false,
 };
 

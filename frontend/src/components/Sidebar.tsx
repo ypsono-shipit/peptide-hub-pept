@@ -15,6 +15,7 @@ import {
   Rocket,
   Package,
   CandlestickChart,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/Logo";
@@ -23,6 +24,7 @@ import { BrandWordmark } from "@/components/BrandWordmark";
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutGrid },
   { href: "/spot", label: "Spot", icon: ArrowLeftRight },
+  { href: "/earn", label: "Earn", icon: Sparkles },
   { href: "/perps", label: "Perps", icon: CandlestickChart },
   { href: "/redeem", label: "Redeem", icon: Package },
   { href: "/launchpad", label: "Launchpad", icon: Rocket },
