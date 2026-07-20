@@ -151,19 +151,19 @@ export default function SpotPage() {
                 Research utility
               </div>
               <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">
-                <strong className="text-ink">1 {pair.baseSymbol}</strong> is designed
-                to map to <strong className="text-ink">1 research vial</strong>{" "}
-                (controlled redemption, subject to availability &amp; verification).
+                <strong className="text-ink">1 {pair.baseSymbol} ≈ 1 vial unit</strong>.
+                Research Only ships in <strong className="text-ink">kits of 10</strong>, so
+                redeem needs <strong className="text-ink">≥10 SEMA</strong> per kit.
               </p>
               <Link
                 href="/redeem"
                 className="btn-green mt-4 inline-flex w-full justify-center py-2 text-xs"
               >
-                Redeem flow
+                Redeem kit flow
               </Link>
               <p className="mt-3 text-[10px] leading-relaxed text-muted">
-                For research use only. Not for human consumption. Redemption is
-                not guaranteed on demand.
+                Research use only. Not for human consumption. Shipping form → sheet +
+                confirmation email; we fulfill manually.
               </p>
             </div>
           </div>
