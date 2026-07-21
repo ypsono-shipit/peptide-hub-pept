@@ -52,6 +52,16 @@ export const ORACLE_MARKETS: OracleMarketDef[] = [
     decimals: 18,
     category: "glp1",
   },
+  {
+    id: "LLY-PERP",
+    name: "Eli Lilly",
+    unit: "$",
+    description:
+      "Eli Lilly equity mark via Robinhood Chain stock token 0x8005d266…600eA + RH last trade.",
+    status: "live",
+    decimals: 18,
+    category: "other",
+  },
 ];
 
 export function marketKeyOf(id: string): `0x${string}` {

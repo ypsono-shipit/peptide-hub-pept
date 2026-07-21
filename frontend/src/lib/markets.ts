@@ -65,9 +65,11 @@ export const MOCK_MARKETS: Market[] = [
   {
     symbol: "LLY-PERP",
     name: "Eli Lilly Perpetual",
-    price: 812.44,
-    change24h: 1.91,
-    volume24h: 3_420_000,
+    // Fallback only — live mark from RH stock token + equity quote via oracle cron
+    // Token (mainnet 4663): 0x8005d266423c7ea827372c9c864491e5786600ea
+    price: 1146.4,
+    change24h: 0,
+    volume24h: 0,
     oracleKey: keccak256(toBytes("LLY-PERP")),
     unit: "$",
   },

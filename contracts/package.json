@@ -15,6 +15,8 @@
     "scrape:glp1:basket": "SKIP_SCOUTER=1 ts-node scripts/scrape-glp1-prices.ts",
     "push:glp1": "hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet",
     "push:glp1:dry": "DRY_RUN=1 hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet",
+    "push:lly": "hardhat run scripts/push-market-prices.ts --network robinhoodTestnet",
+    "push:lly:dry": "DRY_RUN=1 hardhat run scripts/push-market-prices.ts --network robinhoodTestnet",
     "deploy:plp": "hardhat run scripts/deploy-plp.ts --network robinhoodTestnet",
     "deploy:usdc-plp": "hardhat run scripts/deploy-usdc-plp.ts --network robinhoodTestnet",
     "seed:history": "ts-node scripts/seed-price-history.ts"

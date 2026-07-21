@@ -80,6 +80,16 @@ jobs:
           ORACLE_ADMIN_SECRET: ${{ secrets.ORACLE_ADMIN_SECRET }}
         run: npx hardhat run scripts/push-glp1-prices.ts --network robinhoodTestnet
 
+      - name: Push LLY-PERP from RH mainnet stock token + equity quote
+        if: success()
+        env:
+          ROBINHOOD_TESTNET_RPC: https://rpc.testnet.chain.robinhood.com
+          ROBINHOOD_MAINNET_RPC: https://rpc.mainnet.chain.robinhood.com
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          DRY_RUN: ${{ inputs.dry_run == true && '1' || '0' }}
+        run: npx hardhat run scripts/push-market-prices.ts --network robinhoodTestnet
+        continue-on-error: true
+
       - name: Upload scrape snapshot artifact
         if: always()
         uses: actions/upload-artifact@v4
