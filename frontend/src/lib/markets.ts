@@ -55,7 +55,8 @@ export const MOCK_MARKETS: Market[] = [
   {
     symbol: "RETA-PERP",
     name: "Retatrutide",
-    price: 6.37,
+    // Fallback for landing / offline UI — matches dual-source mark + fixed premium (~$13.67/mg)
+    price: 13.0,
     change24h: 0,
     volume24h: 0,
     oracleKey: keccak256(toBytes("RETA-PERP")),
