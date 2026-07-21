@@ -70,16 +70,17 @@ export const SPOT_TESTNET: SpotPairConfig = {
 };
 
 /**
- * Mainnet SEMA/USDG. Update baseToken + pair + gauge after deploy.
- * live stays false until addresses are non-zero.
+ * Mainnet SEMA/USDG — live Uniswap V2 pool (deployed 2026-07-21).
+ * Seed: 10_000 SEMA + 1_000 USDG → ~$0.10 / SEMA launch price.
+ * See contracts/deployments/mainnet-spot.json
  */
 export const SPOT_MAINNET: SpotPairConfig = {
   baseSymbol: "SEMA",
   baseName: "Semaglutide research token",
   quoteSymbol: "USDG",
-  baseToken: ZERO,
+  baseToken: "0x240260c893CbB930aeCAce55E6d12f2e8EaD7A10",
   quoteToken: MAINNET_USDG,
-  pair: ZERO,
+  pair: "0x133b31d825658D7781e5dCA4196C850Bb8F083fF",
   router: UNI_V2_ROUTER,
   factory: UNI_V2_FACTORY,
   baseDecimals: 18,
@@ -87,8 +88,8 @@ export const SPOT_MAINNET: SpotPairConfig = {
   mgPerToken: 1,
   oracleKey: SEMA_ORACLE_KEY,
   redeemTreasury: DEFAULT_DEPLOYER,
-  gauge: ZERO,
-  live: false,
+  gauge: "0xF9b4131239eCfb09E457832a7145357886b1d6dE",
+  live: true,
 };
 
 export function divergenceBps(poolPrice: number, oraclePrice: number): number | null {
