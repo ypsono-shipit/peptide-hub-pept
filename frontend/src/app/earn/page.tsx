@@ -52,6 +52,12 @@ export default function EarnPage() {
   const [lpAmt, setLpAmt] = useState("");
   const [stakeAmt, setStakeAmt] = useState("");
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+  /** Which side the user last edited — other side follows pool ratio. */
+  const [lastEdited, setLastEdited] = useState<"sema" | "usdg" | null>(null);
+  const [pendingAction, setPendingAction] = useState<
+    "approve-sema" | "approve-usdg" | "add" | "remove" | "stake" | "other" | null
+  >(null);
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000);
@@ -160,52 +166,162 @@ export default function EarnPage() {
     return Number(formatUnits(reserveQuote, pair.quoteDecimals)) * 2;
   }, [reserves, token0, pair]);
 
-  const { data: allowSema } = useReadContract({
+  const { data: allowSema, refetch: refetchAllowSema } = useReadContract({
     address: pair.baseToken,
     abi: ERC20_ABI,
     functionName: "allowance",
     args: address ? [address, pair.router] : undefined,
-    query: { enabled: live && !!address },
+    query: { enabled: live && !!address, refetchInterval: 8_000 },
   });
-  const { data: allowUsdg } = useReadContract({
+  const { data: allowUsdg, refetch: refetchAllowUsdg } = useReadContract({
     address: pair.quoteToken,
     abi: ERC20_ABI,
     functionName: "allowance",
     args: address ? [address, pair.router] : undefined,
-    query: { enabled: live && !!address },
+    query: { enabled: live && !!address, refetchInterval: 8_000 },
   });
-  const { data: allowLpRouter } = useReadContract({
+  const { data: allowLpRouter, refetch: refetchAllowLpRouter } = useReadContract({
     address: pair.pair,
     abi: UNI_V2_PAIR_ABI,
     functionName: "allowance",
     args: address ? [address, pair.router] : undefined,
-    query: { enabled: live && !!address },
+    query: { enabled: live && !!address, refetchInterval: 8_000 },
   });
-  const { data: allowLpGauge } = useReadContract({
+  const { data: allowLpGauge, refetch: refetchAllowLpGauge } = useReadContract({
     address: pair.pair,
     abi: UNI_V2_PAIR_ABI,
     functionName: "allowance",
     args: address && gaugeLive ? [address, pair.gauge] : undefined,
-    query: { enabled: gaugeLive && !!address },
+    query: { enabled: gaugeLive && !!address, refetchInterval: 8_000 },
   });
 
-  const { writeContract, data: txHash, isPending, reset } = useWriteContract();
-  const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+  /** Pool reserves as human SEMA / USDG (correct token order). */
+  const poolRatio = useMemo(() => {
+    if (!reserves || !token0) return null;
+    const [r0, r1] = reserves as readonly [bigint, bigint, number];
+    const baseIs0 = (token0 as string).toLowerCase() === pair.baseToken.toLowerCase();
+    const rBase = baseIs0 ? r0 : r1;
+    const rQuote = baseIs0 ? r1 : r0;
+    const sema = Number(formatUnits(rBase, pair.baseDecimals));
+    const usdg = Number(formatUnits(rQuote, pair.quoteDecimals));
+    if (!(sema > 0) || !(usdg > 0)) return null;
+    return {
+      sema,
+      usdg,
+      /** USDG per 1 SEMA */
+      price: usdg / sema,
+      /** SEMA per 1 USDG */
+      semaPerUsdg: sema / usdg,
+    };
+  }, [reserves, token0, pair]);
+
+  // Keep the other field in pool ratio when the user types one side
+  useEffect(() => {
+    if (!poolRatio || !lastEdited) return;
+    if (lastEdited === "sema") {
+      const s = Number(semaAmt);
+      if (!Number.isFinite(s) || s <= 0) return;
+      const needUsdg = s * poolRatio.price;
+      setUsdgAmt(needUsdg.toFixed(6).replace(/\.?0+$/, ""));
+    } else {
+      const u = Number(usdgAmt);
+      if (!Number.isFinite(u) || u <= 0) return;
+      const needSema = u * poolRatio.semaPerUsdg;
+      setSemaAmt(needSema.toFixed(6).replace(/\.?0+$/, ""));
+    }
+    // only re-run when the edited side or ratio changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [semaAmt, usdgAmt, lastEdited, poolRatio?.price, poolRatio?.semaPerUsdg]);
+
+  const { writeContract, data: txHash, isPending, reset, error: writeError } = useWriteContract();
+  const { isLoading: confirming, isSuccess, isError: receiptError } =
+    useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
-    if (isSuccess) reset();
-  }, [isSuccess, reset]);
+    if (!isSuccess || !pendingAction) return;
+    void refetchAllowSema();
+    void refetchAllowUsdg();
+    void refetchAllowLpRouter();
+    void refetchAllowLpGauge();
+    if (pendingAction === "approve-sema") {
+      setStatusMsg("✓ SEMA approved. Click again to approve USDG (or add LP if already approved).");
+    } else if (pendingAction === "approve-usdg") {
+      setStatusMsg("✓ USDG approved. Click again to add liquidity.");
+    } else if (pendingAction === "add") {
+      setStatusMsg("✓ Liquidity added. LP tokens are in your wallet — stake them for points.");
+      setSemaAmt("");
+      setUsdgAmt("");
+      setLastEdited(null);
+    } else if (pendingAction === "remove") {
+      setStatusMsg("✓ Liquidity removed.");
+      setLpAmt("");
+    } else if (pendingAction === "stake") {
+      setStatusMsg("✓ LP staked in gauge — points are accruing.");
+      setStakeAmt("");
+    } else if (pendingAction === "other") {
+      setStatusMsg("✓ Approved. Click the action again to continue.");
+    }
+    setPendingAction(null);
+    reset();
+  }, [
+    isSuccess,
+    pendingAction,
+    refetchAllowSema,
+    refetchAllowUsdg,
+    refetchAllowLpRouter,
+    refetchAllowLpGauge,
+    reset,
+  ]);
+
+  useEffect(() => {
+    if (receiptError || writeError) {
+      setPendingAction(null);
+      const raw = writeError?.message || "Transaction failed or was rejected.";
+      // Surface common Uniswap reverts more clearly
+      let msg = raw.slice(0, 160);
+      if (/INSUFFICIENT_A_AMOUNT|INSUFFICIENT_B_AMOUNT/i.test(raw)) {
+        msg = "Amounts no longer match pool ratio (price moved). Re-enter one side to re-quote.";
+      } else if (/transfer amount exceeds balance|ERC20: transfer/i.test(raw)) {
+        msg = "Insufficient token balance for this deposit.";
+      } else if (/user rejected|denied/i.test(raw)) {
+        msg = "Transaction rejected in wallet.";
+      }
+      setStatusMsg(msg);
+    }
+  }, [receiptError, writeError]);
 
   function deadline() {
     return BigInt(Math.floor(Date.now() / 1000) + 1200);
+  }
+
+  function needsApprove(allowance: unknown, amount: bigint): boolean {
+    // undefined = still loading or never approved → require approve before addLiquidity
+    if (allowance === undefined || allowance === null) return true;
+    return (allowance as bigint) < amount;
   }
 
   function onAddLiquidity() {
     if (!address || !live) return;
     const a = parseUnits(semaAmt || "0", pair.baseDecimals);
     const b = parseUnits(usdgAmt || "0", pair.quoteDecimals);
-    if (a === 0n || b === 0n) return;
-    if ((allowSema as bigint | undefined) !== undefined && (allowSema as bigint) < a) {
+    if (a === 0n || b === 0n) {
+      setStatusMsg("Enter both SEMA and USDG amounts (pool keeps the ratio).");
+      return;
+    }
+
+    // Soft balance checks
+    if (semaBal != null && a > (semaBal as bigint)) {
+      setStatusMsg("Not enough SEMA in wallet for this deposit.");
+      return;
+    }
+    if (usdgBal != null && b > (usdgBal as bigint)) {
+      setStatusMsg("Not enough USDG in wallet for this deposit.");
+      return;
+    }
+
+    setStatusMsg(null);
+    if (needsApprove(allowSema, a)) {
+      setPendingAction("approve-sema");
       writeContract({
         address: pair.baseToken,
         abi: ERC20_ABI,
@@ -214,7 +330,8 @@ export default function EarnPage() {
       });
       return;
     }
-    if ((allowUsdg as bigint | undefined) !== undefined && (allowUsdg as bigint) < b) {
+    if (needsApprove(allowUsdg, b)) {
+      setPendingAction("approve-usdg");
       writeContract({
         address: pair.quoteToken,
         abi: ERC20_ABI,
@@ -223,6 +340,9 @@ export default function EarnPage() {
       });
       return;
     }
+    setPendingAction("add");
+    // amountAMin/BMin = 0: router picks optimal amounts along the pool curve.
+    // Slight SEMA/USDG skew (e.g. 200/20 vs ~9.6:1) is OK — excess stays in wallet.
     writeContract({
       address: pair.router,
       abi: UNI_V2_ROUTER_ABI,
@@ -231,11 +351,42 @@ export default function EarnPage() {
     });
   }
 
+  const addButtonLabel = useMemo(() => {
+    if (isPending || confirming) {
+      if (pendingAction === "approve-sema") return "Confirm SEMA approve…";
+      if (pendingAction === "approve-usdg") return "Confirm USDG approve…";
+      if (pendingAction === "add") return "Confirm add liquidity…";
+      return "Confirm in wallet…";
+    }
+    try {
+      const a = parseUnits(semaAmt || "0", pair.baseDecimals);
+      const b = parseUnits(usdgAmt || "0", pair.quoteDecimals);
+      if (a > 0n && needsApprove(allowSema, a)) return "1 · Approve SEMA";
+      if (b > 0n && needsApprove(allowUsdg, b)) return "2 · Approve USDG";
+      if (a > 0n && b > 0n) return "3 · Add liquidity";
+    } catch {
+      /* ignore parse */
+    }
+    return "Approve / Add liquidity";
+  }, [
+    isPending,
+    confirming,
+    pendingAction,
+    semaAmt,
+    usdgAmt,
+    pair.baseDecimals,
+    pair.quoteDecimals,
+    allowSema,
+    allowUsdg,
+  ]);
+
   function onRemoveLiquidity() {
     if (!address || !live) return;
     const liq = parseUnits(lpAmt || "0", 18);
     if (liq === 0n) return;
-    if ((allowLpRouter as bigint | undefined) !== undefined && (allowLpRouter as bigint) < liq) {
+    setStatusMsg(null);
+    if (needsApprove(allowLpRouter, liq)) {
+      setPendingAction("other");
       writeContract({
         address: pair.pair,
         abi: UNI_V2_PAIR_ABI,
@@ -244,6 +395,7 @@ export default function EarnPage() {
       });
       return;
     }
+    setPendingAction("remove");
     writeContract({
       address: pair.router,
       abi: UNI_V2_ROUTER_ABI,
@@ -256,7 +408,9 @@ export default function EarnPage() {
     if (!address || !gaugeLive) return;
     const amt = parseUnits(stakeAmt || "0", 18);
     if (amt === 0n) return;
-    if ((allowLpGauge as bigint | undefined) !== undefined && (allowLpGauge as bigint) < amt) {
+    setStatusMsg(null);
+    if (needsApprove(allowLpGauge, amt)) {
+      setPendingAction("other");
       writeContract({
         address: pair.pair,
         abi: UNI_V2_PAIR_ABI,
@@ -265,6 +419,7 @@ export default function EarnPage() {
       });
       return;
     }
+    setPendingAction("stake");
     writeContract({
       address: pair.gauge,
       abi: GAUGE_ABI,
@@ -484,6 +639,22 @@ export default function EarnPage() {
               </button>
             ) : tab === "add" ? (
               <div className="mt-4 space-y-3">
+                {poolRatio && (
+                  <div className="rounded-lg border border-border bg-bg px-3 py-2 text-[10px] text-muted">
+                    Pool ratio ≈{" "}
+                    <span className="font-mono text-ink-soft">
+                      {poolRatio.semaPerUsdg.toFixed(2)} SEMA
+                    </span>{" "}
+                    per 1 {pair.quoteSymbol} ·{" "}
+                    <span className="font-mono text-ink-soft">
+                      ${poolRatio.price.toFixed(4)}
+                    </span>{" "}
+                    / SEMA
+                    <br />
+                    Type one side — the other fills to match. Router deposits the optimal pair;
+                    leftovers stay in your wallet.
+                  </div>
+                )}
                 <Field
                   label={`SEMA`}
                   bal={
@@ -494,7 +665,10 @@ export default function EarnPage() {
                 >
                   <input
                     value={semaAmt}
-                    onChange={(e) => setSemaAmt(e.target.value)}
+                    onChange={(e) => {
+                      setLastEdited("sema");
+                      setSemaAmt(e.target.value);
+                    }}
                     placeholder="0.0"
                     className={inputCls}
                     type="number"
@@ -514,21 +688,32 @@ export default function EarnPage() {
                 >
                   <input
                     value={usdgAmt}
-                    onChange={(e) => setUsdgAmt(e.target.value)}
+                    onChange={(e) => {
+                      setLastEdited("usdg");
+                      setUsdgAmt(e.target.value);
+                    }}
                     placeholder="0.0"
                     className={inputCls}
                     type="number"
                     min={0}
                   />
                 </Field>
+                {statusMsg && (
+                  <div className="rounded-lg border border-green/30 bg-green/10 px-3 py-2 text-[11px] leading-relaxed text-ink">
+                    {statusMsg}
+                  </div>
+                )}
                 <button
                   type="button"
                   disabled={!live || isPending || confirming}
                   onClick={onAddLiquidity}
                   className="btn-green w-full py-2.5 text-sm disabled:opacity-50"
                 >
-                  {isPending || confirming ? "Confirm…" : "Approve / Add liquidity"}
+                  {addButtonLabel}
                 </button>
+                <p className="text-center text-[10px] text-muted">
+                  Up to 3 wallet confirms: approve SEMA → approve USDG → add LP
+                </p>
               </div>
             ) : tab === "remove" ? (
               <div className="mt-4 space-y-3">
