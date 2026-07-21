@@ -43,6 +43,11 @@ export type DualSourceResult = {
   maxSourceDivergenceBps: number;
 };
 
+export type MarkAdjustment = {
+  /** Fixed premium in basis points (15580 = +155.8% → multiply by 2.558). */
+  premiumBps?: number;
+};
+
 export type OraclePricingConfig = {
   listingAggregation: "size_weighted" | "median";
   sourceWeights: {
@@ -51,12 +56,22 @@ export type OraclePricingConfig = {
   };
   weightBySampleCount: boolean;
   maxSourceDivergenceBps: number;
+  /** Per-peptide post-combine mark adjustments (not marketing copy). */
+  markAdjustments: Partial<Record<PeptideSlug, MarkAdjustment>>;
 };
 
 export function loadOraclePricingConfig(
   configPath = path.join(__dirname, "../../data/oracle-pricing.json"),
 ): OraclePricingConfig {
   const raw = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const adjRaw = (raw.markAdjustments ?? {}) as Record<string, { premiumBps?: number }>;
+  const markAdjustments: OraclePricingConfig["markAdjustments"] = {};
+  for (const slug of ["semaglutide", "tirzepatide", "retatrutide"] as PeptideSlug[]) {
+    const a = adjRaw[slug];
+    if (a && Number.isFinite(Number(a.premiumBps))) {
+      markAdjustments[slug] = { premiumBps: Number(a.premiumBps) };
+    }
+  }
   return {
     listingAggregation: raw.listingAggregation === "median" ? "median" : "size_weighted",
     sourceWeights: {
@@ -65,7 +80,21 @@ export function loadOraclePricingConfig(
     },
     weightBySampleCount: raw.weightBySampleCount !== false,
     maxSourceDivergenceBps: Number(raw.maxSourceDivergenceBps ?? 4000),
+    markAdjustments,
   };
+}
+
+/** Apply configured mark adjustment (e.g. RETA fixed premium). */
+export function applyMarkAdjustment(
+  slug: PeptideSlug,
+  pricePerMg: number,
+  pricing?: OraclePricingConfig,
+): number {
+  const cfg = pricing ?? loadOraclePricingConfig();
+  const adj = cfg.markAdjustments[slug];
+  if (!adj || !Number.isFinite(adj.premiumBps) || !adj.premiumBps) return pricePerMg;
+  // premiumBps 15580 → +155.8% → × (1 + 1.558) = ×2.558
+  return roundPrice(pricePerMg * (1 + adj.premiumBps / 10_000));
 }
 
 export function combineDualSources(args: {
@@ -108,11 +137,13 @@ export function combineDualSources(args: {
     throw new Error(`dual-source ${args.slug}: no sources available`);
   }
 
-  const combined = roundPrice(
+  const rawCombined = roundPrice(
     sources.length === 1
       ? sources[0]!.pricePerMg
       : weightedAverage(sources.map((s) => ({ value: s.pricePerMg, weight: s.weight }))),
   );
+  // Post-combine mark adjustments (e.g. fixed RETA premium) — raw dual still in sources[]
+  const combined = applyMarkAdjustment(args.slug, rawCombined, pricing);
 
   const prices = sources.map((s) => s.pricePerMg);
   let divergenceBps: number | null = null;

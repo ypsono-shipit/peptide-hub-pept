@@ -1,10 +1,15 @@
 {
-  "note": "GLP-1 oracle aggregation policy. listingAggregation applies within each source after IQR outlier filter. sourceCombine blends PeptideScouter + vendor basket. weightBySampleCount scales each source by how many listings/offers contributed (more data → more influence). Fixed sourceWeights still apply as relative priors.",
+  "note": "GLP-1 oracle aggregation policy. listingAggregation applies within each source after IQR outlier filter. sourceCombine blends PeptideScouter + vendor basket. weightBySampleCount scales each source by how many listings/offers contributed (more data → more influence). Fixed sourceWeights still apply as relative priors. markAdjustments apply after dual combine (internal; not site marketing).",
   "listingAggregation": "size_weighted",
   "sourceWeights": {
     "peptidescouter": 0.55,
     "vendor_basket": 0.45
   },
   "weightBySampleCount": true,
-  "maxSourceDivergenceBps": 4000
+  "maxSourceDivergenceBps": 4000,
+  "markAdjustments": {
+    "retatrutide": {
+      "premiumBps": 15580
+    }
+  }
 }

@@ -3,9 +3,29 @@ import * as path from "path";
 import { ethers } from "hardhat";
 import deployment from "../deployments/testnet.json";
 import referenceData from "../data/glp1-reference-prices.json";
-import { resolveAllDualSources, type DualSourceResult } from "./lib/dual-source";
+import {
+  resolveAllDualSources,
+  applyMarkAdjustment,
+  loadOraclePricingConfig,
+  type DualSourceResult,
+} from "./lib/dual-source";
 import { roundPrice } from "./lib/stats";
 import { appendPriceSamples, type PriceSample } from "./lib/price-history";
+
+/** Stay under on-chain MAX_DEVIATION_BPS (3000 = 30%) when ramping toward a new mark. */
+const MAX_PUSH_STEP = 0.29;
+
+/**
+ * Cap a single push so we don't trip the 30% circuit breaker.
+ * Next cron ticks continue stepping until on-chain reaches the target mark.
+ */
+function stepTowardTarget(onChain: number, target: number): number {
+  if (!(onChain > 0) || !(target > 0)) return target;
+  const lo = onChain * (1 - MAX_PUSH_STEP);
+  const hi = onChain * (1 + MAX_PUSH_STEP);
+  if (target >= lo && target <= hi) return target;
+  return target > onChain ? roundPrice(hi) : roundPrice(lo);
+}
 
 /**
  * Refresh GLP-1 peptide oracle prices on Robinhood Chain testnet.
@@ -126,18 +146,27 @@ function fromDual(results: {
 }
 
 function fromReferenceJson(reason: string): { rows: PriceRow[]; meta: Record<string, unknown> } {
+  const pricing = loadOraclePricingConfig();
   const { peptides, glp1Index } = referenceData;
-  const rows: PriceRow[] = Object.entries(peptides).map(([name, data]) => ({
-    name,
-    symbol: data.symbol,
-    pricePerMg: data.pricePerMg,
-    source: `${data.source} · ${reason}`,
-  }));
+  const rows: PriceRow[] = Object.entries(peptides).map(([name, data]) => {
+    const slug = name as "semaglutide" | "tirzepatide" | "retatrutide";
+    const pricePerMg =
+      slug === "semaglutide" || slug === "tirzepatide" || slug === "retatrutide"
+        ? applyMarkAdjustment(slug, data.pricePerMg, pricing)
+        : data.pricePerMg;
+    return {
+      name,
+      symbol: data.symbol,
+      pricePerMg,
+      source: `${data.source} · ${reason}`,
+    };
+  });
 
+  const byName = Object.fromEntries(rows.map((r) => [r.name, r.pricePerMg]));
   const indexPrice = roundPrice(
-    peptides.semaglutide.pricePerMg * glp1Index.weights.semaglutide +
-      peptides.tirzepatide.pricePerMg * glp1Index.weights.tirzepatide +
-      peptides.retatrutide.pricePerMg * glp1Index.weights.retatrutide,
+    (byName.semaglutide ?? peptides.semaglutide.pricePerMg) * glp1Index.weights.semaglutide +
+      (byName.tirzepatide ?? peptides.tirzepatide.pricePerMg) * glp1Index.weights.tirzepatide +
+      (byName.retatrutide ?? peptides.retatrutide.pricePerMg) * glp1Index.weights.retatrutide,
   );
 
   rows.push({
@@ -354,21 +383,34 @@ async function main() {
 
   for (const row of rows) {
     const marketKey = ethers.keccak256(ethers.toUtf8Bytes(row.symbol));
-    const priceWei = ethers.parseEther(row.pricePerMg.toFixed(4));
+    let pushPrice = row.pricePerMg;
+    let prevNum = 0;
 
     try {
       const prev = await oracle.latestPrice(marketKey);
-      const prevNum = Number(ethers.formatEther(prev));
+      prevNum = Number(ethers.formatEther(prev));
       if (prevNum > 0) {
-        const pct = (Math.abs(row.pricePerMg - prevNum) / prevNum) * 100;
-        console.log(
-          `  ${row.symbol}: on-chain $${prevNum.toFixed(4)} → $${row.pricePerMg.toFixed(4)} (${pct.toFixed(1)}% move)` +
-            (pct > 30 && !forcePush ? "  ⚠ will trip circuit breaker unless FORCE_PUSH=1" : ""),
-        );
+        // Auto-step ≤29% toward target so a large mark reprice (e.g. RETA premium)
+        // does not pause the feed. Subsequent cron runs finish the ramp.
+        const stepped = stepTowardTarget(prevNum, row.pricePerMg);
+        if (Math.abs(stepped - row.pricePerMg) > 1e-9) {
+          console.log(
+            `  ${row.symbol}: target $${row.pricePerMg.toFixed(4)} from on-chain $${prevNum.toFixed(4)}` +
+              ` — stepping to $${stepped.toFixed(4)} (≤${MAX_PUSH_STEP * 100}% / push)`,
+          );
+          pushPrice = stepped;
+        } else {
+          const pct = (Math.abs(row.pricePerMg - prevNum) / prevNum) * 100;
+          console.log(
+            `  ${row.symbol}: on-chain $${prevNum.toFixed(4)} → $${row.pricePerMg.toFixed(4)} (${pct.toFixed(1)}% move)`,
+          );
+        }
       }
     } catch {
       console.log(`  ${row.symbol}: no readable prior price (new/paused/stale)`);
     }
+
+    const priceWei = ethers.parseEther(pushPrice.toFixed(4));
 
     // forcePushPrice removed: large moves pause the feed instead of applying.
     try {
