@@ -48,6 +48,10 @@ export default function SpotPage() {
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [amountIn, setAmountIn] = useState("");
   const [slippageBps, setSlippageBps] = useState(100); // 1%
+  /** Tracks which write is in flight so approve → swap handoff works. */
+  const [pendingAction, setPendingAction] = useState<"approve" | "swap" | null>(null);
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [readyToSwap, setReadyToSwap] = useState(false);
 
   const { data: reserves } = useReadContract({
     address: pairCfg.pair,
@@ -108,26 +112,96 @@ export default function SpotPage() {
   const amountOutHuman =
     amountOutWei > 0n ? Number(formatUnits(amountOutWei, outDecimals)) : 0;
 
-  const { data: allowance } = useReadContract({
+  const {
+    data: allowance,
+    refetch: refetchAllowance,
+  } = useReadContract({
     address: inToken,
     abi: ERC20_ABI,
     functionName: "allowance",
     args: address ? [address, pairCfg.router] : undefined,
-    query: { enabled: live && !!address && amountInWei > 0n },
+    query: { enabled: live && !!address, refetchInterval: 8_000 },
+  });
+
+  const { data: semaBal, refetch: refetchSema } = useReadContract({
+    address: pairCfg.baseToken,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: live && !!address && pairCfg.baseToken !== ZERO, refetchInterval: 12_000 },
+  });
+  const { data: usdgBal, refetch: refetchUsdg } = useReadContract({
+    address: pairCfg.quoteToken,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: live && !!address && pairCfg.quoteToken !== ZERO, refetchInterval: 12_000 },
   });
 
   const needsApprove =
-    live && amountInWei > 0n && (allowance === undefined || (allowance as bigint) < amountInWei);
+    live &&
+    amountInWei > 0n &&
+    (allowance === undefined || (allowance as bigint) < amountInWei);
 
-  const { writeContract, data: txHash, isPending, reset } = useWriteContract();
-  const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+  const { writeContract, data: txHash, isPending, reset, error: writeError } = useWriteContract();
+  const { isLoading: confirming, isSuccess, isError: receiptError } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
 
   useEffect(() => {
-    if (isSuccess) {
+    if (!isSuccess || !pendingAction) return;
+    if (pendingAction === "approve") {
+      void refetchAllowance();
+      setReadyToSwap(true);
+      setStatusMsg(
+        `✓ ${inLabel} approved. Confirm swap to receive ${outLabel}.`,
+      );
+      setPendingAction(null);
+      reset();
+      return;
+    }
+    if (pendingAction === "swap") {
+      void refetchSema();
+      void refetchUsdg();
+      void refetchAllowance();
+      setReadyToSwap(false);
+      setStatusMsg(
+        side === "buy"
+          ? `✓ Swapped — ${outLabel} is in your wallet. Open Portfolio to view balances.`
+          : `✓ Swapped — ${outLabel} is in your wallet.`,
+      );
       setAmountIn("");
+      setPendingAction(null);
       reset();
     }
-  }, [isSuccess, reset]);
+  }, [
+    isSuccess,
+    pendingAction,
+    inLabel,
+    outLabel,
+    side,
+    refetchAllowance,
+    refetchSema,
+    refetchUsdg,
+    reset,
+  ]);
+
+  useEffect(() => {
+    if (receiptError || writeError) {
+      setPendingAction(null);
+      setStatusMsg(
+        writeError?.message?.slice(0, 120) ||
+          "Transaction failed or was rejected. Try again.",
+      );
+    }
+  }, [receiptError, writeError]);
+
+  // After approve, allowance may update — clear ready banner once swap available
+  useEffect(() => {
+    if (readyToSwap && !needsApprove && amountInWei > 0n) {
+      setReadyToSwap(true);
+    }
+  }, [readyToSwap, needsApprove, amountInWei]);
 
   const { data: lpBal } = useReadContract({
     address: pairCfg.pair,
@@ -143,6 +217,15 @@ export default function SpotPage() {
     query: { enabled: live },
   });
 
+  const semaHuman =
+    semaBal !== undefined
+      ? Number(formatUnits(semaBal as bigint, pairCfg.baseDecimals))
+      : null;
+  const usdgHuman =
+    usdgBal !== undefined
+      ? Number(formatUnits(usdgBal as bigint, pairCfg.quoteDecimals))
+      : null;
+
   const lpPoints = useMemo(() => {
     if (!live || !lpBal || !lpSupply || !reserves || (lpSupply as bigint) === 0n) return 0;
     const [r0, r1] = reserves as readonly [bigint, bigint, number];
@@ -156,6 +239,8 @@ export default function SpotPage() {
   }, [live, lpBal, lpSupply, reserves, token0, pairCfg]);
 
   function onApprove() {
+    setStatusMsg(null);
+    setPendingAction("approve");
     writeContract({
       address: inToken,
       abi: ERC20_ABI,
@@ -166,6 +251,8 @@ export default function SpotPage() {
 
   function onSwap() {
     if (!address || amountInWei === 0n || amountOutWei === 0n) return;
+    setStatusMsg(null);
+    setPendingAction("swap");
     const minOut = (amountOutWei * BigInt(10_000 - slippageBps)) / 10_000n;
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
     writeContract({
@@ -345,6 +432,27 @@ export default function SpotPage() {
               </span>
             </div>
 
+            {isConnected && live && (
+              <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg border border-border bg-bg px-3 py-2 text-[11px]">
+                <div>
+                  <div className="text-muted">{pairCfg.baseSymbol}</div>
+                  <div className="font-mono tabular-nums text-ink">
+                    {semaHuman != null
+                      ? semaHuman.toLocaleString(undefined, { maximumFractionDigits: 4 })
+                      : "—"}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-muted">{pairCfg.quoteSymbol}</div>
+                  <div className="font-mono tabular-nums text-ink">
+                    {usdgHuman != null
+                      ? usdgHuman.toLocaleString(undefined, { maximumFractionDigits: 2 })
+                      : "—"}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="mt-3 flex gap-1 rounded-lg bg-bg p-0.5">
               {(["buy", "sell"] as const).map((s) => (
                 <button
@@ -426,6 +534,32 @@ export default function SpotPage() {
               </div>
             </div>
 
+            {statusMsg && (
+              <div
+                className={cn(
+                  "mt-3 rounded-lg border px-3 py-2.5 text-[11px] leading-relaxed",
+                  readyToSwap || statusMsg.startsWith("✓")
+                    ? "border-green/40 bg-green/10 text-ink"
+                    : "border-border bg-bg text-ink-soft",
+                )}
+              >
+                <p>{statusMsg}</p>
+                {readyToSwap && !needsApprove && (
+                  <p className="mt-1 font-semibold text-green-soft">
+                    Next step: Swap {inLabel} → {outLabel}
+                  </p>
+                )}
+                {statusMsg.includes("Portfolio") && (
+                  <Link
+                    href="/portfolio"
+                    className="mt-2 inline-flex font-semibold text-green-soft hover:underline"
+                  >
+                    View portfolio →
+                  </Link>
+                )}
+              </div>
+            )}
+
             {!isConnected ? (
               <button
                 type="button"
@@ -449,20 +583,35 @@ export default function SpotPage() {
               <button
                 type="button"
                 className="btn-green mt-4 w-full py-2.5 text-sm"
-                disabled={isPending || confirming}
+                disabled={isPending || confirming || amountInWei === 0n}
                 onClick={onApprove}
               >
-                {isPending || confirming ? "Confirm in wallet…" : `Approve ${inLabel}`}
+                {pendingAction === "approve" && (isPending || confirming)
+                  ? "Confirm approve in wallet…"
+                  : `1 · Approve ${inLabel}`}
               </button>
             ) : (
               <button
                 type="button"
-                className="btn-green mt-4 w-full py-2.5 text-sm"
+                className={cn(
+                  "btn-green mt-4 w-full py-2.5 text-sm",
+                  readyToSwap && "ring-2 ring-green/50 ring-offset-2 ring-offset-panel",
+                )}
                 disabled={isPending || confirming || amountInWei === 0n || amountOutWei === 0n}
                 onClick={onSwap}
               >
-                {isPending || confirming ? "Swapping…" : `Swap ${inLabel} → ${outLabel}`}
+                {pendingAction === "swap" && (isPending || confirming)
+                  ? "Confirm swap in wallet…"
+                  : readyToSwap
+                    ? `2 · Swap ${inLabel} → ${outLabel}`
+                    : `Swap ${inLabel} → ${outLabel}`}
               </button>
+            )}
+
+            {needsApprove && amountInWei > 0n && (
+              <p className="mt-2 text-center text-[10px] text-muted">
+                Step 1 of 2: approve router to spend {inLabel}, then swap
+              </p>
             )}
 
             {txHash && (
