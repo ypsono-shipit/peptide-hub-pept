@@ -235,7 +235,13 @@ export default function SpotPage() {
               label="Official research price"
               value={oraclePrice}
               unit="$/mg"
-              note={isLive ? "PeptideOracle · SEMA-PERP" : "Oracle offline · reference"}
+              note={
+                isLive
+                  ? network.testnet
+                    ? "PeptideOracle · SEMA-PERP"
+                    : "Research mark · SEMA-PERP (testnet oracle feed)"
+                  : "Oracle offline · reference"
+              }
               tone="oracle"
             />
             <PriceCard
