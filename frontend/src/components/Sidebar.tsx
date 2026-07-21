@@ -15,6 +15,7 @@ import {
   CandlestickChart,
   Sparkles,
   ShieldAlert,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/Logo";
@@ -26,6 +27,7 @@ const NAV = [
   { href: "/earn", label: "Earn", icon: Sparkles },
   { href: "/perps", label: "Perps", icon: CandlestickChart },
   { href: "/redeem", label: "Redeem", icon: Package },
+  { href: "/learn", label: "Learn", icon: BookOpen },
   { href: "/risk", label: "Risk", icon: ShieldAlert },
   { href: "/launchpad", label: "Launchpad", icon: Rocket },
   { href: "/portfolio", label: "Positions", icon: Wallet },
