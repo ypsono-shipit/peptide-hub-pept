@@ -111,6 +111,7 @@ export const SEMA_RISK = {
     { label: "PEPT SEMA token?", detail: "Market instrument · not a prescription" },
   ],
   related: [
+    { href: "/learn", label: "Learn SEMA / TIRZ / RETA" },
     { href: "/spot", label: "SEMA spot" },
     { href: "/oracle/monitor", label: "Oracle monitor" },
     { href: "/redeem", label: "Kit redemption" },
