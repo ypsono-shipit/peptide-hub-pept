@@ -2,7 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { MOCK_MARKETS } from "@/lib/markets";
-import { MARKETPLACE_BRAND } from "@/lib/marketplaceData";
+import {
+  MARKETPLACE_BRAND,
+  MARKETPLACE_STATS,
+  PEPTIDES,
+  RESEARCH_ONLY,
+} from "@/lib/marketplaceData";
 import { NetworkToggle } from "@/components/NetworkToggle";
 import { BrandWordmark } from "@/components/BrandWordmark";
 
@@ -32,6 +37,16 @@ const FEATURES = [
 ];
 
 const MARKETS = MOCK_MARKETS.filter((m) => m.unit === "$/mg" || m.symbol.startsWith("SEMA") || m.symbol.startsWith("GLP"));
+
+/** Featured kits for landing preview only — no checkout; waitlist CTA. */
+const PREVIEW_KITS = PEPTIDES.filter((p) =>
+  ["semaglutide", "tirzepatide", "retatrutide", "bpc-157", "tb-500", "kpv"].includes(p.id),
+).slice(0, 6);
+// fallback if ids differ
+const KIT_PREVIEW =
+  PREVIEW_KITS.length >= 4
+    ? PREVIEW_KITS
+    : PEPTIDES.filter((p) => p.bestseller || p.category === "weightloss").slice(0, 6);
 
 export default function LandingPage() {
   return (
@@ -68,9 +83,9 @@ export default function LandingPage() {
           <a href="#product" className="hover:text-ink">
             Product
           </a>
-          <Link href="/marketplace" className="hover:text-ink">
+          <a href="#marketplace" className="hover:text-ink">
             Marketplace
-          </Link>
+          </a>
           <Link href="/oracle" className="hover:text-ink">
             Oracle API
           </Link>
@@ -115,12 +130,12 @@ export default function LandingPage() {
               >
                 Join waitlist
               </Link>
-              <Link
-                href="/marketplace"
+              <a
+                href="#marketplace"
                 className="inline-flex items-center justify-center rounded-full border border-border-strong px-7 py-3.5 text-sm font-semibold text-ink transition hover:border-ink hover:bg-panel"
               >
-                Browse Kits
-              </Link>
+                Preview kits
+              </a>
             </div>
 
             <p className="mt-8 text-xs text-muted">
@@ -235,6 +250,99 @@ export default function LandingPage() {
             >
               Read the Oracle API docs →
             </Link>
+          </div>
+        </section>
+
+        {/* Marketplace preview — catalog teaser; checkout only via waitlist for now */}
+        <section id="marketplace" className="border-t border-border bg-panel/60">
+          <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">
+                  {MARKETPLACE_BRAND.name}
+                </p>
+                <h2 className="mt-2 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+                  Research kit{" "}
+                  <em className="font-serif font-normal italic text-green-soft">marketplace</em>
+                </h2>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
+                  {RESEARCH_ONLY.tagline}. Preview of the catalog — kit checkout opens with early
+                  access. Join the waitlist to be first in line.
+                </p>
+              </div>
+              <Link
+                href="/waitlist?from=marketplace"
+                className="shrink-0 rounded-full bg-green px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-green-dim"
+              >
+                Join waitlist
+              </Link>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[
+                { label: "Compounds", value: MARKETPLACE_STATS.peptidesListed },
+                { label: "Purity", value: MARKETPLACE_STATS.purity },
+                { label: "Kit size", value: MARKETPLACE_STATS.kitNote },
+                { label: "Access", value: "Waitlist" },
+              ].map((s) => (
+                <div
+                  key={s.label}
+                  className="rounded-xl border border-border bg-bg px-3 py-3"
+                >
+                  <div className="text-sm font-semibold tabular-nums text-ink">{s.value}</div>
+                  <div className="text-[10px] uppercase tracking-wide text-muted">{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {KIT_PREVIEW.map((p) => (
+                <div
+                  key={p.id}
+                  className="group flex flex-col rounded-2xl border border-border bg-bg p-4 transition hover:border-border-strong"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-semibold text-ink">{p.name}</div>
+                      <div className="mt-0.5 text-[11px] text-muted">
+                        {p.dosage} · {p.kitLabel}
+                      </div>
+                    </div>
+                    {p.bestseller ? (
+                      <span className="rounded bg-green-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-green-soft">
+                        Featured
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-2 line-clamp-2 flex-1 text-xs leading-relaxed text-ink-soft">
+                    {p.description}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+                    <span className="font-mono text-sm tabular-nums text-ink">
+                      {p.priceIsFrom ? "from " : ""}${p.priceFrom.toFixed(0)}
+                      <span className="ml-1 text-[10px] font-normal text-muted">/ kit</span>
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted">
+                      Coming soon
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border-strong bg-bg/80 px-6 py-8 text-center">
+              <p className="max-w-md text-sm text-ink-soft">
+                Full marketplace checkout is invite-only while we finish on-chain kit vouchers and
+                shipping. Get notified when you can buy.
+              </p>
+              <Link
+                href="/waitlist?from=marketplace"
+                className="inline-flex rounded-full bg-green px-8 py-3 text-sm font-semibold text-black transition hover:bg-green-dim"
+              >
+                Join waitlist for kit access
+              </Link>
+              <p className="text-[10px] text-faint">{RESEARCH_ONLY.disclaimer}</p>
+            </div>
           </div>
         </section>
 
