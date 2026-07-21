@@ -406,11 +406,31 @@ export default function EarnPage() {
 
   function onStake() {
     if (!address || !gaugeLive) return;
-    const amt = parseUnits(stakeAmt || "0", 18);
-    if (amt === 0n) return;
+    // Prefer exact wallet balance when field matches Max / full bal
+    let amt = 0n;
+    try {
+      amt = parseUnits((stakeAmt || "0").trim() || "0", 18);
+    } catch {
+      setStatusMsg("Invalid LP amount.");
+      return;
+    }
+    if (amt === 0n && walletLp != null && (walletLp as bigint) > 0n) {
+      // Empty field → stake all
+      amt = walletLp as bigint;
+      setStakeAmt(formatUnits(amt, 18));
+    }
+    if (amt === 0n) {
+      setStatusMsg("Enter an LP amount or tap Max.");
+      return;
+    }
+    if (walletLp != null && amt > (walletLp as bigint)) {
+      setStatusMsg("Amount exceeds wallet LP. Tap Max to use the exact balance.");
+      return;
+    }
     setStatusMsg(null);
     if (needsApprove(allowLpGauge, amt)) {
       setPendingAction("other");
+      setStatusMsg("Approve LP for the gauge, then click Stake again.");
       writeContract({
         address: pair.pair,
         abi: UNI_V2_PAIR_ABI,
@@ -749,32 +769,59 @@ export default function EarnPage() {
                   <div className="text-muted">Wallet LP</div>
                   <div className="font-mono text-ink">
                     {walletLp != null
-                      ? Number(formatUnits(walletLp as bigint, 18)).toFixed(6)
+                      ? // Show full precision — Uni V2 LP for this pool is often &lt; 0.01
+                        formatUnits(walletLp as bigint, 18)
                       : "—"}
                   </div>
                   <div className="mt-1 text-muted">Staked in gauge</div>
                   <div className="font-mono text-green">
-                    {Number(formatUnits(stakedLp, 18)).toFixed(6)}
+                    {stakedLp > 0n ? formatUnits(stakedLp, 18) : "0"}
                   </div>
                 </div>
+                <p className="text-[10px] leading-relaxed text-muted">
+                  LP amounts look tiny (~0.003) by Uniswap math — that can still be{" "}
+                  <strong className="text-ink-soft">most of the pool</strong>. No minimum to stake;
+                  use Max and confirm in wallet.
+                </p>
                 <Field label="Amount (LP)">
-                  <input
-                    value={stakeAmt}
-                    onChange={(e) => setStakeAmt(e.target.value)}
-                    placeholder="0.0"
-                    className={inputCls}
-                    type="number"
-                    min={0}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      value={stakeAmt}
+                      onChange={(e) => setStakeAmt(e.target.value)}
+                      placeholder="0.0"
+                      className={inputCls}
+                      type="text"
+                      inputMode="decimal"
+                    />
+                    <button
+                      type="button"
+                      className="shrink-0 rounded-lg border border-border-strong px-2.5 text-[11px] font-semibold text-ink hover:bg-bg disabled:opacity-40"
+                      disabled={walletLp == null || (walletLp as bigint) === 0n}
+                      onClick={() => {
+                        if (walletLp != null && (walletLp as bigint) > 0n) {
+                          // Exact balance string — avoid toFixed rounding that exceeds balance
+                          setStakeAmt(formatUnits(walletLp as bigint, 18));
+                        }
+                      }}
+                    >
+                      Max
+                    </button>
+                  </div>
                 </Field>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    disabled={!gaugeLive || isPending || confirming}
+                    disabled={
+                      !gaugeLive ||
+                      isPending ||
+                      confirming ||
+                      walletLp == null ||
+                      (walletLp as bigint) === 0n
+                    }
                     onClick={onStake}
                     className="btn-green py-2 text-xs disabled:opacity-50"
                   >
-                    Stake LP
+                    {isPending || confirming ? "Confirm…" : "Stake LP"}
                   </button>
                   <button
                     type="button"
