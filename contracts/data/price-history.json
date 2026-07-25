@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-25T08:20:16.418Z",
+  "updatedAt": "2026-07-25T08:21:18.081Z",
   "note": "Oracle mark samples for PEPT Trade charts. Appended on each successful pushPrice (~5m cron). Fine TFs (5m/15m) need dense samples; coarser TFs still stair-step when marks are quiet.",
   "samples": [
     {
@@ -53294,6 +53294,34 @@
       "price": 3.557,
       "source": "Dual source weighted · peptidescouter=$3.2216(n=64) · vendor_basket=$3.9872(n=61) · divergence=23.8%",
       "txHash": "0x04748bbee8742c3ca0bdc0fe40b46f84769cccd604b8d98b24407f51db2557e6"
+    },
+    {
+      "market": "GLP1-IDX-PERP",
+      "ts": 1784967661,
+      "price": 5.9258,
+      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
+      "txHash": "0x1750e9d71a3b5b1d1eaaf382f8d626f64288f9c01e5111eeac2b53db666c3c29"
+    },
+    {
+      "market": "RETA-PERP",
+      "ts": 1784967661,
+      "price": 13.4175,
+      "source": "Dual source weighted · peptidescouter=$4.7415(n=82) · vendor_basket=$6.3196(n=47) · divergence=33.3%",
+      "txHash": "0x88f486e9bca288f7e45af4ee7883454cec1c0220ec99542dc90b3dd7cbf942b1"
+    },
+    {
+      "market": "SEMA-PERP",
+      "ts": 1784967661,
+      "price": 5.0799,
+      "source": "Dual source weighted · peptidescouter=$4.5105(n=26) · vendor_basket=$5.8665(n=23) · divergence=30.1%",
+      "txHash": "0xd9df621a7710b020d74bedafe375b4e15d4a73faeff1f5e161473a268ca5e6c3"
+    },
+    {
+      "market": "TIRZ-PERP",
+      "ts": 1784967661,
+      "price": 3.4608,
+      "source": "Dual source weighted · peptidescouter=$3.2216(n=64) · vendor_basket=$3.9173(n=41) · divergence=21.6%",
+      "txHash": "0x7ef96e95e746269f37144659bc21221f18c13df8ba8b5d4e5058748a709c32f0"
     }
   ]
 }
