@@ -1,16 +1,16 @@
 {
-  "scrapedAt": "2026-07-29T13:45:53.395Z",
+  "scrapedAt": "2026-07-29T13:50:56.275Z",
   "method": "dual source: PeptideScouter + vendor basket",
   "sourceErrors": [],
-  "previousScrapedAt": "2026-07-29T13:40:58.964Z",
+  "previousScrapedAt": "2026-07-29T13:45:53.395Z",
   "peptides": {
     "semaglutide": {
-      "pricePerMg": 5.0601,
-      "method": "weighted(peptidescouter@w=17.1+vendor_basket@w=10.3)",
-      "source": "Dual source weighted · peptidescouter=$4.9116(n=31) · vendor_basket=$5.3046(n=23) · divergence=8.0%",
+      "pricePerMg": 5.8113,
+      "method": "weighted(peptidescouter@w=17.1+vendor_basket@w=14.0)",
+      "source": "Dual source weighted · peptidescouter=$4.9116(n=31) · vendor_basket=$6.911(n=31) · divergence=40.7%",
       "singleSource": false,
-      "divergenceBps": 800,
-      "divergenceWarning": false,
+      "divergenceBps": 4071,
+      "divergenceWarning": true,
       "sources": [
         {
           "name": "peptidescouter",
@@ -21,10 +21,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 5.3046,
-          "source": "Vendor basket live scrape · semaglutide · size-weighted (IQR) n=23/25 vendors=15 · 2026-07-29",
-          "sampleCount": 23,
-          "weight": 10.35
+          "pricePerMg": 6.911,
+          "source": "Vendor basket live scrape · semaglutide · size-weighted (IQR) n=31/32 vendors=17 · 2026-07-29",
+          "sampleCount": 31,
+          "weight": 13.950000000000001
         }
       ],
       "scouter": {
@@ -359,25 +359,15 @@
         ]
       },
       "basket": {
-        "pricePerMg": 5.3046,
-        "sampleCount": 23,
-        "vendorCount": 15,
-        "offerCount": 25,
+        "pricePerMg": 6.911,
+        "sampleCount": 31,
+        "vendorCount": 17,
+        "offerCount": 32,
         "errors": [
-          {
-            "vendor": "PeptidesKingdom",
-            "url": "https://peptideskingdom.com/product/semaglutide/",
-            "error": "HTTP 504"
-          },
-          {
-            "vendor": "Trulab Peptides",
-            "url": "https://trulabpeptides.com/product/glp1sm/",
-            "error": "HTTP 403"
-          },
           {
             "vendor": "Alpha Peptides",
             "url": "https://alpha-peptides.com/product/glp-1-sm/",
-            "error": "no parseable price/size on page"
+            "error": "HTTP 403"
           },
           {
             "vendor": "Synthesis Peptides",
@@ -387,7 +377,7 @@
           {
             "vendor": "Longevity Peptides",
             "url": "https://longevitypeptides.us/product/semaglutide-research-peptide/",
-            "error": "no parseable price/size on page"
+            "error": "HTTP 403"
           }
         ],
         "offers": [
@@ -414,6 +404,50 @@
             "changePct": 0
           },
           {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/semaglutide/",
+            "sizeMg": 2,
+            "priceUsd": 60,
+            "pricePerMg": 30,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/semaglutide/",
+            "sizeMg": 5,
+            "priceUsd": 100,
+            "pricePerMg": 20,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/semaglutide/",
+            "sizeMg": 10,
+            "priceUsd": 165,
+            "pricePerMg": 16.5,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/semaglutide/",
+            "sizeMg": 20,
+            "priceUsd": 300,
+            "pricePerMg": 15,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
             "vendor": "Pepvida Labs",
             "url": "https://pepvidalabs.com/product/glp-1-10mg/",
             "sizeMg": 10,
@@ -422,6 +456,50 @@
             "inStock": true,
             "method": "json_ld",
             "previousPricePerMg": 8.9,
+            "changePct": 0
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp1sm/",
+            "sizeMg": 5,
+            "priceUsd": 59,
+            "pricePerMg": 11.8,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp1sm/",
+            "sizeMg": 10,
+            "priceUsd": 89,
+            "pricePerMg": 8.9,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp1sm/",
+            "sizeMg": 30,
+            "priceUsd": 229,
+            "pricePerMg": 7.6333,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Biotech Compounds",
+            "url": "https://biotechcompounds.com/products/glp-1s",
+            "sizeMg": 30,
+            "priceUsd": 80,
+            "pricePerMg": 2.6667,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 2.6667,
             "changePct": 0
           },
           {
@@ -469,28 +547,6 @@
             "changePct": 0
           },
           {
-            "vendor": "Biotech Compounds",
-            "url": "https://biotechcompounds.com/products/glp-1s",
-            "sizeMg": 30,
-            "priceUsd": 80,
-            "pricePerMg": 2.6667,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 2.6667,
-            "changePct": 0
-          },
-          {
-            "vendor": "Ascension Peptides",
-            "url": "https://ascensionpeptides.com/product/s-5/",
-            "sizeMg": 5,
-            "priceUsd": 40,
-            "pricePerMg": 8,
-            "inStock": true,
-            "method": "simple_price",
-            "previousPricePerMg": 8,
-            "changePct": 0
-          },
-          {
             "vendor": "Peptide Giants",
             "url": "https://peptidegiants.com/product/glp-1s/",
             "sizeMg": 10,
@@ -513,14 +569,14 @@
             "changePct": 0
           },
           {
-            "vendor": "Puratek Peptides",
-            "url": "https://puratekpeptides.com/product/pur-1s/",
-            "sizeMg": 10,
-            "priceUsd": 34.95,
-            "pricePerMg": 3.495,
+            "vendor": "Ascension Peptides",
+            "url": "https://ascensionpeptides.com/product/s-5/",
+            "sizeMg": 5,
+            "priceUsd": 40,
+            "pricePerMg": 8,
             "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 3.495,
+            "method": "simple_price",
+            "previousPricePerMg": 8,
             "changePct": 0
           },
           {
@@ -532,6 +588,17 @@
             "inStock": true,
             "method": "json_ld",
             "previousPricePerMg": 12,
+            "changePct": 0
+          },
+          {
+            "vendor": "Puratek Peptides",
+            "url": "https://puratekpeptides.com/product/pur-1s/",
+            "sizeMg": 10,
+            "priceUsd": 34.95,
+            "pricePerMg": 3.495,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": 3.495,
             "changePct": 0
           },
           {
@@ -568,17 +635,6 @@
             "changePct": 0
           },
           {
-            "vendor": "Bio Peptide",
-            "url": "https://biopeptitech.com/products/sema-30mg",
-            "sizeMg": 30,
-            "priceUsd": 150,
-            "pricePerMg": 5,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 5,
-            "changePct": 0
-          },
-          {
             "vendor": "Red Rock Peptides",
             "url": "https://redrockpeptides.com/product/glp-1-s-30mg/",
             "sizeMg": 30,
@@ -587,6 +643,17 @@
             "inStock": true,
             "method": "json_ld",
             "previousPricePerMg": 5.5667,
+            "changePct": 0
+          },
+          {
+            "vendor": "Bio Peptide",
+            "url": "https://biopeptitech.com/products/sema-30mg",
+            "sizeMg": 30,
+            "priceUsd": 150,
+            "pricePerMg": 5,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 5,
             "changePct": 0
           },
           {
@@ -670,12 +737,12 @@
       }
     },
     "tirzepatide": {
-      "pricePerMg": 3.1701,
-      "method": "weighted(peptidescouter@w=47.9+vendor_basket@w=21.2)",
-      "source": "Dual source weighted · peptidescouter=$2.9483(n=87) · vendor_basket=$3.6718(n=47) · divergence=24.5%",
+      "pricePerMg": 3.3743,
+      "method": "weighted(peptidescouter@w=47.9+vendor_basket@w=26.1)",
+      "source": "Dual source weighted · peptidescouter=$2.9483(n=87) · vendor_basket=$4.1554(n=58) · divergence=40.9%",
       "singleSource": false,
-      "divergenceBps": 2454,
-      "divergenceWarning": false,
+      "divergenceBps": 4094,
+      "divergenceWarning": true,
       "sources": [
         {
           "name": "peptidescouter",
@@ -686,10 +753,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 3.6718,
-          "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=47/53 vendors=16 · 2026-07-29",
-          "sampleCount": 47,
-          "weight": 21.150000000000002
+          "pricePerMg": 4.1554,
+          "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=58/64 vendors=18 · 2026-07-29",
+          "sampleCount": 58,
+          "weight": 26.1
         }
       ],
       "scouter": {
@@ -1618,19 +1685,14 @@
         ]
       },
       "basket": {
-        "pricePerMg": 3.6718,
-        "sampleCount": 47,
-        "vendorCount": 16,
-        "offerCount": 53,
+        "pricePerMg": 4.1554,
+        "sampleCount": 58,
+        "vendorCount": 18,
+        "offerCount": 64,
         "errors": [
           {
-            "vendor": "PeptidesKingdom",
-            "url": "https://peptideskingdom.com/product/tirzepatide/",
-            "error": "HTTP 504"
-          },
-          {
-            "vendor": "Trulab Peptides",
-            "url": "https://trulabpeptides.com/product/glp2tz/",
+            "vendor": "Alpha Peptides",
+            "url": "https://alpha-peptides.com/product/glp-2-tz/",
             "error": "HTTP 403"
           },
           {
@@ -1639,8 +1701,8 @@
             "error": "no parseable price/size on page"
           },
           {
-            "vendor": "Alpha Peptides",
-            "url": "https://alpha-peptides.com/product/glp-2-tz/",
+            "vendor": "Glow Aminos",
+            "url": "https://glowaminos.com/product/fg2-t/",
             "error": "no parseable price/size on page"
           },
           {
@@ -1649,13 +1711,28 @@
             "error": "no parseable price/size on page"
           },
           {
-            "vendor": "Glow Aminos",
-            "url": "https://glowaminos.com/product/fg2-t/",
+            "vendor": "NextGen Peptide",
+            "url": "https://ngpeptide.com/product/trz-2/",
+            "error": "HTTP 403"
+          },
+          {
+            "vendor": "Purity Peptides",
+            "url": "https://puritypeptides.is/product/glp-2-tirzepatide-30mg/",
+            "error": "HTTP 404"
+          },
+          {
+            "vendor": "Purity Peptides",
+            "url": "https://puritypeptides.is/product/tirzepatide-20/",
             "error": "no parseable price/size on page"
           },
           {
-            "vendor": "NextGen Peptide",
-            "url": "https://ngpeptide.com/product/trz-2/",
+            "vendor": "TrustedPeps",
+            "url": "https://trustedpeps.us/product/glp-2-tz-30mg/",
+            "error": "HTTP 403"
+          },
+          {
+            "vendor": "Purity Peptides",
+            "url": "https://puritypeptides.is/product/tirzepatide-10/",
             "error": "no parseable price/size on page"
           },
           {
@@ -1664,29 +1741,9 @@
             "error": "no parseable price/size on page"
           },
           {
-            "vendor": "Purity Peptides",
-            "url": "https://puritypeptides.is/product/tirzepatide-10/",
-            "error": "no parseable price/size on page"
-          },
-          {
-            "vendor": "Purity Peptides",
-            "url": "https://puritypeptides.is/product/tirzepatide-20/",
-            "error": "no parseable price/size on page"
-          },
-          {
-            "vendor": "Purity Peptides",
-            "url": "https://puritypeptides.is/product/glp-2-tirzepatide-30mg/",
-            "error": "HTTP 404"
-          },
-          {
-            "vendor": "TrustedPeps",
-            "url": "https://trustedpeps.us/product/glp-2-tz-30mg/",
-            "error": "no parseable price/size on page"
-          },
-          {
             "vendor": "Longevity Peptides",
             "url": "https://longevitypeptides.us/product/peptide-sciences-tirzepatide/",
-            "error": "no parseable price/size on page"
+            "error": "HTTP 403"
           },
           {
             "vendor": "Oneday Compounds",
@@ -1702,17 +1759,6 @@
         "offers": [
           {
             "vendor": "EZPeptides",
-            "url": "https://ezpeptides.com/product/ezp-2p-20mg/",
-            "sizeMg": 20,
-            "priceUsd": 88,
-            "pricePerMg": 4.4,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 4.4,
-            "changePct": 0
-          },
-          {
-            "vendor": "EZPeptides",
             "url": "https://ezpeptides.com/product/ezp-2p-15mg/",
             "sizeMg": 15,
             "priceUsd": 71,
@@ -1720,6 +1766,17 @@
             "inStock": true,
             "method": "json_ld",
             "previousPricePerMg": 4.7333,
+            "changePct": 0
+          },
+          {
+            "vendor": "EZPeptides",
+            "url": "https://ezpeptides.com/product/ezp-2p-20mg/",
+            "sizeMg": 20,
+            "priceUsd": 88,
+            "pricePerMg": 4.4,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 4.4,
             "changePct": 0
           },
           {
@@ -1732,6 +1789,127 @@
             "method": "json_ld",
             "previousPricePerMg": 5.3,
             "changePct": 0
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/tirzepatide/",
+            "sizeMg": 10,
+            "priceUsd": 120,
+            "pricePerMg": 12,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/tirzepatide/",
+            "sizeMg": 20,
+            "priceUsd": 180,
+            "pricePerMg": 9,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/tirzepatide/",
+            "sizeMg": 30,
+            "priceUsd": 250,
+            "pricePerMg": 8.3333,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/tirzepatide/",
+            "sizeMg": 45,
+            "priceUsd": 350,
+            "pricePerMg": 7.7778,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/tirzepatide/",
+            "sizeMg": 60,
+            "priceUsd": 480,
+            "pricePerMg": 8,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/tirzepatide/",
+            "sizeMg": 5,
+            "priceUsd": 65,
+            "pricePerMg": 13,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp2tz/",
+            "sizeMg": 5,
+            "priceUsd": 55,
+            "pricePerMg": 11,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp2tz/",
+            "sizeMg": 10,
+            "priceUsd": 67,
+            "pricePerMg": 6.7,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp2tz/",
+            "sizeMg": 20,
+            "priceUsd": 90,
+            "pricePerMg": 4.5,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp2tz/",
+            "sizeMg": 30,
+            "priceUsd": 105,
+            "pricePerMg": 3.5,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp2tz/",
+            "sizeMg": 60,
+            "priceUsd": 150,
+            "pricePerMg": 2.5,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
           },
           {
             "vendor": "Peppy and Me",
@@ -1855,6 +2033,61 @@
             "changePct": 0
           },
           {
+            "vendor": "Biotech Compounds",
+            "url": "https://biotechcompounds.com/products/glp-2t",
+            "sizeMg": 15,
+            "priceUsd": 60,
+            "pricePerMg": 4,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 4,
+            "changePct": 0
+          },
+          {
+            "vendor": "Biotech Compounds",
+            "url": "https://biotechcompounds.com/products/glp-2t",
+            "sizeMg": 20,
+            "priceUsd": 80,
+            "pricePerMg": 4,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 4,
+            "changePct": 0
+          },
+          {
+            "vendor": "Biotech Compounds",
+            "url": "https://biotechcompounds.com/products/glp-2t",
+            "sizeMg": 30,
+            "priceUsd": 90,
+            "pricePerMg": 3,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 3,
+            "changePct": 0
+          },
+          {
+            "vendor": "Biotech Compounds",
+            "url": "https://biotechcompounds.com/products/glp-2t",
+            "sizeMg": 50,
+            "priceUsd": 145,
+            "pricePerMg": 2.9,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 2.9,
+            "changePct": 0
+          },
+          {
+            "vendor": "Biotech Compounds",
+            "url": "https://biotechcompounds.com/products/glp-2t",
+            "sizeMg": 60,
+            "priceUsd": 150,
+            "pricePerMg": 2.5,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 2.5,
+            "changePct": 0
+          },
+          {
             "vendor": "Peptide Giants",
             "url": "https://peptidegiants.com/product/glp-2t/",
             "sizeMg": 10,
@@ -1932,61 +2165,6 @@
             "changePct": 0
           },
           {
-            "vendor": "Biotech Compounds",
-            "url": "https://biotechcompounds.com/products/glp-2t",
-            "sizeMg": 15,
-            "priceUsd": 60,
-            "pricePerMg": 4,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 4,
-            "changePct": 0
-          },
-          {
-            "vendor": "Biotech Compounds",
-            "url": "https://biotechcompounds.com/products/glp-2t",
-            "sizeMg": 20,
-            "priceUsd": 80,
-            "pricePerMg": 4,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 4,
-            "changePct": 0
-          },
-          {
-            "vendor": "Biotech Compounds",
-            "url": "https://biotechcompounds.com/products/glp-2t",
-            "sizeMg": 30,
-            "priceUsd": 90,
-            "pricePerMg": 3,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 3,
-            "changePct": 0
-          },
-          {
-            "vendor": "Biotech Compounds",
-            "url": "https://biotechcompounds.com/products/glp-2t",
-            "sizeMg": 50,
-            "priceUsd": 145,
-            "pricePerMg": 2.9,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 2.9,
-            "changePct": 0
-          },
-          {
-            "vendor": "Biotech Compounds",
-            "url": "https://biotechcompounds.com/products/glp-2t",
-            "sizeMg": 60,
-            "priceUsd": 150,
-            "pricePerMg": 2.5,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 2.5,
-            "changePct": 0
-          },
-          {
             "vendor": "Bio Peptide",
             "url": "https://biopeptitech.com/products/tirz-60mg",
             "sizeMg": 60,
@@ -2009,14 +2187,36 @@
             "changePct": 0
           },
           {
-            "vendor": "Pepvida Labs",
-            "url": "https://pepvidalabs.com/product/glp-2-12mg/",
-            "sizeMg": 12,
-            "priceUsd": 99,
-            "pricePerMg": 8.25,
+            "vendor": "Helixion Labs",
+            "url": "https://hlxlabs.shop/product/tirzepatide/",
+            "sizeMg": 10,
+            "priceUsd": 69.99,
+            "pricePerMg": 6.999,
             "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 8.25,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": 6.999,
+            "changePct": 0
+          },
+          {
+            "vendor": "Helixion Labs",
+            "url": "https://hlxlabs.shop/product/tirzepatide/",
+            "sizeMg": 5,
+            "priceUsd": 49.99,
+            "pricePerMg": 9.998,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": 9.998,
+            "changePct": 0
+          },
+          {
+            "vendor": "Helixion Labs",
+            "url": "https://hlxlabs.shop/product/tirzepatide/",
+            "sizeMg": 30,
+            "priceUsd": 119.99,
+            "pricePerMg": 3.9997,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": 3.9997,
             "changePct": 0
           },
           {
@@ -2050,6 +2250,17 @@
             "inStock": true,
             "method": "woocommerce_variation",
             "previousPricePerMg": 1.4992,
+            "changePct": 0
+          },
+          {
+            "vendor": "Pepvida Labs",
+            "url": "https://pepvidalabs.com/product/glp-2-12mg/",
+            "sizeMg": 12,
+            "priceUsd": 99,
+            "pricePerMg": 8.25,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 8.25,
             "changePct": 0
           },
           {
@@ -2097,39 +2308,6 @@
             "changePct": 0
           },
           {
-            "vendor": "Helixion Labs",
-            "url": "https://hlxlabs.shop/product/tirzepatide/",
-            "sizeMg": 10,
-            "priceUsd": 69.99,
-            "pricePerMg": 6.999,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 6.999,
-            "changePct": 0
-          },
-          {
-            "vendor": "Helixion Labs",
-            "url": "https://hlxlabs.shop/product/tirzepatide/",
-            "sizeMg": 5,
-            "priceUsd": 49.99,
-            "pricePerMg": 9.998,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 9.998,
-            "changePct": 0
-          },
-          {
-            "vendor": "Helixion Labs",
-            "url": "https://hlxlabs.shop/product/tirzepatide/",
-            "sizeMg": 30,
-            "priceUsd": 119.99,
-            "pricePerMg": 3.9997,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 3.9997,
-            "changePct": 0
-          },
-          {
             "vendor": "Sigma Compounds",
             "url": "https://sigmacompounds.com/products/tz-2/",
             "sizeMg": 20,
@@ -2138,17 +2316,6 @@
             "inStock": true,
             "method": "simple_price",
             "previousPricePerMg": 4.85,
-            "changePct": 0
-          },
-          {
-            "vendor": "Red Rock Peptides",
-            "url": "https://redrockpeptides.com/product/glp-2-tirz-60mg/",
-            "sizeMg": 60,
-            "priceUsd": 240,
-            "pricePerMg": 4,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 4,
             "changePct": 0
           },
           {
@@ -2163,6 +2330,17 @@
             "changePct": 0
           },
           {
+            "vendor": "Red Rock Peptides",
+            "url": "https://redrockpeptides.com/product/glp-2-tirz-60mg/",
+            "sizeMg": 60,
+            "priceUsd": 240,
+            "pricePerMg": 4,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 4,
+            "changePct": 0
+          },
+          {
             "vendor": "Palmetto Peptides",
             "url": "https://palmettopeptides.com/products/tirzepatide",
             "sizeMg": 15,
@@ -2171,6 +2349,17 @@
             "inStock": true,
             "method": "json_ld",
             "previousPricePerMg": 6.6667,
+            "changePct": 0
+          },
+          {
+            "vendor": "Red Rock Peptides",
+            "url": "https://redrockpeptides.com/product/glp-2-tz-10mg/",
+            "sizeMg": 10,
+            "priceUsd": 79,
+            "pricePerMg": 7.9,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 7.9,
             "changePct": 0
           },
           {
@@ -2204,28 +2393,6 @@
             "inStock": true,
             "method": "woocommerce_variation",
             "previousPricePerMg": 2.4998,
-            "changePct": 0
-          },
-          {
-            "vendor": "Red Rock Peptides",
-            "url": "https://redrockpeptides.com/product/glp-2-tz-10mg/",
-            "sizeMg": 10,
-            "priceUsd": 79,
-            "pricePerMg": 7.9,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 7.9,
-            "changePct": 0
-          },
-          {
-            "vendor": "Pepvida Labs",
-            "url": "https://pepvidalabs.com/product/glp-2-32mg/",
-            "sizeMg": 32,
-            "priceUsd": 249,
-            "pricePerMg": 7.7813,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 7.7813,
             "changePct": 0
           },
           {
@@ -2282,16 +2449,27 @@
             "method": "json_ld",
             "previousPricePerMg": 17,
             "changePct": 0
+          },
+          {
+            "vendor": "Pepvida Labs",
+            "url": "https://pepvidalabs.com/product/glp-2-32mg/",
+            "sizeMg": 32,
+            "priceUsd": 249,
+            "pricePerMg": 7.7813,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 7.7813,
+            "changePct": 0
           }
         ]
       }
     },
     "retatrutide": {
-      "pricePerMg": 13.0269,
-      "method": "weighted(peptidescouter@w=58.9+vendor_basket@w=22.9)",
-      "source": "Dual source weighted · peptidescouter=$4.5295(n=107) · vendor_basket=$6.5367(n=51) · divergence=44.3%",
+      "pricePerMg": 13.1241,
+      "method": "weighted(peptidescouter@w=58.9+vendor_basket@w=22.5)",
+      "source": "Dual source weighted · peptidescouter=$4.5295(n=107) · vendor_basket=$6.7029(n=50) · divergence=48.0%",
       "singleSource": false,
-      "divergenceBps": 4431,
+      "divergenceBps": 4798,
       "divergenceWarning": true,
       "sources": [
         {
@@ -2303,10 +2481,10 @@
         },
         {
           "name": "vendor_basket",
-          "pricePerMg": 6.5367,
-          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=51/51 vendors=16 · 2026-07-29",
-          "sampleCount": 51,
-          "weight": 22.95
+          "pricePerMg": 6.7029,
+          "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=50/50 vendors=16 · 2026-07-29",
+          "sampleCount": 50,
+          "weight": 22.5
         }
       ],
       "scouter": {
@@ -3352,30 +3530,25 @@
         ]
       },
       "basket": {
-        "pricePerMg": 6.5367,
-        "sampleCount": 51,
+        "pricePerMg": 6.7029,
+        "sampleCount": 50,
         "vendorCount": 16,
-        "offerCount": 51,
+        "offerCount": 50,
         "errors": [
           {
-            "vendor": "PeptidesKingdom",
-            "url": "https://peptideskingdom.com/product/retatrutide/",
-            "error": "HTTP 504"
-          },
-          {
-            "vendor": "Trulab Peptides",
-            "url": "https://trulabpeptides.com/product/glp3rt/",
-            "error": "HTTP 403"
-          },
-          {
-            "vendor": "Alpha Peptides",
-            "url": "https://alpha-peptides.com/product/glp-3-rt/",
-            "error": "no parseable price/size on page"
+            "vendor": "Peptide Giants",
+            "url": "https://peptidegiants.com/product/glp-3r/",
+            "error": "fetch failed"
           },
           {
             "vendor": "Synthesis Peptides",
             "url": "https://synthesispeptides.io/product/glp-3r/",
             "error": "no parseable price/size on page"
+          },
+          {
+            "vendor": "Alpha Peptides",
+            "url": "https://alpha-peptides.com/product/glp-3-rt/",
+            "error": "HTTP 403"
           },
           {
             "vendor": "Flawless Compounds",
@@ -3390,7 +3563,7 @@
           {
             "vendor": "NextGen Peptide",
             "url": "https://ngpeptide.com/product/glp-3/",
-            "error": "no parseable price/size on page"
+            "error": "HTTP 403"
           },
           {
             "vendor": "Amino Club",
@@ -3403,13 +3576,8 @@
             "error": "no parseable price/size on page"
           },
           {
-            "vendor": "Purity Peptides",
-            "url": "https://puritypeptides.is/product/retatrutide-20mg/",
-            "error": "no parseable price/size on page"
-          },
-          {
-            "vendor": "Oneday Compounds",
-            "url": "https://onedaycompounds.net/product/glp3-r-10mg/",
+            "vendor": "Platinum Lion Peptides",
+            "url": "https://platinumlionpeptides.com/product/glp-3r/",
             "error": "no parseable price/size on page"
           },
           {
@@ -3418,19 +3586,29 @@
             "error": "no parseable price/size on page"
           },
           {
-            "vendor": "TrustedPeps",
-            "url": "https://trustedpeps.us/product/glp-3-rt-10mg/",
+            "vendor": "Oneday Compounds",
+            "url": "https://onedaycompounds.net/product/glp3-r-10mg/",
             "error": "no parseable price/size on page"
           },
           {
             "vendor": "TrustedPeps",
+            "url": "https://trustedpeps.us/product/glp-3-rt-10mg/",
+            "error": "HTTP 403"
+          },
+          {
+            "vendor": "TrustedPeps",
             "url": "https://trustedpeps.us/product/glp-3-rt-30mg/",
+            "error": "HTTP 403"
+          },
+          {
+            "vendor": "Purity Peptides",
+            "url": "https://puritypeptides.is/product/retatrutide-20mg/",
             "error": "no parseable price/size on page"
           },
           {
             "vendor": "Longevity Peptides",
             "url": "https://longevitypeptides.us/product/retatrutide-for-sale-usa/",
-            "error": "no parseable price/size on page"
+            "error": "HTTP 403"
           },
           {
             "vendor": "Oneday Compounds",
@@ -3451,17 +3629,6 @@
         "offers": [
           {
             "vendor": "EZPeptides",
-            "url": "https://ezpeptides.com/product/ezp-3p-12mg/",
-            "sizeMg": 12,
-            "priceUsd": 82,
-            "pricePerMg": 6.8333,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 6.8333,
-            "changePct": 0
-          },
-          {
-            "vendor": "EZPeptides",
             "url": "https://ezpeptides.com/product/ezp-3p-20mg/",
             "sizeMg": 20,
             "priceUsd": 108,
@@ -3472,15 +3639,92 @@
             "changePct": 0
           },
           {
-            "vendor": "Paradigm Peptide",
-            "url": "https://www.paradigm-peptide.com/product-page/retatrutide-10mg",
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/retatrutide/",
             "sizeMg": 10,
-            "priceUsd": 100,
-            "pricePerMg": 10,
+            "priceUsd": 95,
+            "pricePerMg": 9.5,
             "inStock": true,
-            "method": "simple_price",
-            "previousPricePerMg": 10,
-            "changePct": 0
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/retatrutide/",
+            "sizeMg": 20,
+            "priceUsd": 150,
+            "pricePerMg": 7.5,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "PeptidesKingdom",
+            "url": "https://peptideskingdom.com/product/retatrutide/",
+            "sizeMg": 30,
+            "priceUsd": 220,
+            "pricePerMg": 7.3333,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp3rt/",
+            "sizeMg": 5,
+            "priceUsd": 39,
+            "pricePerMg": 7.8,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp3rt/",
+            "sizeMg": 10,
+            "priceUsd": 71,
+            "pricePerMg": 7.1,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp3rt/",
+            "sizeMg": 20,
+            "priceUsd": 130,
+            "pricePerMg": 6.5,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp3rt/",
+            "sizeMg": 30,
+            "priceUsd": 178,
+            "pricePerMg": 5.9333,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
+          },
+          {
+            "vendor": "Trulab Peptides",
+            "url": "https://trulabpeptides.com/product/glp3rt/",
+            "sizeMg": 50,
+            "priceUsd": 240,
+            "pricePerMg": 4.8,
+            "inStock": true,
+            "method": "woocommerce_variation",
+            "previousPricePerMg": null,
+            "changePct": null
           },
           {
             "vendor": "Peppy and Me",
@@ -3527,10 +3771,21 @@
             "changePct": 0
           },
           {
+            "vendor": "EZPeptides",
+            "url": "https://ezpeptides.com/product/ezp-3p-12mg/",
+            "sizeMg": 12,
+            "priceUsd": 82,
+            "pricePerMg": 6.8333,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 6.8333,
+            "changePct": 0
+          },
+          {
             "vendor": "Paradigm Peptide",
-            "url": "https://www.paradigm-peptide.com/product-page/retatrutide-20mg",
-            "sizeMg": 20,
-            "priceUsd": 200,
+            "url": "https://www.paradigm-peptide.com/product-page/retatrutide-10mg",
+            "sizeMg": 10,
+            "priceUsd": 100,
             "pricePerMg": 10,
             "inStock": true,
             "method": "simple_price",
@@ -3582,58 +3837,14 @@
             "changePct": 0
           },
           {
-            "vendor": "Peptide Giants",
-            "url": "https://peptidegiants.com/product/glp-3r/",
-            "sizeMg": 5,
-            "priceUsd": 65.99,
-            "pricePerMg": 13.198,
+            "vendor": "Paradigm Peptide",
+            "url": "https://www.paradigm-peptide.com/product-page/retatrutide-20mg",
+            "sizeMg": 20,
+            "priceUsd": 200,
+            "pricePerMg": 10,
             "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 13.198,
-            "changePct": 0
-          },
-          {
-            "vendor": "Peptide Giants",
-            "url": "https://peptidegiants.com/product/glp-3r/",
-            "sizeMg": 40,
-            "priceUsd": 247.49,
-            "pricePerMg": 6.1873,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 6.1873,
-            "changePct": 0
-          },
-          {
-            "vendor": "Peptide Giants",
-            "url": "https://peptidegiants.com/product/glp-3r/",
-            "sizeMg": 10,
-            "priceUsd": 76.99,
-            "pricePerMg": 7.699,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 7.699,
-            "changePct": 0
-          },
-          {
-            "vendor": "Peptide Giants",
-            "url": "https://peptidegiants.com/product/glp-3r/",
-            "sizeMg": 30,
-            "priceUsd": 219.99,
-            "pricePerMg": 7.333,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 7.333,
-            "changePct": 0
-          },
-          {
-            "vendor": "Peptide Giants",
-            "url": "https://peptidegiants.com/product/glp-3r/",
-            "sizeMg": 60,
-            "priceUsd": 302.49,
-            "pricePerMg": 5.0415,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 5.0415,
+            "method": "simple_price",
+            "previousPricePerMg": 10,
             "changePct": 0
           },
           {
@@ -3648,14 +3859,14 @@
             "changePct": 0
           },
           {
-            "vendor": "Pepvida Labs",
-            "url": "https://pepvidalabs.com/product/glp-3-30mg/",
-            "sizeMg": 30,
-            "priceUsd": 259,
-            "pricePerMg": 8.6333,
+            "vendor": "Bio Peptide",
+            "url": "https://biopeptitech.com/products/retatru-20mg",
+            "sizeMg": 20,
+            "priceUsd": 120,
+            "pricePerMg": 6,
             "inStock": true,
             "method": "json_ld",
-            "previousPricePerMg": 8.6333,
+            "previousPricePerMg": 6,
             "changePct": 0
           },
           {
@@ -3678,17 +3889,6 @@
             "inStock": true,
             "method": "json_ld",
             "previousPricePerMg": 4.99,
-            "changePct": 0
-          },
-          {
-            "vendor": "Bio Peptide",
-            "url": "https://biopeptitech.com/products/retatru-20mg",
-            "sizeMg": 20,
-            "priceUsd": 120,
-            "pricePerMg": 6,
-            "inStock": true,
-            "method": "json_ld",
-            "previousPricePerMg": 6,
             "changePct": 0
           },
           {
@@ -3736,50 +3936,6 @@
             "changePct": 0
           },
           {
-            "vendor": "Platinum Lion Peptides",
-            "url": "https://platinumlionpeptides.com/product/glp-3r/",
-            "sizeMg": 60,
-            "priceUsd": 224.99,
-            "pricePerMg": 3.7498,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 3.7498,
-            "changePct": 0
-          },
-          {
-            "vendor": "Platinum Lion Peptides",
-            "url": "https://platinumlionpeptides.com/product/glp-3r/",
-            "sizeMg": 30,
-            "priceUsd": 154.99,
-            "pricePerMg": 5.1663,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 5.1663,
-            "changePct": 0
-          },
-          {
-            "vendor": "Platinum Lion Peptides",
-            "url": "https://platinumlionpeptides.com/product/glp-3r/",
-            "sizeMg": 20,
-            "priceUsd": 139.99,
-            "pricePerMg": 6.9995,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 6.9995,
-            "changePct": 0
-          },
-          {
-            "vendor": "Platinum Lion Peptides",
-            "url": "https://platinumlionpeptides.com/product/glp-3r/",
-            "sizeMg": 10,
-            "priceUsd": 79.99,
-            "pricePerMg": 7.999,
-            "inStock": true,
-            "method": "woocommerce_variation",
-            "previousPricePerMg": 7.999,
-            "changePct": 0
-          },
-          {
             "vendor": "Puratek Peptides",
             "url": "https://puratekpeptides.com/product/pur-3r/",
             "sizeMg": 10,
@@ -3814,13 +3970,13 @@
           },
           {
             "vendor": "Pepvida Labs",
-            "url": "https://pepvidalabs.com/product/glp-3-22mg/",
-            "sizeMg": 22,
-            "priceUsd": 195,
-            "pricePerMg": 8.8636,
+            "url": "https://pepvidalabs.com/product/glp-3-30mg/",
+            "sizeMg": 30,
+            "priceUsd": 259,
+            "pricePerMg": 8.6333,
             "inStock": true,
             "method": "json_ld",
-            "previousPricePerMg": 8.8636,
+            "previousPricePerMg": 8.6333,
             "changePct": 0
           },
           {
@@ -3835,6 +3991,17 @@
             "changePct": 0
           },
           {
+            "vendor": "Pepvida Labs",
+            "url": "https://pepvidalabs.com/product/glp-3-22mg/",
+            "sizeMg": 22,
+            "priceUsd": 195,
+            "pricePerMg": 8.8636,
+            "inStock": true,
+            "method": "json_ld",
+            "previousPricePerMg": 8.8636,
+            "changePct": 0
+          },
+          {
             "vendor": "Sigma Compounds",
             "url": "https://sigmacompounds.com/products/glp-3-r-20-mg/",
             "sizeMg": 20,
@@ -3846,17 +4013,6 @@
             "changePct": 0
           },
           {
-            "vendor": "Sigma Compounds",
-            "url": "https://sigmacompounds.com/products/glp-3-r-10-mg/",
-            "sizeMg": 10,
-            "priceUsd": 129,
-            "pricePerMg": 12.9,
-            "inStock": true,
-            "method": "simple_price",
-            "previousPricePerMg": 12.9,
-            "changePct": 0
-          },
-          {
             "vendor": "Red Rock Peptides",
             "url": "https://redrockpeptides.com/product/glp-3-rt-30mg/",
             "sizeMg": 30,
@@ -3865,6 +4021,17 @@
             "inStock": true,
             "method": "json_ld",
             "previousPricePerMg": 9.9667,
+            "changePct": 0
+          },
+          {
+            "vendor": "Sigma Compounds",
+            "url": "https://sigmacompounds.com/products/glp-3-r-10-mg/",
+            "sizeMg": 10,
+            "priceUsd": 129,
+            "pricePerMg": 12.9,
+            "inStock": true,
+            "method": "simple_price",
+            "previousPricePerMg": 12.9,
             "changePct": 0
           },
           {
@@ -4021,6 +4188,6 @@
       "tirzepatide": 0.25,
       "retatrutide": 0.15
     },
-    "pricePerMg": 5.7826
+    "pricePerMg": 6.299
   }
 }
