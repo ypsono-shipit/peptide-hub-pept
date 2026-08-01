@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-01T10:16:03.490Z",
+  "updatedAt": "2026-08-01T10:21:20.031Z",
   "note": "Oracle mark samples for PEPT Trade charts. Appended on each successful pushPrice (~5m cron). Fine TFs (5m/15m) need dense samples; coarser TFs still stair-step when marks are quiet.",
   "samples": [
     {
@@ -96638,6 +96638,34 @@
       "price": 4.1881,
       "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=54/60 vendors=17 · 2026-08-01",
       "txHash": "0x14ad75c79c2170411e13bf36075f4f9c43e1a6c1148f9905a54799a8ef5bd458"
+    },
+    {
+      "market": "GLP1-IDX-PERP",
+      "ts": 1785579665,
+      "price": 7.5106,
+      "source": "Weighted 60% SEMA / 25% TIRZ / 15% RETA · dual-source medians",
+      "txHash": "0x408b3faaad56b64d27d1b8f87849458d9a660b9c0ecb74e6ae4d6e71531d2019"
+    },
+    {
+      "market": "RETA-PERP",
+      "ts": 1785579665,
+      "price": 16.243,
+      "source": "Vendor basket live scrape · retatrutide · size-weighted (IQR) n=54/54 vendors=15 · 2026-08-01",
+      "txHash": "0xf176ccf2f1155ce2c6b0faf04f076b53ce00e9e6f3dd726a8cef289f2d021dad"
+    },
+    {
+      "market": "SEMA-PERP",
+      "ts": 1785579665,
+      "price": 6.7761,
+      "source": "Vendor basket live scrape · semaglutide · size-weighted (IQR) n=26/27 vendors=13 · 2026-08-01",
+      "txHash": "0xc854cfdb110c31094fc37981ba813aabc689e395e473ebe49badb2838f70384b"
+    },
+    {
+      "market": "TIRZ-PERP",
+      "ts": 1785579665,
+      "price": 4.0339,
+      "source": "Vendor basket live scrape · tirzepatide · size-weighted (IQR) n=48/54 vendors=14 · 2026-08-01",
+      "txHash": "0x89086c1e673ffaee20ad047fcbcb57c4bbb0747edb75d4a4cc6738115f5d2893"
     }
   ]
 }
